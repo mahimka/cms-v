@@ -6,7 +6,7 @@ class TagsController < App
 
       @q = Tag.ransack(params[:q])
       @tags_found = @q.result(distinct: true).size # for index.rb
-      @tags       = @q.result(distinct: true).page(params[:page]).per(50)
+      @tags       = @q.result(distinct: true).includes(:parent).order(:parent_id, :position, :name).page(params[:page]).per(500)
       erb :"/tags/index", layout: :"/layout/wide", views: settings.views_admin   
 
     end  

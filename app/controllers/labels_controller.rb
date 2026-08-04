@@ -6,7 +6,7 @@ class LabelsController < App
 
       @q = Label.ransack(params[:q])
       @labels_found = @q.result(distinct: true).size
-      @labels       = @q.result(distinct: true).order(:ancestry, :position, :name).page(params[:page]).per(100)
+      @labels       = @q.result(distinct: true).order(:ancestry, :position, :name).page(params[:page]).per(500)
 
       erb :"/labels/index", layout: :"/layout/wide", views: settings.views_admin
 

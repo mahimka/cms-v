@@ -39,18 +39,32 @@
       <td></td>
     </tr>
 
-  <% @labels.each do |label| %>
+  <% grouped_labels = @labels.group_by { |l| l.root? ? l : l.parent } %>
+  <% grouped_labels.sort_by { |group, _| [group.position || 0, group.name.to_s] }.each do |group, labels_in_group| %>
 
-    <tr>
-      <td><%= checkbox_in_place(label, :active) %></td>
-      <td><%= ("— " * label.depth) + label.name %></td>
-      <td><%= label.slug %></td>
-      <td><%= label.field_type %></td>
+    <tr class="has-background-light">
+      <td><%= checkbox_in_place(group, :active) %></td>
+      <td class="has-text-weight-semibold"><%= group.name %></td>
+      <td><%= group.slug %></td>
+      <td><%= group.field_type %></td>
       <td>
-        <a href="/admin/labels/<%= label.id %>" class="button is-small">show</a>
-        <a href="/admin/labels/<%= label.id %>/edit" class="button is-small">edit</a>
+        <a href="/admin/labels/<%= group.id %>" class="button is-small">show</a>
+        <a href="/admin/labels/<%= group.id %>/edit" class="button is-small">edit</a>
       </td>
     </tr>
+
+    <% (labels_in_group - [group]).sort_by { |l| [l.position || 0, l.name.to_s] }.each do |label| %>
+      <tr>
+        <td><%= checkbox_in_place(label, :active) %></td>
+        <td class="pl-5"><%= label.name %></td>
+        <td><%= label.slug %></td>
+        <td><%= label.field_type %></td>
+        <td>
+          <a href="/admin/labels/<%= label.id %>" class="button is-small">show</a>
+          <a href="/admin/labels/<%= label.id %>/edit" class="button is-small">edit</a>
+        </td>
+      </tr>
+    <% end %>
 
   <% end %>
 
