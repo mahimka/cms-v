@@ -5,6 +5,7 @@
 !helpers/
 !views/
 !lib/
+!tasks/
 
 !_routes.rb
 !_project_methods.rb
