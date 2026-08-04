@@ -55,7 +55,7 @@
   </div>
 
   <div class="column is-9">
-    <%= textarea(:schema, :json_ld_template, @schema.json_ld_template, options = {class: 'textarea is-success', rows: 8, placeholder: '{"@type": "Hotel", "name": "{{name}}"}'}) %>
+    <%= textarea(:schema, :json_ld_template, "#{@schema.json_ld_template}", options = {class: 'textarea is-success', rows: 8, placeholder: '{"@type": "Hotel", "name": "{{name}}"}'}) %>
   </div>
 
 </div>
