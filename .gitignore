@@ -10,6 +10,7 @@ main.db
 files/*
 
 public/images/*
+!public/images/.gitkeep 
 
 public/fonts/*
 !public/fonts/.gitkeep 
