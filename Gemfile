@@ -40,6 +40,7 @@ gem "rack-flash3", require: 'rack-flash'
 gem 'ancestry'
 gem 'kaminari', require: 'kaminari'
 gem 'ransack', require: 'ransack'
+gem 'kramdown', require: 'kramdown'
 
 gem 'ferrum'
 gem "nokogiri"

@@ -210,6 +210,9 @@ class App < Sinatra::Base
     # erb :"countries_geonames" #, :layout => :"/layout/gada_ads"
     "stats"
   end
- 
+
+
+
+
 
 end

@@ -52,18 +52,21 @@
       <td>address</td>
       <td>parent</td>
       <td>tags</td>
+      <td>details</td>
       <td></td>
     </tr>
 
   <% @entities.each do |entity| %>
 
     <tr>
-      <td><%#= checkbox_in_place entity, :active %></td>
-      <td><%= entity.name %></td>
-      <td><%= entity.schema&.name %></td>
-      <td><%= entity.address %></td>
+      <td><%= checkbox_in_place entity, :active %></td>
+      <td width=300><%= input_in_place(entity, :name) %></td>
+      <% values = Schema.all.map{|schema| [schema.id, schema.name]}.to_h %>
+      <td width><%= select_in_place(entity, :schema_id, values) %></td>
+      <td width=300><%= input_in_place(entity, :address) %></td>
       <td><%= entity.parent_id %></td>
       <td><%= entity&.tags&.size %></td>
+      <td><%= entity&.details&.size %></td>
 
       <td>
         <a href="/admin/entities/<%= entity.id %>" class='button is-small'>show</a>
