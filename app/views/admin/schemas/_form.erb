@@ -110,18 +110,18 @@
 
   <div class="column is-2">
     <p class="label">labels</p>
-    <p class="help">собственные ключи details этого узла (без учёта родителей)</p>
+    <p class="help">группы ключей details этого узла (без учёта родителей); при выборе группы все её ключи становятся доступны для entity/item</p>
   </div>
 
   <div class="column is-9">
-    <% Label.active.order(:ancestry, :position, :name).group_by(&:parent).each do |parent, children| %>
-      <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
-      <% children.each do |lbl| %>
-        <label class="checkbox mr-3">
-          <input type="checkbox" name="label_ids[]" value="<%= lbl.id %>" <%= "checked" if @schema.label_ids.include?(lbl.id) %>>
-          <%= lbl.name %>
+    <% Label.roots.order(:position, :name).each do |group| %>
+      <div class="mb-2">
+        <label class="checkbox">
+          <input type="checkbox" name="label_ids[]" value="<%= group.id %>" <%= "checked" if @schema.label_ids.include?(group.id) %>>
+          <%= group.name %>
+          <span class="has-text-grey is-size-7">(<%= group.children.active.count %>)</span>
         </label>
-      <% end %>
+      </div>
     <% end %>
   </div>
 

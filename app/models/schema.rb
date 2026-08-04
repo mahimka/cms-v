@@ -31,8 +31,16 @@ class Schema < ActiveRecord::Base
     Tag.active.where(parent_id: effective_tag_groups.select(:id)).distinct
   end
 
-  # Ключи details, допустимые для этого узла, с тем же наследованием по цепочке предков.
-  def effective_labels
+  # Группы лейблов, привязанные к этому узлу целиком: свои + унаследованные
+  # от всех предков. schema_labels хранит id корневых лейблов (групп), а не отдельных лейблов.
+  def effective_label_groups
     Label.joins(:schema_labels).where(schema_labels: { schema_id: path_ids }).distinct
+  end
+
+  # Ключи details, допустимые для этого узла — активные дочерние лейблы привязанных групп,
+  # с тем же наследованием по цепочке предков.
+  def effective_labels
+    group_ids = effective_label_groups.pluck(:id).map(&:to_s)
+    Label.active.where(ancestry: group_ids).distinct
   end
 end

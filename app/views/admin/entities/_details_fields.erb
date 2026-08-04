@@ -12,32 +12,20 @@
   <div class="column is-9">
 
     <% existing_details = @entity.details || {} %>
-    <% schema_labels     = @entity.effective_labels.to_a %>
-    <% schema_label_names = schema_labels.map(&:name) %>
+    <% schema_label_names = @entity.effective_labels.pluck(:name) %>
+
+    <datalist id="details-labels-datalist">
+      <% schema_label_names.each do |name| %>
+        <option value="<%= fast_escape_html(name) %>">
+      <% end %>
+    </datalist>
 
     <div id="details-rows">
 
-      <%# ключи, разрешённые schema — имя ключа зафиксировано, чтобы форма %>
-      <%# не показывала лишние для данного типа поля %>
-      <% schema_labels.each do |label| %>
-        <div class="field has-addons details-row">
-          <div class="control">
-            <input type="text" class="input is-small" value="<%= fast_escape_html(label.name) %>" readonly>
-            <input type="hidden" name="details_keys[]" value="<%= fast_escape_html(label.name) %>">
-          </div>
-          <div class="control is-expanded">
-            <input type="text" class="input is-small" name="details_values[]" value="<%= fast_escape_html(existing_details[label.name]) %>" placeholder="значение">
-          </div>
-        </div>
-      <% end %>
-
-      <%# уже сохранённые ключи, не входящие в текущий набор schema (например, %>
-      <%# остались от старого entity_type или от смены schema) — не теряем данные %>
       <% existing_details.each do |key, value| %>
-        <% next if schema_label_names.include?(key) %>
         <div class="field has-addons details-row">
           <div class="control">
-            <input type="text" class="input is-small" name="details_keys[]" value="<%= fast_escape_html(key) %>" placeholder="параметр">
+            <input type="text" class="input is-small" name="details_keys[]" value="<%= fast_escape_html(key) %>" placeholder="параметр" list="details-labels-datalist">
           </div>
           <div class="control is-expanded">
             <input type="text" class="input is-small" name="details_values[]" value="<%= fast_escape_html(value) %>" placeholder="значение">
@@ -52,7 +40,7 @@
     <template id="details-row-template">
       <div class="field has-addons details-row">
         <div class="control">
-          <input type="text" class="input is-small" name="details_keys[]" placeholder="параметр">
+          <input type="text" class="input is-small" name="details_keys[]" placeholder="параметр" list="details-labels-datalist">
         </div>
         <div class="control is-expanded">
           <input type="text" class="input is-small" name="details_values[]" placeholder="значение">
@@ -64,7 +52,7 @@
     </template>
 
     <button type="button" id="add-details-row" class="button is-small is-info mt-2">+ add custom param</button>
-    <p class="help">произвольный параметр вне набора schema (для случаев, которые схема ещё не описывает)</p>
+    <p class="help">параметр можно выбрать из ключей, привязанных к schema, или ввести свой</p>
 
   </div>
 
