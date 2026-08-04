@@ -8,6 +8,8 @@ class RoutesController < App
     get '*' do |uri|
        @page = Page.where(uri: uri).first
 
+       halt 404, "Not Found\n" unless @page
+
        call_erb_view(@page.view, layout: @page.layout)
 
     end
