@@ -27,6 +27,8 @@ class App < Sinatra::Base
 
   use Rack::MethodOverride
 
+  # i test git bare
+
 
   # подключаю списки для стран и прочего, там - константы - маасивы стран
   # include AdsLists # константы для формироварния списков из /lib/Lists.rb
