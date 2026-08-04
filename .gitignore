@@ -9,6 +9,8 @@ main.db
 
 files/*
 
+public/images/*
+
 public/fonts/*
 !public/fonts/.gitkeep 
 
