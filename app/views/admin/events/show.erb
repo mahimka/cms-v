@@ -1,0 +1,53 @@
+<h1 class='title'><%= @event.name %></h1>
+
+<p class='subtitle'><%= @event.schema&.name %></p>
+
+<a href="/admin/events/<%= @event.id %>/edit" class="button is-small">edit</a>
+
+<ul>
+  <li><b>active:</b> <%= @event.active %>
+  <li><b>published:</b> <%= @event.published %>
+  <li><b>start_at:</b> <%= @event.start_at %>
+  <li><b>end_at:</b> <%= @event.end_at %>
+  <li><b>venue:</b> <% if @event.venue %><a href="/admin/entities/<%= @event.venue.id %>"><%= @event.venue.name %></a><% end %>
+  <li><b>address:</b> <%= @event.effective_address %>
+  <li><b>latitude:</b> <%= @event.effective_latitude %>
+  <li><b>longitude:</b> <%= @event.effective_longitude %>
+</ul>
+
+<h2 class='title is-4 mt-4'>details</h2>
+<ul>
+  <% (@event.details || {}).each do |key, value| %>
+    <li><b><%= key %>:</b> <%= value %>
+  <% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>tags</h2>
+<ul>
+	<% @event.tags.each do |tag| %>
+	  <li><%= tag.name %> - <%= tag.parent&.name %> - <%= tag.markers.map{|marker| marker.name } %> -
+	<% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>links</h2>
+<a href="/admin/links/new?linkable_type=Event&linkable_id=<%= @event.id %>" class="button is-small is-info">+ add link</a>
+<ul>
+	<% @event.links.each do |link| %>
+	  <li><%= link.label&.name %> - <a href="<%= link.url %>" target="_blank"><%= link.url %></a> - <a href="/admin/links/<%= link.id %>/edit">edit</a>
+	<% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>pictures</h2>
+<a href="/admin/pictures/new?imageable_type=Event&imageable_id=<%= @event.id %>" class="button is-small is-info">+ add picture</a>
+<div class="columns is-multiline mt-1">
+  <% @event.pictures.each do |picture| %>
+    <div class="column is-2">
+      <figure class="image is-4by3">
+        <a href="/admin/pictures/<%= picture.id %>/edit"><img src="<%= picture.file %>" alt="<%= picture.alt %>"></a>
+      </figure>
+    </div>
+  <% end %>
+</div>

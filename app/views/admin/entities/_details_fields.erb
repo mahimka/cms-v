@@ -1,0 +1,88 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <p class="label">details</p>
+    <% if @entity.schema %>
+      <p class="help">ключи из schema «<%= @entity.schema.name %>» (с учётом родительских схем)</p>
+    <% else %>
+      <p class="help">у entity не задана schema — показаны только уже сохранённые параметры</p>
+    <% end %>
+  </div>
+
+  <div class="column is-9">
+
+    <% existing_details = @entity.details || {} %>
+    <% schema_labels     = @entity.effective_labels.to_a %>
+    <% schema_label_names = schema_labels.map(&:name) %>
+
+    <div id="details-rows">
+
+      <%# ключи, разрешённые schema — имя ключа зафиксировано, чтобы форма %>
+      <%# не показывала лишние для данного типа поля %>
+      <% schema_labels.each do |label| %>
+        <div class="field has-addons details-row">
+          <div class="control">
+            <input type="text" class="input is-small" value="<%= fast_escape_html(label.name) %>" readonly>
+            <input type="hidden" name="details_keys[]" value="<%= fast_escape_html(label.name) %>">
+          </div>
+          <div class="control is-expanded">
+            <input type="text" class="input is-small" name="details_values[]" value="<%= fast_escape_html(existing_details[label.name]) %>" placeholder="значение">
+          </div>
+        </div>
+      <% end %>
+
+      <%# уже сохранённые ключи, не входящие в текущий набор schema (например, %>
+      <%# остались от старого entity_type или от смены schema) — не теряем данные %>
+      <% existing_details.each do |key, value| %>
+        <% next if schema_label_names.include?(key) %>
+        <div class="field has-addons details-row">
+          <div class="control">
+            <input type="text" class="input is-small" name="details_keys[]" value="<%= fast_escape_html(key) %>" placeholder="параметр">
+          </div>
+          <div class="control is-expanded">
+            <input type="text" class="input is-small" name="details_values[]" value="<%= fast_escape_html(value) %>" placeholder="значение">
+          </div>
+          <div class="control">
+            <button type="button" class="button is-small is-danger remove-details-row">&times;</button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <template id="details-row-template">
+      <div class="field has-addons details-row">
+        <div class="control">
+          <input type="text" class="input is-small" name="details_keys[]" placeholder="параметр">
+        </div>
+        <div class="control is-expanded">
+          <input type="text" class="input is-small" name="details_values[]" placeholder="значение">
+        </div>
+        <div class="control">
+          <button type="button" class="button is-small is-danger remove-details-row">&times;</button>
+        </div>
+      </div>
+    </template>
+
+    <button type="button" id="add-details-row" class="button is-small is-info mt-2">+ add custom param</button>
+    <p class="help">произвольный параметр вне набора schema (для случаев, которые схема ещё не описывает)</p>
+
+  </div>
+
+</div>
+
+<script>
+  (function() {
+    var rows = document.getElementById('details-rows');
+    var template = document.getElementById('details-row-template');
+
+    document.getElementById('add-details-row').addEventListener('click', function() {
+      rows.appendChild(template.content.cloneNode(true));
+    });
+
+    rows.addEventListener('click', function(event) {
+      if (event.target.classList.contains('remove-details-row')) {
+        event.target.closest('.details-row').remove();
+      }
+    });
+  })();
+</script>

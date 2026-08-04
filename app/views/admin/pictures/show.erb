@@ -1,0 +1,42 @@
+<h1 class='title is-4'><%= @picture.alt || @picture.file %></h1>
+
+<a href="/admin/pictures/<%= @picture.id %>/edit" class="button is-small">edit</a>
+
+<figure class="image mt-3" style="max-width: 400px;">
+  <img src="<%= @picture.file %>" alt="<%= @picture.alt %>">
+</figure>
+
+<table class='table is-size-7'>
+  <tr>
+    <td>file</td>
+    <td><%= @picture.file %></td>
+  </tr>
+  <tr>
+    <td>imageable</td>
+    <td>
+      <% if @picture.imageable %>
+        <a href="/admin/<%= @picture.imageable.class.name.underscore.pluralize %>/<%= @picture.imageable.id %>">
+          <%= @picture.imageable_type %> — <%= @picture.imageable.name %>
+        </a>
+      <% else %>
+        —
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td>content_type</td>
+    <td><%= @picture.content_type %></td>
+  </tr>
+  <tr>
+    <td>width x height</td>
+    <td><%= @picture.width %> x <%= @picture.height %> (<%= @picture.ratio %>)</td>
+  </tr>
+  <tr>
+    <td>published / active</td>
+    <td><%= @picture.published %> / <%= @picture.active %></td>
+  </tr>
+  <tr>
+    <td>tags</td>
+    <td><%= @picture.tags.map(&:name).join(', ') %></td>
+  </tr>
+</table>

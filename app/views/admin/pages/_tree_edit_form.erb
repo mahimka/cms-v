@@ -1,0 +1,309 @@
+<section class="section">
+  <%# Шапка формы %>
+  <div class="level mb-5">
+    <div class="level-left">
+      <div>
+        <h2 class="title is-6 mb-2">
+          <%= @page.uri %>
+        </h2>
+
+        <p class="subtitle is-7 text-muted">
+          <span class="tag is-info is-light"><%= @page.lang %></span>
+
+          <% if @page.master? %>
+            <span class="tag is-info is-light">master page</span>
+          <% else %>
+            <span class="tag is-info is-light">
+              · перевод страницы      
+            </span> <code><%= @page.master.uri %></code>
+          <% end %>
+        </p>
+      </div>
+    </div>
+
+    <div class="level-right">
+<!--
+      <button
+        type="button"
+        class="button is-light is-small"
+        data-page-edit
+        data-page-id="<%= @page.id %>"
+      >
+        Edit fix на Отдельную
+      </button>
+-->
+
+
+      <% if @page.master? %>
+
+          <button
+            type="button"
+            class="button is-warning is-small"
+            data-page-sub
+            data-source-page-id="<%= @page.id %>"
+          >
+            Sub
+          </button>
+
+          <button
+            type="button"
+            class="button is-warning is-small"
+            data-page-copy
+            data-source-page-id="<%= @page.id %>"
+          >
+            Dup
+          </button>
+
+      <% end %>
+      <a href='/admin/pages/<%= @page.id %>/edit-in-place' class="button is-light is-small">Edit in Place</a>
+
+    </div>
+
+  </div>
+
+  <% if @page.errors.any? %>
+    <div class="notification is-danger is-light">
+      <ul>
+        <% @page.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+    <form
+      method="post"
+      action="/admin/pages/<%= @page.id %>"
+      data-page-edit-form
+    >
+    <input type="hidden" name="_method" value="patch">
+
+    <%# Блок системных полей (только для master-страницы) %>
+    <% if @page.master? %>
+      <div class="field">
+        <label class="label is-small">Языки</label>
+
+        <div class="buttons">
+          <% settings.languages.each do |lang_code, lang_info| %>
+            <% lang_code = lang_code.to_s %>
+
+            <% if lang_code == @page.lang %>
+              <button
+                type="button"
+                class="button is-small is-link"
+                disabled
+                title="<%= lang_info[:name] %> (текущий язык)"
+              >
+                <%= lang_code.upcase %>
+              </button>
+            <% else %>
+              <% translation = @page.version_for(lang_code) %>
+
+              <% if translation %>
+                <button
+                  type="button"
+                  class="button is-small is-success is-light"
+                  data-page-lang-open
+                  data-target-page-id="<%= translation.id %>"
+                  title="Открыть перевод: <%= lang_info[:name] %>"
+                >
+                  <%= lang_code.upcase %>
+                </button>
+              <% else %>
+                <button
+                  type="button"
+                  class="button is-small is-light"
+                  data-page-lang-create
+                  data-source-page-id="<%= @page.id %>"
+                  data-lang="<%= lang_code %>"
+                  title="Создать перевод: <%= lang_info[:name] %>"
+                >
+                  <%= lang_code.upcase %>
+                </button>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label is-small">Родительская страница</label>
+        <div class="control is-small">
+          <div class="select is-fullwidth">
+            <select name="page[parent_id]" class="input is-small">
+              <option value="">Корневая страница</option>
+
+              <% @parent_pages.each do |parent_page| %>
+                <option
+                  value="<%= parent_page.id %>"
+                  <%= "selected" if @page.parent_id == parent_page.id %>
+                >
+                  <%= parent_page.uri %>
+                </option>
+              <% end %>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    <div class="field is-grouped mt-0 pt-0">
+        <button type="submit" class="button is-danger is-small has-text-white">
+          Save
+        </button>
+    </div>
+
+  <div class="columns">
+
+    <div class="column is-1">
+      <label class="label is-small">slug</label>
+    </div>
+
+    <div class="column is-11">
+      <input
+          class="input is-small"
+          type="text"
+          name="page[slug]"
+          value="<%= @page.slug %>"
+          <%= "required" if @page.non_root_master? %>
+        >
+    </div>
+  </div>
+
+      <div class="columns">
+
+        <div class="column">
+          <%= label(:page, :layout, "layout:", options = {class: 'label mb-0'}) %>
+          <% values = Dir.glob("**", base: "project/views/layout").delete_if{|file| file.starts_with?("_")}.unshift("") %>
+          <%= select(:page, :layout, values, options = {class: 'select input is-success is-size-7', value: @page.layout}) %>
+          <span class="icon is-small is-left">
+            <i class="fas fa-caret-down"></i>
+          </span>
+        </div>
+
+        <div class="column">
+          <%= label(:page, :view, "view:", options = {class: 'label mb-0'}) %>
+          <% values = Dir.glob("**", base: "project/views").delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.unshift("") %>
+          <%= select(:page, :view, values, options = {class: 'select input is-success is-size-7', value: @page.view}) %>
+          <span class="icon is-small is-left">
+            <i class="fas fa-caret-down"></i>
+          </span>
+        </div>
+
+<!--
+        <div class="column">
+
+            <label class="label is-small">layout</label>
+            <div class="control">
+              <input
+                class="input is-small"
+                type="text"
+                name="page[layout]"
+                value="<%#= @page.layout %>"
+              >
+      
+          </div>
+        </div>
+-->
+        <div class="column">
+ 
+            <label class="label is-small">pageable_type</label>
+            <div class="control">
+              <input
+                class="input is-small"
+                type="text"
+                name="page[pageable_type]"
+                value="<%= @page.pageable_type %>"
+              >
+            </div>
+     
+        </div>
+      </div>
+    <% end %>
+
+    <%# Основной контент страницы %>
+    <div class="field">
+      <label class="label is-small">title</label>
+      <div class="control">
+        <input
+          class="input is-small"
+          type="text"
+          name="page[title]"
+          value="<%= @page.title %>"
+        >
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label is-small">h1</label>
+      <div class="control">
+        <input
+          class="input is-small"
+          type="text"
+          name="page[h1]"
+          value="<%= @page.h1 %>"
+        >
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label is-small">body</label>
+      <div class="control">
+        <textarea
+          class="textarea"
+          name="page[body]"
+          rows="16"
+        ><%= @page.body %></textarea>
+      </div>
+    </div>
+
+    <hr class="dropdown-divider my-5">
+
+    <%# SEO поля %>
+    <div class="field">
+      <label class="label">subtitle</label>
+      <div class="control">
+        <input
+          class="input is-small"
+          type="text"
+          name="page[subtitle]"
+          value="<%= @page.subtitle %>"
+        >
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">meta_description</label>
+      <div class="control">
+        <textarea
+          class="textarea"
+          name="page[meta_description]"
+          rows="4"
+        ><%= @page.meta_description %></textarea>
+      </div>
+    </div>
+
+    <%# Чекбокс публикации %>
+    <div class="field my-4">
+      <div class="control">
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            name="page[published]"
+            value="1"
+            <%= "checked" if @page.published? %>
+          >
+          <strong>Опубликована</strong>
+        </label>
+      </div>
+    </div>
+
+    <%# Кнопки действия %>
+    <div class="field is-grouped mt-5 pt-3">
+      <div class="control">
+        <button type="submit" class="button is-danger is-small has-text-white">
+          Save
+        </button>
+      </div>
+    </div>
+  </form>
+</section>

@@ -1,0 +1,28 @@
+<% if @ad %>
+
+    <dl>
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Yoga Styles</dt>
+       <dd>
+          <%= tags_by_parent["Yoga Styles"].map{|tag| "<a href='/" + @ad.permalink + "/" + (tag.content.permalink? ? tag.content.permalink : tag.permalink) + "'>" + tag.name + "</a>"}.join(", ") if tags_by_parent["Yoga Styles"]  %>
+          <%= tags_by_parent["Modern Styles"].map{|tag| "<a href='/" + @ad.permalink + "/" + (tag.content.permalink? ? tag.content.permalink : tag.permalink) + "'>" + tag.name + "</a>"}.join(", ") if tags_by_parent["Modern Styles"]  %>
+       </dd>
+       
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Special Yoga</dt>
+       <dd><%= tags_by_parent["Special"].map{|tag| "<a href='/" + @ad.permalink + "/" + (tag.content.permalink? ? tag.content.permalink : tag.permalink) + "'>" + tag.name + "</a>"}.join(", ") if tags_by_parent["Special"]  %></dd>
+       
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Yoga Age</dt>
+       <dd><%= tags_by_parent["Age"].map{|tag| "<a href='/" + @ad.permalink + "/" + (tag.content.permalink? ? tag.content.permalink : tag.permalink) + "'>" + tag.name + "</a>"}.join(", ") if tags_by_parent["Age"] %></dd>
+       
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Skill Level</dt>
+       <dd><%= tags_by_parent["Level"].map{|tag| "<a href='/" + @ad.permalink + "/" + (tag.content.permalink? ? tag.content.permalink : tag.permalink) + "'>" + tag.name + "</a>"}.join(", ") if tags_by_parent["Level"]  %></dd>
+       
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Group Size</dt>
+       <dd><%= tags_by_parent["Groups"].map{|tag| "<a href='/" + @ad.permalink + "/" + (tag.content.permalink? ? tag.content.permalink : tag.permalink) + "'>" + tag.name + "</a>"}.join(", ") if tags_by_parent["Groups"]  %></dd>
+       
+    </dl>   
+
+<% else %>
+
+  no @ad
+
+<% end %>    

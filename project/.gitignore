@@ -1,0 +1,10 @@
+*
+!.gitignore
+
+!config/
+!helpers/
+!views/
+!lib/
+
+!_routes.rb
+!_project_methods.rb

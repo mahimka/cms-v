@@ -1,0 +1,29 @@
+development: 
+  adapter: sqlite3
+  pool: 5
+  timeout: 5000
+  database: db/main.db
+
+production: 
+  adapter: sqlite3
+  pool: 5
+  timeout: 5000
+  database: db/main.db
+  
+
+# development:
+#   adapter: mysql2
+#   encoding: utf8
+#   database: yogamela_do
+#   pool: 2
+#   username: max_super
+#   password: sERSNtd4234p_22222
+
+# production:
+#   adapter: mysql2
+#   encoding: utf8
+#   pool: 5
+#   host: 127.0.0.1
+#   database: yogamela_production
+#   username: yogamela
+#   password: ddddd

@@ -1,0 +1,29 @@
+<h1 class='title is-4'><%= @tag.parent_id %> : <%= @tag.name %></h1>
+<table class='table is-size-7'>
+
+	<tr>
+		<td>domain</td>
+		<td><%#= @tag.site&.domain %> <a href="<%#=  @tag.site&.url %>">site</a></td>
+	</tr>
+
+</table>
+
+
+<p></p>
+
+<%# @label.labels.each do |key, value| %>
+  <p>
+  	<strong><%#= key %></strong><br>
+  	<%# if value.is_a? String %>
+  	  <br>
+  	  <%#= value %>
+  	<%# elsif value.is_a? Array %>
+  	  <ul>
+  	  <%# value.each do |value| %>  
+  	    <li><%#= value %>
+  	  <%# end %>  
+  	  </ul>
+  	<%# end %>
+
+  </p>
+<%# end %>

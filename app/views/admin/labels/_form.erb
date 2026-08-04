@@ -1,0 +1,98 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:label, :parent_id, "parent_id", options = {class: 'label'}) %>
+    <p class="help">группа (например, "Amenities"), либо пусто для группы верхнего уровня</p>
+  </div>
+
+  <div class="column is-9">
+    <% @labels_for_select = {"": ""}.merge(Label.where.not(id: @label.id).order(:ancestry, :position, :name).to_h { |label| [label.id, ("— " * label.depth) + label.name] }) %>
+    <%= select(:label, :parent_id, @labels_for_select, options = {class: 'select input is-success', value: @label.parent_id}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:label, :name, "name", options = {class: 'label'}) %>
+    <p class="help">это и есть ключ в details, например check_in_time</p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:label, :name, options = {class: 'input is-success', value: @label.name, placeholder: "enter label name"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <p class="label">translations</p>
+    <p class="help">перевод name на каждый язык (используется в видах вместо оригинала)</p>
+  </div>
+
+  <div class="column is-9">
+    <% settings.languages.each do |lang_code, lang_info| %>
+      <% lang_code = lang_code.to_s %>
+      <div class="field has-addons mb-1">
+        <div class="control">
+          <span class="button is-small is-static"><%= lang_info[:icon] %> <%= lang_code.upcase %></span>
+        </div>
+        <div class="control is-expanded">
+          <input type="text" class="input is-small" name="label[translations][<%= lang_code %>]" value="<%= fast_escape_html(@label.translations&.dig(lang_code)) %>" placeholder="<%= fast_escape_html(@label.name) %>">
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:label, :slug, "slug", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:label, :slug, options = {class: 'input is-success', value: @label.slug, placeholder: "enter label slug"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:label, :field_type, "field_type", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= select(:label, :field_type, {"string" => "string", "text" => "text", "boolean" => "boolean", "integer" => "integer"}, options = {class: 'select input is-success', value: @label.field_type}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:label, :position, "position", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:label, :position, options = {class: 'input is-success', value: @label.position, placeholder: "enter position"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:label, :active, "active", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="label[active]" value="0">
+    <input type="checkbox" name="label[active]" value="1" <%= @label.active ? "checked" : "" %>>
+  </div>
+
+</div>

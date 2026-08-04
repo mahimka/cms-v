@@ -1,0 +1,21 @@
+    <% span_class = "tag is-primary" %>
+
+    <dl>
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Yoga Styles</dt>
+       <dd class="ml-0 mt-4">
+          <%= tags_by_parent["Yoga Styles"].map{|tag| "<span class='#{span_class}'>#{tag.name}</span>"}.join(" ") if tags_by_parent["Yoga Styles"]  %>
+          <%= tags_by_parent["Modern Styles"].map{|tag| "<span class='#{span_class}'>#{tag.name}</span>"}.join(" ") if tags_by_parent["Modern Styles"]  %>
+       </dd>
+       
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Special Yoga</dt>
+       <dd class="ml-0 mt-4"><%= tags_by_parent["Special"].map{|tag| "<span class='#{span_class}'>#{tag.name}</span>"}.join(" ") if tags_by_parent["Special"]  %></dd>
+       
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Yoga Age</dt>
+       <dd class="ml-0 mt-4"><%= tags_by_parent["Age"].map{|tag| "<span class='#{span_class}'>#{tag.name}</span>"}.join(" ") if tags_by_parent["Age"] %></dd>
+       
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Skill Level</dt>
+       <dd class="ml-0 mt-4"><%= tags_by_parent["Level"].map{|tag| "<span class='#{span_class}'>#{tag.name}</span>"}.join(" ") if tags_by_parent["Level"]  %></dd>
+       
+       <dt class="title is-size-5 mb-2 mt-5 has-text-grey">Group Size</dt>
+       <dd class="ml-0 mt-4"><%= tags_by_parent["Groups"].map{|tag| "<span class='#{span_class}'>#{tag.name}</span>"}.join(" ") if tags_by_parent["Groups"]  %></dd>       
+    </dl>   

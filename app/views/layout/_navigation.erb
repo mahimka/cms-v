@@ -1,0 +1,130 @@
+
+<nav class="navbar is-white">
+  
+  <div class="container">
+    <div class="navbar-brand">
+      <a class="navbar-item brand-text" href="/">
+        Zad litsa
+      </a>
+      <div class="navbar-burger burger" data-target="navMenu">
+        <span></span>
+        <span></span>
+        <span></span>jjjjjjjjjjjjjjjjjjj
+      </div>
+    </div>
+
+    <div id="navMenu" class="navbar-menu">
+      <div class="navbar-start">
+
+      <%# if authorized? %>
+        <a class="navbar-item has-text-danger" href="/">
+          my piles
+        </a>
+        <a class="navbar-item has-text-danger" href="/stockpiles">
+          stockpiles
+        </a>
+        <a class="navbar-item has-text-danger" href="/piles">
+          piles
+        </a>
+
+        
+      <%# end %>  
+        
+        <!--
+        
+        <a class="navbar-item" href="admin.html">
+          Exceptions
+        </a>
+        <a class="navbar-item" href="admin.html">
+          Reports
+        </a>
+    -->
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+
+<!-- START NAV -->
+  <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+
+    <div class="container">
+      <div class="navbar-brand">
+        <a class="navbar-item" href="/">
+          <%#= link_to root_path, class: "navbar-item" do %>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><title>view-tile</title><g fill="#111111"><path d="M0 0h9v9H0V0zm2 2v5h5V2H2zm-2 9h9v9H0v-9zm2 2v5h5v-5H2zm9-13h9v9h-9V0zm2 2v5h5V2h-5zm-2 9h9v9h-9v-9zm2 2v5h5v-5h-5z"></path></g></svg>
+              <span class="has-text-weight-bold is-size-4 ml-4">SpiritsCentral</span>
+          <%# end %>
+        </a>
+        <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-start">
+          <a hre
+        <a class="navbar-item " href="/">
+          my piles
+        </a>
+        <a class="navbar-item " href="/stockpiles">
+          stockpiles
+        </a>
+        <a class="navbar-item " href="/piles">
+          piles
+        </a>
+
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              More
+            </a>
+
+            <div class="navbar-dropdown">
+              <a class="navbar-item">
+                About
+              </a>
+              <a class="navbar-item">
+                Jobs
+              </a>
+              <a class="navbar-item">
+                Contact
+              </a>
+              <hr class="navbar-divider">
+              <a class="navbar-item">
+                Report an issue
+              </a>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="navbar-end">
+          <div class="navbar-item">
+             <%# if logged_in? %>
+               <div class="buttons">
+                    
+                    <a href="" class="button is-light"><%#= current_user.role %> <%#= current_user.id %></a>
+
+                    <a href="" class="button is-light"><%#= current_user.email %></a>
+
+                    <a href="/logout" data-method="delete" class="button is-light">Sign out</a>
+               </div>
+             <%# else %>
+               <div class="buttons">
+                  <strong><a href="/signup" class="button is-primary">Sign Up</a></strong>
+                  <a href="/login" class="button is-light">Log in</a>
+               </div>
+             <%# end %>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </nav>
+
+
+
+<!-- END NAV -->

@@ -1,0 +1,17 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <form method="POST" action="/admin/schemas">
+
+    <%= erb :'/schemas/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Create Schema" class="button is-warning">
+      </div>
+    </div>
+
+  </form>
+
+</div>

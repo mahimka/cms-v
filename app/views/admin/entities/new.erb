@@ -1,0 +1,43 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <h1 class="title">New entity</h1>
+  <p class="subtitle is-6">Step 1: name and type. Details, tags and links can be filled in on the next step.</p>
+
+  <form method="POST" action="/admin/entities">
+
+    <div class="columns">
+
+      <div class="column is-2">
+        <%= label(:entity, :name, "name", options = {class: 'label'}) %>
+      </div>
+
+      <div class="column is-9">
+        <%= input(:entity, :name, options = {class: 'input is-success', value: @entity.name, placeholder: "enter entity name"}) %>
+      </div>
+
+    </div>
+
+    <div class="columns">
+
+      <div class="column is-2">
+        <%= label(:entity, :schema_id, "schema", options = {class: 'label'}) %>
+      </div>
+
+      <div class="column is-9">
+        <% @schemas_for_select = {"": ""}.merge(Schema.active.order(:ancestry, :position, :name).to_h { |schema| [schema.id, ("— " * schema.depth) + schema.name] }) %>
+        <%= select(:entity, :schema_id, @schemas_for_select, options = {class: 'select input is-success', value: @entity.schema_id}) %>
+      </div>
+
+    </div>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Create Entity" class="button is-warning">
+      </div>
+    </div>
+
+  </form>
+
+</div>

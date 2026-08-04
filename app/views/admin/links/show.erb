@@ -1,0 +1,38 @@
+<h1 class='title is-4'><%= @link.label&.name || "link" %></h1>
+
+<a href="/admin/links/<%= @link.id %>/edit" class="button is-small">edit</a>
+
+<table class='table is-size-7'>
+  <tr>
+    <td>url</td>
+    <td><a href="<%= @link.url %>" target="_blank"><%= @link.url %></a></td>
+  </tr>
+  <tr>
+    <td>linkable</td>
+    <td>
+      <% if @link.linkable %>
+        <a href="/admin/<%= @link.linkable.class.name.underscore.pluralize %>/<%= @link.linkable.id %>">
+          <%= @link.linkable_type %> — <%= @link.linkable.name %>
+        </a>
+      <% else %>
+        —
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td>label</td>
+    <td><%= @link.label&.name %></td>
+  </tr>
+  <tr>
+    <td>ready / published / active</td>
+    <td><%= @link.ready %> / <%= @link.published %> / <%= @link.active %></td>
+  </tr>
+  <tr>
+    <td>checked_at</td>
+    <td><%= @link.checked_at %></td>
+  </tr>
+  <tr>
+    <td>response</td>
+    <td><%= @link.response %></td>
+  </tr>
+</table>

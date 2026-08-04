@@ -1,0 +1,279 @@
+<table class="table is-narrow">
+  <%# GscStat.where(page: @page.url).first(1).each do |page| %>
+    <tr>
+      <!--<td><%#= page.page_id %></td>-->
+      <td><%#= page.clicks %></td>
+      <td><%#= page.impressions %></td>
+      <td><%#= page.position %></td>
+      <td><%#= page.page %></td>
+      <td><%#= page.query %></td>
+      <td><%#= page.stat_date %></td>
+      <!--<td><%#= page.ctr %></td>-->
+    </tr>
+  <%# end %>
+</table>
+
+
+<%# is_base_page = @page.base_page.blank? %>
+
+<%#= is_base_page %>
+<%# @disabled = is_base_page ? '' : "pointer-events: none; background-color: lightgrey;" %>
+
+<style>
+   .label {
+      font-size:0.75em;
+      margin: 0.6em  0 0.2em  0.2em ;
+   }  
+   .column {
+      padding:0 0.15em 0.1em 0;
+   }
+   .input, .textarea {
+      font-size:0.75em;
+      margin: 0 0.2em  0 0.2em;
+   }
+   .icon {
+      font-size:0.75em; 
+   }
+
+   hr {
+    padding: 0em;
+    margin: 0.1em 0 1.5em 0; 
+   }
+
+</style>
+
+<div class="columns">
+
+<div class="column is-1"> 
+
+</div>  
+
+
+ <input id="hidden" type="hidden" name="page[id]" value="<%= @page.id %>">
+
+  <div class="column is-1">   
+     <%= checkbox_in_place @page, :ready %>ready
+  </div>
+
+  <div class="column is-2">   
+    <%= checkbox_in_place @page, :published %> published
+
+  </div>  
+
+  <div class="column is-1">
+
+
+  </div>  
+
+  <div class="column is-3">
+
+  </div>
+
+
+
+  <div class="column is-1">  
+    <div class="control">
+      <%#= input(:page, :position, options = {class: 'input is-success', value: @page.position, placeholder: "position", title: "position", style: @disabled}) %>
+    </div>
+  </div>  
+</div>  
+
+<%# uri вычисляется автоматически из slug и родителя — вручную не редактируется.
+    Смена родителя — только в дереве (_tree_edit_form.erb). %>
+<% if @page.master? %>
+  <div class="columns">
+    <div class="column is-1">
+      <%= label(:page, :slug, "slug", options = {class: 'label'}) %>
+    </div>
+    <div class="column is-11">
+      <%= input_in_place @page, :slug %>
+    </div>
+  </div>
+<% end %>
+
+<div class="columns">
+  <div class="column is-1">
+  </div>
+
+  <%# view/layout — из Page::MASTER_ONLY_FIELDS, у перевода не заполняются %>
+  <% if @page.master? %>
+    <div class="column is-2">
+      <%= label(:page, :layout, "layout:", options = {class: 'label mb-0'}) %>
+      <% values = Dir.glob("**", base: "app/views/layout") %>
+      <%= select_in_place @page, :layout, values, style: @disabled %>
+    </div>
+
+    <div class="column is-2">
+      <%= label(:page, :view, "view:", options = {class: 'label mb-0'}) %>
+      <% values = Dir.glob("*.*", base: "app/views").sort %>
+      <%= select_in_place @page, :view, values, style: @disabled %>
+    </div>
+  <% end %>
+
+  <div class="column is-2">
+
+    <label class="label mb-0" for="page_has_feed">has_feed: </label>
+
+    <%= checkbox_in_place @page, :has_feed, style: @disabled %>
+
+  </div>
+
+</div>
+
+
+
+<hr>
+
+
+
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :title, "title", options = {class: 'label'}) %></div>  
+  <div class="column is-11"><%= input_in_place @page, :title %></div>  
+</div>  
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :h1, "h1", options = {class: 'label'}) %></div>  
+  <div class="column is-11"><%= input_in_place @page, :h1 %></div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :meta_description, "meta_d", options = {class: 'label'}) %></div>  
+  <div class="column is-11"><%= textarea_in_place @page, :meta_description %></div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :anchors, "anchors", options = {class: 'label'}) %></div>  
+  <div class="column is-4">
+    <%#= label(:page, :anchor_1, "anchor_1", options = {class: 'label'}) %>
+    <%= input_in_place @page, :anchor_1 %>
+  </div>
+  <div class="column is-4">
+    <%#= label(:page, :anchor_2, "anchor_2", options = {class: 'label'}) %>
+    <%= input_in_place @page, :anchor_2 %>
+  </div>
+  <div class="column is-3">
+    <%#= label(:page, :anchor_3, "anchor_3", options = {class: 'label'}) %>
+    <%= input_in_place @page, :anchor_3 %>
+  </div>
+</div>  
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :body, "body", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :body %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :schema, "schema", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :schema %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :faq, "faq", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :faq %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :hero_1, "hero_1", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :hero_1 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :hero_2, "hero_2", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :hero_2 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :hero_3, "hero_3", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :hero_3 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :sidebar_1, "sidebar_1", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :sidebar_1 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :sidebar_2, "sidebar_2", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :sidebar_2 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :sidebar_3, "sidebar_3", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :sidebar_3 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :footer_1, "footer_1", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :footer_1 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :footer_2, "footer_2", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :footer_2 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :footer_3, "footer_3", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :footer_3 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :block_1, "block_1", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :block_1 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :block_2, "block_2", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :block_2 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :block_3, "block_3", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%= textarea_in_place @page, :block_3 %>
+  </div>  
+</div>
+
+<div class="columns">
+  <div class="column is-1"><%= label(:page, :block_4, "block_4", options = {class: 'label'}) %></div>  
+  <div class="column is-11">
+    <%#= textarea_in_place @page, :block_4 %>
+  </div>  
+</div>
+
+
+
+
+
+
+
+

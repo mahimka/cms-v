@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title><%= @title -%></title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+</head>
+
+<body>
+
+  <section class="section pt-2 pb-5">
+    <%= erb :'/layout/_navigation', views: settings.views_admin  %>
+  </section>
+
+  <section class="section pt-0">
+    <%= yield %>
+  </section>
+
+  <section class="section has-background-grey-dark has-text-white-ter">
+    <%= erb :'/layout/_footer', views: settings.views_admin %>
+  </section>  
+
+
+</body>

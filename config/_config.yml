@@ -1,0 +1,36 @@
+items_folder: /listings 
+tags_folder: /tags
+
+domain: nearme.com 
+author: 
+site_name: NearMe.com
+copyright: 2022 nearme.com
+
+# urls to pages
+about: 
+contact: 
+disclaimer: 
+terms: 
+twitter:  
+facebook: 
+
+# lists
+per_page: 7
+
+href_titles:
+  home: "Yoga classes near me - Home Page"
+
+# rss
+rss_ad_channel_title:       "Updates: yoga classes and studios in "
+rss_ad_channel_description: "Updated listings of yoga classes and studios in "
+rss_ad_item_title:          "Yoga Classes in "
+rss_ad_item_description:    
+  
+
+# admin
+# show_testing: false
+# show_views:   false
+# show_timings: false
+
+# # on updates
+# activate_new_objects: true

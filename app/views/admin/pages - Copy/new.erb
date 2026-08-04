@@ -1,0 +1,28 @@
+<div id="edit_page_form">
+
+<form method="POST" action="/admin/pages">
+
+<!--
+<div class="columns"> 
+  <div class="column is-12">
+    <input type="submit" value="Create Page" class="button is-link is-warning">
+    <hr>
+  </div>
+</div>
+-->
+
+  
+<%= erb :'pages/_form', views: settings.views_admin, layout: false  %>
+
+<!--
+<div class="field is-grouped">
+  <div class="control">
+    <hr>
+    <input type="submit" value="Create Page" class="button is-link is-warning">
+  </div>
+</div>
+-->
+
+</form>
+
+</div>

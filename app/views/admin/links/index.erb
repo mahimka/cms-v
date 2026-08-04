@@ -1,0 +1,84 @@
+<p><a class="button is-warning" href="/admin/links/new">Add Link</a></p>
+
+<div class="content m-3">
+
+<form method="GET" action="/admin/links">
+
+  <div class="columns">
+    <div class="column is-2">
+      <tag class="tag is-size-7">linkable_type_eq</tag>
+      <% @linkable_types_for_select = {"": ""}.merge(LinksController::LINKABLE_TYPES.to_h { |type| [type, type] }) %>
+      <%= select(:q, :linkable_type_eq, @linkable_types_for_select, options = {class: 'select input is-small', value: @q.linkable_type_eq}) %>
+    </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">url_cont</tag>
+      <%= input(:q, :url_cont, options = {class: 'input is-small', value: @q.url_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">label_name_cont</tag>
+      <%= input(:q, :label_name_cont, options = {class: 'input is-small', value: @q.label_name_cont, placeholder: ""}) %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-1">
+      <input type="submit" value="Filter" class="button is-warning">
+    </div>
+    <div class="column is-11">
+      Found/Total: <%= @links_found %> / <%= Link.all.size %>
+    </div>
+  </div>
+
+</form>
+
+<div class="content">
+
+  <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
+    <div class="column is-12">
+      <%= paginate @links unless @links.blank? %>
+    </div>
+  </div>
+
+  <table class="table is-narrow is-size-7">
+    <tr class="is-size-6 has-text-weight-semibold">
+      <td>active</td>
+      <td>linkable</td>
+      <td>label</td>
+      <td>url</td>
+      <td>ready</td>
+      <td>published</td>
+      <td>response</td>
+      <td></td>
+    </tr>
+
+  <% @links.each do |link| %>
+
+    <tr>
+      <td><%= checkbox_in_place(link, :active) %></td>
+      <td>
+        <% if link.linkable %>
+          <a href="/admin/<%= link.linkable.class.name.underscore.pluralize %>/<%= link.linkable.id %>">
+            <%= link.linkable_type %> #<%= link.linkable_id %>
+          </a>
+        <% else %>
+          <%= link.linkable_type %> #<%= link.linkable_id %>
+        <% end %>
+      </td>
+      <td><%= link.label&.name %></td>
+      <td><a href="<%= link.url %>" target="_blank"><%= link.url %></a></td>
+      <td><%= link.ready %></td>
+      <td><%= link.published %></td>
+      <td><%= link.response %></td>
+      <td>
+        <a href="/admin/links/<%= link.id %>" class="button is-small">show</a>
+        <a href="/admin/links/<%= link.id %>/edit" class="button is-small">edit</a>
+      </td>
+    </tr>
+
+  <% end %>
+
+  </table>
+
+</div>
+
+</div>

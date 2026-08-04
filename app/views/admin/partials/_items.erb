@@ -1,0 +1,55 @@
+<%#= paginate @items if @items.respond_to? :current_page %>
+
+<!--<%= settings.items_folder %>-->
+
+<%- for item in items -%>
+  <li style="list-style-type: none;">  
+  <p class="title is-size-6 mt-3 mb-1"><a href="<%= path_to_item(item) %>" 
+    title="<%= item.name -%> in  <%= !item.pp.nil? ? item.pp.name : "nsp" -%> zip <%= item.zip %>, <%= !item.country.nil? ? item.country.name : "nsp" -%> <%= !item.adm1.nil? ? item.adm1.name : "nsp" -%> "
+    ><%= item.name -%></a></p>
+  <span class="is-size-7 mt-1 mb-1">
+    <%= !item.country.nil? ? item.country.name : "nsp" -%> \ <%= !item.adm1.nil? ? item.adm1.name : "nsp" -%> \ <%= !item.pp.nil? ? item.pp.name : "nsp" -%> 
+  </span>
+      
+    <div class="tags are-small mt-4">
+      
+      <% if item.tags[1..10] %>
+        <% item.tags[1..10].each do |tag| -%>
+          <span class="tag">
+            <%= tag.name %>
+            <%#= tag.listed ? "<a href='/#{tag.content.permalink? ? tag.content.permalink : tag.permalink}'>#{tag.name}</a>" : tag.name %>
+          </span>
+        <%- end -%>
+        <span class="tag"><a href="<%= path_to_item(item) %>">... more</a></span>
+      <% end %>  
+    </div>
+
+    <%#= item.address_for_listing.html_safe unless item.address_for_listing.nil? -%>
+
+    <%# i = 0 -%>
+    <%# for tag in item.tags -%>
+      <%#= i < 5 ?  tag.name : '' -%><%#= i < 4 ?  ',' : '' -%>
+      <%#- i += 1 -%>
+    <%#- end -%>
+
+    <!--<b>Style:</b>-->
+    <%#- for tag in item.tags -%>
+      <%# if !tag.nil? && !tag.parent_id.nil? %>
+        <%# parent = Tag.find(tag.parent_id) %>
+
+        <%# if parent.name == "Yoga Styles" || parent.name == "Modern Styles" %>
+          <%# if tag.listed? %>
+          <a href="<%#= tag.permalink %>"><%#= tag.name %></a>
+            <%#= link_to tag.name, permalink_path(tag.content.permalink? ? tag.content.permalink : tag.permalink) -%>
+          <%# else %>
+            <%#= tag.name -%>
+          <%# end %>
+        <%# end %>
+      
+      <%# end %>
+    <%#- end -%>
+    
+
+
+<%- end -%>
+

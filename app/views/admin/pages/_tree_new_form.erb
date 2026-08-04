@@ -1,0 +1,298 @@
+<section class="section page-editor-content">
+  <div class="container is-fluid">
+    <header class="mb-5">
+      <h2 class="title is-4 mb-2">
+        <% if @page.translation? %>
+          Новый перевод (<%= @page.lang %>)
+        <% elsif params[:copy] == "true" %>
+          Копирование страницы
+        <% elsif params[:sub] == "true" %>
+          Новая подстраница
+        <% else %>
+          Новая страница
+        <% end %>
+      </h2>
+
+      <% if @page.parent %>
+        <p class="subtitle is-6 has-text-grey">
+          Родитель:
+          <code><%= @page.parent.uri %></code>
+        </p>
+      <% end %>
+
+      <% if @page.errors.any? %>
+        <div class="notification is-danger is-light">
+          <ul>
+            <% @page.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </header>
+
+    <form
+      method="post"
+      action="/admin/pages"
+      class="page-new-form"
+      data-page-create-form
+    >
+      <div class="field">
+
+        <div class="field is-grouped mt-5">
+          <div class="control">
+            <button
+              type="submit"
+              class="button is-small is-danger has-text-white"
+            >
+              Create Page
+            </button>
+          </div>
+
+          <div class="control">
+            <button
+              type="button"
+              class="button is-light is-small "
+              data-page-form-cancel
+            >
+              discard
+            </button>
+          </div>
+        </div>
+
+        <% if @page.translation? %>
+          <input type="hidden" name="page[lang]" value="<%= @page.lang %>">
+          <input type="hidden" name="page[master_id]" value="<%= @page.master_id %>">
+          <input type="hidden" name="page[parent_id]" value="<%= @page.parent_id %>">
+
+          <p class="help">
+            Перевод страницы <code><%= @page.master.uri %></code>.
+            Родитель и slug наследуются от исходной страницы.
+          </p>
+        <% else %>
+          <label class="label" for="page-parent-id">
+            Родительская страница
+          </label>
+
+          <div class="control">
+            <div class="select is-fullwidth">
+              <select
+                id="page-parent-id"
+                name="page[parent_id]"
+              >
+                <option value="">
+                  Корневая страница
+                </option>
+
+                <% @parent_pages.each do |parent_page| %>
+                  <option
+                    value="<%= parent_page.id %>"
+                    <%= "selected" if @page.parent_id == parent_page.id %>
+                  >
+                    <%= parent_page.uri %>
+                  </option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <% unless @page.translation? %>
+        <div class="field">
+          <label class="label is-small" for="page-slug">
+            Slug
+          </label>
+
+          <div class="control">
+            <input
+              id="page-slug"
+              class="input"
+              type="text"
+              name="page[slug]"
+              value="<%= @page.slug %>"
+              required
+              autofocus
+            >
+          </div>
+
+          <p class="help">
+            URI будет рассчитан автоматически на основе родительской страницы и slug.
+          </p>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <label class="label" for="page-title">
+          Title
+        </label>
+
+        <div class="control">
+          <input
+            id="page-title"
+            class="input"
+            type="text"
+            name="page[title]"
+            value="<%= @page.title %>"
+          >
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="page-subtitle">
+          Subtitle
+        </label>
+
+        <div class="control">
+          <input
+            id="page-subtitle"
+            class="input"
+            type="text"
+            name="page[subtitle]"
+            value="<%= @page.subtitle %>"
+          >
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="page-h1">
+          H1
+        </label>
+
+        <div class="control">
+          <input
+            id="page-h1"
+            class="input"
+            type="text"
+            name="page[h1]"
+            value="<%= @page.h1 %>"
+          >
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="page-body">
+          Body
+        </label>
+
+        <div class="control">
+          <textarea
+            id="page-body"
+            class="textarea"
+            name="page[body]"
+            rows="16"
+          ><%= @page.body %></textarea>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label" for="page-meta-description">
+          Meta description
+        </label>
+
+        <div class="control">
+          <textarea
+            id="page-meta-description"
+            class="textarea"
+            name="page[meta_description]"
+            rows="4"
+          ><%= @page.meta_description %></textarea>
+        </div>
+      </div>
+
+      <% unless @page.translation? %>
+        <div class="columns">
+          <div class="column">
+            <div class="field">
+              <label class="label" for="page-view">
+                View
+              </label>
+
+              <div class="control">
+                <input
+                  id="page-view"
+                  class="input"
+                  type="text"
+                  name="page[view]"
+                  value="<%= @page.view %>"
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="field">
+              <label class="label" for="page-layout">
+                Layout
+              </label>
+
+              <div class="control">
+                <input
+                  id="page-layout"
+                  class="input"
+                  type="text"
+                  name="page[layout]"
+                  value="<%= @page.layout %>"
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="field">
+              <label class="label" for="page-pageable-type">
+                Pageable type
+              </label>
+
+              <div class="control">
+                <input
+                  id="page-pageable-type"
+                  class="input"
+                  type="text"
+                  name="page[pageable_type]"
+                  value="<%= @page.pageable_type %>"
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <div class="control">
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              name="page[published]"
+              value="1"
+              <%= "checked" if @page.published? %>
+            >
+
+            Опубликована
+          </label>
+        </div>
+      </div>
+
+      <div class="field is-grouped mt-5">
+        <div class="control">
+          <button
+            type="submit"
+            class="button is-small is-danger has-text-white"
+          >
+            Create Page
+          </button>
+        </div>
+
+        <div class="control">
+          <button
+            type="button"
+            class="button is-light is-small "
+            data-page-form-cancel
+          >
+            discard
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>

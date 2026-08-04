@@ -1,0 +1,30 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <p class="label">tags</p>
+    <% if @item.schema %>
+      <p class="help">теги из schema «<%= @item.schema.name %>» (с учётом родительских схем)</p>
+    <% else %>
+      <p class="help">у item не задана schema — нечего предложить</p>
+    <% end %>
+  </div>
+
+  <div class="column is-9">
+
+    <% schema_tags   = @item.effective_tags.to_a %>
+    <% selected_ids   = @item.tag_ids %>
+    <% grouped_tags   = schema_tags.group_by { |tag| tag.parent } %>
+
+    <% grouped_tags.each do |parent, children| %>
+      <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
+      <% children.each do |tag| %>
+        <label class="checkbox mr-3">
+          <input type="checkbox" name="tag_ids[]" value="<%= tag.id %>" <%= "checked" if selected_ids.include?(tag.id) %>>
+          <%= tag.name %>
+        </label>
+      <% end %>
+    <% end %>
+
+  </div>
+
+</div>

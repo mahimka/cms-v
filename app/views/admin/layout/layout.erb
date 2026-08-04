@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= @title %></title>
+
+    <meta name="description" content="<%= @meta_description -%>">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css">
+
+    <script src="https://kit.fontawesome.com/eaa64c5f2f.js" crossorigin="anonymous"></script>
+
+    <script
+          src="https://code.jquery.com/jquery-3.6.0.min.js"
+          integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+          crossorigin="anonymous"></script>
+      
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <%= yield_content :feed %>
+    
+</head>
+
+<body>
+
+  <%= erb :'/layout/_navigation' %>
+  <%= erb :'/layout/_flash' %>
+
+  <div class="container">
+    <div class="columns">
+      <div class="column is-12 mt-0 mb-3 pt-2 pb-4">
+        <nav class="breadcrumb is-small" aria-label="breadcrumbs">
+          <%= yield_content :breadcrumb %>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <%= yield_content :hero %>
+
+  <div class="container">
+    <div class="columns">
+
+      <div class="column is-12">
+        <%= yield %>
+      </div>
+    </div>
+  </div> 
+
+  <%= erb :'/layout/_footer' %>
+
+  <script async type="text/javascript" src="/javascripts/bulma.js"></script>
+
+</body>

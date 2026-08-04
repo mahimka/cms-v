@@ -1,0 +1,84 @@
+<h1 class='title'><%= @entity.name %></h1>
+
+<p class='subtitle'><%= @entity.schema&.name %></p>
+
+<a href="/admin/entities/<%= @entity.id %>/edit" class="button is-small">edit</a>
+
+<ul>
+  <li><b>active:</b> <%= @entity.active %>
+  <li><b>address:</b> <%= @entity.address %>
+  <li><b>latitude:</b> <%= @entity.latitude %>
+  <li><b>longitude:</b> <%= @entity.longitude %>
+</ul>
+
+<h2 class='title is-4 mt-4'>details</h2>
+<ul>
+  <% (@entity.details || {}).each do |key, value| %>
+    <li><b><%= key %>:</b> <%= value %>
+  <% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>tags</h2>
+<ul>
+	<% @entity.tags.each do |tag| %>
+	  <li><%= tag.name %> - <%= tag.parent&.name %> - <%= tag.markers.map{|marker| marker.name } %> -
+	<% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>links</h2>
+<a href="/admin/links/new?linkable_type=Entity&linkable_id=<%= @entity.id %>" class="button is-small is-info">+ add link</a>
+<ul>
+	<% @entity.links.each do |link| %>
+	  <li><%= link.label&.name %> - <a href="<%= link.url %>" target="_blank"><%= link.url %></a> - <a href="/admin/links/<%= link.id %>/edit">edit</a>
+	<% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>pictures</h2>
+<a href="/admin/pictures/new?imageable_type=Entity&imageable_id=<%= @entity.id %>" class="button is-small is-info">+ add picture</a>
+<div class="columns is-multiline mt-1">
+  <% @entity.pictures.each do |picture| %>
+    <div class="column is-2">
+      <figure class="image is-4by3">
+        <a href="/admin/pictures/<%= picture.id %>/edit"><img src="<%= picture.file %>" alt="<%= picture.alt %>"></a>
+      </figure>
+    </div>
+  <% end %>
+</div>
+
+
+<h2 class='title is-4 mt-4'>pages</h2>
+<ul>
+	<% @entity.pages.each do |page| %>
+	  <li><%= page.uri %> - <%= page.title %>
+	<% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>profiles</h2>
+
+<% @entity.profiles.each do |profile| %>
+  <p><%= profile.site.domain %> - <%= profile.url %>
+  <ul>
+  	<li><%= profile.snap_shots.first.param_1  %>
+  	<li><%= profile.snap_shots.first.param_2  %>
+  	<li><%= profile.snap_shots.first.param_3  %>
+  	<li><%= profile.snap_shots.first.param_4  %>
+  </ul>
+
+
+  <h2 class='title is-4 mt-4'>snap_shot.first</h2>
+  <p class="mt-4">
+  <% profile.snap_shots.first.labels.each do |key, value| %>
+
+    <h3 class="title is-size-6 mt-4"><%= key %></h3>
+    <p>
+    	<%= value  if value.is_a? String %>
+    	<%= value.map{|node| "<li>" + node }.join if value.is_a? Array %>
+
+
+  <% end %>
+
+<% end %>

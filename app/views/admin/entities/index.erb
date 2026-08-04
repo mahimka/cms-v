@@ -1,0 +1,78 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<form method="GET" action="/admin/entities">
+
+<div class="columns mb-0 ">
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">name_cont</p>
+    <input class="input is-small" type="text" name="q[name_cont]" value="<%= @q.name_cont %>" placeholder="enter name">
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">schema_name_cont</p>
+    <input class="input is-small" type="text" name="q[schema_name_cont]" value="<%= @q.schema_name_cont %>" placeholder="">
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">address_cont</p>
+    <input class="input is-small" type="text" name="q[address_cont]" value="<%= @q.address_cont %>" placeholder="">
+  </div>
+</div>
+
+<hr class="my-2">
+
+<div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+  <div class="column is-1">
+    <input type="submit" value="Filter" class="button is-warning">
+  </div>
+
+  <div class="column is-1">
+    <a href="/admin/entities/new" class="button is-success">New</a>
+  </div>
+
+  <div class="column is-3">
+    <h6 class="title is-size-6 mt-2">Found/Total: <%= @entities_found.size %> / <%= Entity.all.size %></h6>
+  </div>
+</div>
+
+<hr class="my-0">
+
+</form>
+
+
+<div class="content is-size-7">
+  <%= paginate(@entities) %>
+</div>
+
+<div class="content">
+
+  <table class="table is-size-7">
+    <tr>
+      <td></td>
+      <td>name</td>
+      <td>schema</td>
+      <td>address</td>
+      <td>parent</td>
+      <td>tags</td>
+      <td></td>
+    </tr>
+
+  <% @entities.each do |entity| %>
+
+    <tr>
+      <td><%#= checkbox_in_place entity, :active %></td>
+      <td><%= entity.name %></td>
+      <td><%= entity.schema&.name %></td>
+      <td><%= entity.address %></td>
+      <td><%= entity.parent_id %></td>
+      <td><%= entity&.tags&.size %></td>
+
+      <td>
+        <a href="/admin/entities/<%= entity.id %>" class='button is-small'>show</a>
+        <a href="/admin/entities/<%= entity.id %>/edit" class='button is-small'>edit</a>
+      </td>
+    </tr>
+
+  <% end %>
+
+  </table>
+
+</div>

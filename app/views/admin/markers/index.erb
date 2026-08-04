@@ -1,0 +1,124 @@
+<div class="content m-3">
+
+<form method="GET" action="/admin/markers">
+
+  <div class="columns">
+
+<!--
+    <div class="column is-3">
+      <label class="label is-size-7">site_id_eq</label>
+      <div class="control has-icons-left">
+        <%# list_values = {"": ""}.merge(Site.where(rival_site: true).order("domain ASC").select(:id, :domain).to_h {|site| [site.id, site.domain]}) %>
+        <%# list_values = Site.all.order("domain ASC").map{|s| "#{s.id}#{s.id.to_s.length == 6 ? '&nbsp;&nbsp;' : ' '}| #{s.name} | #{s.domain}" }.unshift("") %>
+        <%#= select(:q, :site_id_eq, list_values, options = {class: 'select input is-success is-small is-family-monospace', value: @q.site_id_eq}) %>
+        <span class="icon is-small is-left">
+          <i class="fas fa-caret-down"></i>
+        </span>
+      </div>
+    </div>
+-->
+
+    <div class="column is-2">
+      <label class="label is-size-7">profile_profileable_name_cont</label>
+      <%#= input(:q, :profile_profileable_type_cont, options = {class: 'input is-small', value: @q.profile_profileable_type_cont, placeholder: ""}) %>
+    </div>
+
+    <div class="column is-2">
+      <label class="label is-size-7">group_cont</label>
+      <%= input(:q, :group_cont, options = {class: 'input is-small', value: @q.group_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <label class="label is-size-7">name_cont</label>
+      <%= input(:q, :name_cont, options = {class: 'input is-small', value: @q.name_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <label class="label is-size-7">details_cont</label>
+      <%= input(:q, :details_cont, options = {class: 'input is-small', value: @q.details_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <label class="label is-size-7">admin_notes_cont</label>
+      <%= input(:q, :admin_notes_cont, options = {class: 'input is-small', value: @q.admin_notes_cont, placeholder: ""}) %>
+    </div>
+
+</div>
+
+<div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+    <div class="column is-1">
+      <b>blank: </b>
+    </div>
+
+    <div class="column is-1">
+      <input type="checkbox" name="q[site_id_blank]" value='1'  <%= @q.site_id_blank  ? "checked" : "" %>>
+      site_id
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[tag_id_blank]" value='1'  <%= @q.tag_id_blank  ? "checked" : "" %>>
+      tag_id
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[group_blank]" value='1'  <%= @q.group_blank  ? "checked" : "" %>>
+      group
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[name_blank]" value='1'  <%= @q.name_blank  ? "checked" : "" %>>
+      name
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[details_blank]" value='1'  <%= @q.details_blank  ? "checked" : "" %>>
+      details
+    </div>
+
+</div>
+
+<div class="columns">
+  <div class="column is-1">
+    <input type="submit" value="Filter" class="button is-warning">
+  </div>
+  <div class="column is-11">
+    Found/Total: <%= @markers_found %> / <%= Marker.all.size %>
+  </div>
+</div>
+
+</form>
+
+<div class="content">
+
+  <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
+    <div class="column is-12">
+      <%= paginate @markers unless @markers.blank? %>
+    </div>
+  </div>
+
+  <table class="tableis-narrow is-size-7 ">
+    <tr class="is-size-6 has-text-weight-semibold">
+      <td>active</td>
+      <td>site</td>
+      <td>group</td>
+      <td>name</td>
+      <td>tag</td>
+      <td>details</td>
+      <td>admin_notes</td>
+      <td></td>
+    </tr>
+
+  <% @markers.each do |marker| %>
+
+    <tr>
+      <td><%= checkbox_in_place(marker, :active) %></td>
+      <td><%= marker.site&.domain %></td>
+      <td><%= marker.group %></td>
+      <td><%= marker.name %></td>
+      <td><a href="/admin/tags/<%= marker.tag&.id %>/edit"><%= marker.tag&.name %></a></td>
+      <td><%= marker.details %></td>
+      <td><%= marker.admin_notes %></td>
+      <td><a href="/admin/markers/<%= marker.id %>" class="button is-small" target='_blank'>marker</a></td>
+    </tr>
+
+  <% end %>
+
+  </table>
+
+</div>
+
+</div>

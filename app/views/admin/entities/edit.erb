@@ -1,0 +1,34 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @entity.name %></h1>
+  <p class="subtitle is-6">Step 2: остальные поля, details, tags, links и pictures.</p>
+
+  <form method="POST" action="/admin/entities/<%= @entity.id %>">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <%= erb :'/entities/_form', views: settings.views_admin %>
+
+    <%= erb :'/entities/_details_fields', views: settings.views_admin %>
+
+    <%= erb :'/entities/_tags_fields', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Update Entity" class="button is-link is-warning">
+      </div>
+      <div class="control">
+        <a href="/admin/entities/<%= @entity.id %>" class="button">Show</a>
+      </div>
+    </div>
+
+  </form>
+
+  <%# отдельно от формы Entity: у каждой ссылки/картинки свой ресурс/маршрут, %>
+  <%# вложенные <form> в HTML невалидны %>
+  <%= erb :'/entities/_links_fields', views: settings.views_admin %>
+
+  <%= erb :'/entities/_pictures_fields', views: settings.views_admin %>
+
+</div>

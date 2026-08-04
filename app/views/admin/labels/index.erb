@@ -1,0 +1,61 @@
+<p><a class="button is-warning" href="/admin/labels/new">Add Label</a></p>
+
+<div class="content m-3">
+
+<form method="GET" action="/admin/labels">
+
+  <div class="columns">
+    <div class="column is-2">
+      <tag class="tag is-size-7">name_cont</tag>
+      <%= input(:q, :name_cont, options = {class: 'input is-small', value: @q.name_cont, placeholder: ""}) %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-1">
+      <input type="submit" value="Filter" class="button is-warning">
+    </div>
+    <div class="column is-11">
+      Found/Total: <%= @labels_found %> / <%= Label.all.size %>
+    </div>
+  </div>
+
+</form>
+
+<div class="content">
+
+  <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
+    <div class="column is-12">
+      <%= paginate @labels unless @labels.blank? %>
+    </div>
+  </div>
+
+  <table class="table is-narrow is-size-7">
+    <tr class="is-size-6 has-text-weight-semibold">
+      <td>active</td>
+      <td>name</td>
+      <td>slug</td>
+      <td>field_type</td>
+      <td></td>
+    </tr>
+
+  <% @labels.each do |label| %>
+
+    <tr>
+      <td><%= checkbox_in_place(label, :active) %></td>
+      <td><%= ("— " * label.depth) + label.name %></td>
+      <td><%= label.slug %></td>
+      <td><%= label.field_type %></td>
+      <td>
+        <a href="/admin/labels/<%= label.id %>" class="button is-small">show</a>
+        <a href="/admin/labels/<%= label.id %>/edit" class="button is-small">edit</a>
+      </td>
+    </tr>
+
+  <% end %>
+
+  </table>
+
+</div>
+
+</div>

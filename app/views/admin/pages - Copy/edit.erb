@@ -1,0 +1,108 @@
+dddddddddddddddddddddddd<% content_for  :sidebar do %>
+
+<% if @page %>
+<div class="content">
+<p>
+
+        <a href="<%= @page.url %>" class="button is-small is-secondary" target="_blank">
+          <span class="icon"><i class="<%= @page.active ? 'fas fa-broadcast-tower has-text-success fa-lg' : 'far fa-hourglass has-text-grey-light fa-lg' %>" aria-hidden="true"></i></span>
+          <span>&nbsp;View Page</span>
+        </a>
+
+ </p>       
+
+  <% unless @page.template_id && @page.template_id > 0 %>
+  
+       <a href="/admin/pages/<%= @page.id %>/copy" class="button is-small" title="Copy page"><i class="far fa-copy" aria-hidden="true"></i></a> 
+       <a href="/admin/pages/<%= @page.id %>/copy?to_subpage=true" class="button is-small" title="Create SUBPAGE"><i class="fas fa-level-down-alt" aria-hidden="true"></i></a> 
+ 
+       <a href="/admin/templates/new?page_id=<%= @page.id %>" class="button is-small" title="Create template for current page"><i class="fas fa-atom" aria-hidden="true"></i></a>
+
+      <a href="/histories/new?page_id=<%= @page.id %>" class="button is-small" title="Create history for current page"><i class="fas fa-history" aria-hidden="true"></i></a>
+      <!-- кнопки на версии страницы по языкам -->   
+      <p><br>
+      
+        <% base_id = @page.base_id || @page.id %>
+        <% base_page = Page.find(base_id) %>
+
+        <% settings.languages.each do |ln_code, parameters| %>
+
+          <% lang_folder   = settings.languages[ln_code.to_sym][:folder] || '' ;
+             page_lang_url = (lang_folder + base_page.url).gsub(/\/\z/, "") ; 
+              
+             page_lang_url = "/" if page_lang_url == ""  
+             page_lang_url = page_lang_url.gsub('//', '/') # иначе идет два слеша!!
+
+             @page_lang_url = page_lang_url;
+             page_lang     = Page.where(url: page_lang_url).first ; 
+          %>
+
+          <% if page_lang  %>  
+            <a href="/admin/pages/<%= page_lang.id %>/edit" class="button is-small is-primary " title="Edit <%= ln_code %>"><%= ln_code %></a> 
+          <% else %>
+            <a href="/admin/pages/<%= base_page.id %>/copy/<%= ln_code %>" class="button is-small is-warning" title="Copy to lang - <%= ln_code %>"><%= ln_code %></a> 
+          <% end %>
+
+        <% end %>
+      </p>
+
+  <% end %>
+
+  <% if @page.template_id && @page.template_id > 0 %>
+    <p><a href="/histories/new?page_id=<%= @page.id %>" class="button is-small" title="Create history for current page"><i class="fas fa-history" aria-hidden="true"></i></a></p>
+  <% end %>
+
+  <p>
+    id: &nbsp;<span class="tag is-light"><%= @page.id %></span>
+    <br>
+    lang: &nbsp;<span class="tag is-light"><%= @page.lang %></span>
+    <br>
+    base_id: &nbsp;<span class="tag is-light"><%= @page.base_id %></span><br>
+    <% base_page = Page.where(id: @page.base_id).first %>
+    <% if base_page %>
+      <a href="/admin/pages/<%= base_page.id %>/edit" title="base page for lang"><%= base_page.url %></a>
+    <% else %>
+      <span class="tag is-light">it's a base page</span>
+    <% end %>  
+
+  </p>  
+
+  <% if @page.template_id && @page.template_id > 0 %>
+    <p><p><%= link "template #{@page.template_id}", "/admin/templates/#{@page.template_id}/edit", options = {class: "button is-small is-success"} %><p>
+  <% end %>  
+
+  <p class="menu-label">
+    Page History
+  </p>
+  <ul class="menu-list">
+  <% @page.histories.each do |history| %>
+    <li><%= history.code %> | <%= history.url %>
+  <% end %>    
+  </ul>
+
+  <p class="menu-label">
+    updated_at
+  </p>
+
+  <p class="menu-list" >
+    <span class="tag is-light"><%= @page.updated_at %></span>
+  </p>  
+
+  <p class="menu-label">
+    protected_columns
+  </p>
+  <p class="menu-list" >
+
+      <%#= @page.protected_columns unless @page.protected_columns.nil? %>
+      <%= @page.protected_columns.map{|pc| "<span class='tag is-danger is-small'>#{pc}</span>"}.join(" ") unless @page.protected_columns.nil? %>
+
+  </p>  
+
+</div>        
+<% end %>   
+<% end %>
+
+<form method="POST" action="/admin/pages/<%= @page.id %>">
+	<input id="hidden" type="hidden" name="_method" value="PATCH">
+   <%= erb :'pages/_form' %>
+</form>

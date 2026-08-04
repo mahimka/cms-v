@@ -1,0 +1,31 @@
+<div class="content m-3">
+
+<%# content_for  :sidebar do %>
+  
+<%# end %>
+<!--
+<div class="field has-addons">
+
+  <form action="/admin/tags/<%#= @tag.id %>" method="post">
+    <input id="hidden" type="hidden" name="_method" value="delete">
+    <input type="submit" value="Delete" class="button is-danger" onclick="return confirm('Are you sure?')">
+  </form>    
+ 
+</div>    
+-->
+
+
+<form method="POST" action="/admin/tags/<%= @tag.id %>">
+	<input id="hidden" type="hidden" name="_method" value="PATCH">
+
+<%= erb :'/tags/_form', views: settings.views_admin %>
+
+<div class="field is-grouped">
+  <div class="control">
+    <input type="submit" value="Update Card" class="button is-link is-warning">
+  </div>
+</div>
+
+</form>
+
+</div>

@@ -1,0 +1,70 @@
+<h1 class='title'><%= @item.name %></h1>
+
+<p class='subtitle'><%= @item.ean %> — <%= @item.schema&.name %></p>
+
+<a href="/admin/items/<%= @item.id %>/edit" class="button is-small">edit</a>
+
+<h2 class='title is-4 mt-4'>details</h2>
+<ul>
+  <% (@item.details || {}).each do |key, value| %>
+    <li><b><%= key %>:</b> <%= value %>
+  <% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>tags</h2>
+<ul>
+	<% @item.tags.each do |tag| %>
+	  <li><%= tag.name %> - <%= tag.parent&.name %> - <%= tag.markers.map{|marker| marker.name } %> -
+	<% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>links</h2>
+<a href="/admin/links/new?linkable_type=Item&linkable_id=<%= @item.id %>" class="button is-small is-info">+ add link</a>
+<ul>
+	<% @item.links.each do |link| %>
+	  <li><%= link.label&.name %> - <a href="<%= link.url %>" target="_blank"><%= link.url %></a> - <a href="/admin/links/<%= link.id %>/edit">edit</a>
+	<% end %>
+</ul>
+
+
+<h2 class='title is-4 mt-4'>pictures</h2>
+<a href="/admin/pictures/new?imageable_type=Item&imageable_id=<%= @item.id %>" class="button is-small is-info">+ add picture</a>
+<div class="columns is-multiline mt-1">
+  <% @item.pictures.each do |picture| %>
+    <div class="column is-2">
+      <figure class="image is-4by3">
+        <a href="/admin/pictures/<%= picture.id %>/edit"><img src="<%= picture.file %>" alt="<%= picture.alt %>"></a>
+      </figure>
+    </div>
+  <% end %>
+</div>
+
+
+<h2 class='title is-4 mt-4'>profiles</h2>
+
+<% @item.profiles.each do |profile| %>
+  <p><%= profile.site.domain %> - <%= profile.url %> - <%#= tag.labels.map{|label| label.name } %> -
+  <ul>
+  	<li><%= profile.snap_shots.first.param_1  %>
+  	<li><%= profile.snap_shots.first.param_2  %>
+  	<li><%= profile.snap_shots.first.param_3  %>
+  	<li><%= profile.snap_shots.first.param_4  %>
+  </ul>
+
+
+
+  <h2 class='title is-4 mt-4'>snap_shot.first</h2>
+  <p class="mt-4">
+  <% profile.snap_shots.first.labels.each do |key, value| %>
+
+    <h3 class="title is-size-6 mt-4"><%= key %></h3>
+    <p>
+    	<%= value  if value.is_a? String %>
+    	<%= value.map{|node| "<li>" + node }.join if value.is_a? Array %>
+
+
+  <% end %>
+
+<% end %>

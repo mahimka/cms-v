@@ -1,0 +1,57 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <p class="label">links</p>
+    <p class="help">вебадреса (сайт, соцсети и т.п.), каждая привязана к label</p>
+  </div>
+
+  <div class="column is-9">
+
+    <% labels_for_select = {"": ""}.merge(Label.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("— " * l.depth) + l.name] }) %>
+
+    <% @event.links.each do |link| %>
+      <div class="columns is-mobile mb-1">
+
+        <form method="POST" action="/admin/links/<%= link.id %>" class="column is-11 field has-addons mb-0">
+          <input type="hidden" name="_method" value="PATCH">
+          <input type="hidden" name="redirect_to" value="/admin/events/<%= @event.id %>/edit">
+          <div class="control">
+            <%= select(:link, :label_id, labels_for_select, options = {class: 'select input is-small', value: link.label_id}) %>
+          </div>
+          <div class="control is-expanded">
+            <input type="text" class="input is-small" name="link[url]" value="<%= fast_escape_html(link.url) %>" placeholder="https://...">
+          </div>
+          <div class="control">
+            <button type="submit" class="button is-small is-info">save</button>
+          </div>
+        </form>
+
+        <form method="POST" action="/admin/links/<%= link.id %>" class="column is-1" onsubmit="return confirm('Delete this link?')">
+          <input type="hidden" name="_method" value="DELETE">
+          <input type="hidden" name="redirect_to" value="/admin/events/<%= @event.id %>/edit">
+          <button type="submit" class="button is-small is-danger">&times;</button>
+        </form>
+
+      </div>
+    <% end %>
+
+    <hr class="my-2">
+
+    <form method="POST" action="/admin/links" class="field has-addons">
+      <input type="hidden" name="link[linkable_type]" value="Event">
+      <input type="hidden" name="link[linkable_id]" value="<%= @event.id %>">
+      <input type="hidden" name="redirect_to" value="/admin/events/<%= @event.id %>/edit">
+      <div class="control">
+        <%= select(:link, :label_id, labels_for_select, options = {class: 'select input is-small'}) %>
+      </div>
+      <div class="control is-expanded">
+        <input type="text" class="input is-small" name="link[url]" placeholder="https://...">
+      </div>
+      <div class="control">
+        <button type="submit" class="button is-small is-success">+ add link</button>
+      </div>
+    </form>
+
+  </div>
+
+</div>

@@ -1,0 +1,280 @@
+<div class="pages-workspace">
+  <aside class="pages-tree-panel">
+    <header class="pages-tree-header">
+
+      <% unless Page.exists?(
+           uri: "/",
+           master_id: nil,
+           lang: settings.home_language
+         ) %>
+        <form
+          method="post"
+          action="/admin/pages/setup-root"
+          class="mb-4"
+        >
+          <button
+            type="submit"
+            class="button is-danger is-small"
+          >
+            Создать корневую страницу
+          </button>
+        </form>
+      <% end %>
+
+    </header>
+
+    <div class="pages-tree-scroll is-size-7" id="pages-tree">
+      <%= erb :"/pages/_tree",
+              layout: false,
+              views: settings.views_admin %>
+    </div>
+  </aside>
+
+  <main class="page-editor-panel" id="page-editor">
+    <div class="page-editor-placeholder">
+      <h2>Выберите страницу</h2>
+
+      <p>
+        Нажмите на URI страницы в дереве, чтобы открыть форму редактирования.
+      </p>
+    </div>
+  </main>
+</div>
+
+<script src="/admin/javascripts/pages-tree.js"></script>
+
+<style>  
+.pages-workspace {
+  display: grid;
+  grid-template-columns: minmax(160px, 18%) minmax(0, 1fr);
+  height: calc(100vh - 4rem);
+  min-height: 600px;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  overflow: hidden;
+  background: var(--pico-background-color);
+}
+
+.pages-tree-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border-right: 1px solid var(--pico-muted-border-color);
+  background: var(--pico-card-background-color);
+}
+
+.pages-tree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.pages-tree-header h1 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.pages-tree-header small {
+  color: var(--pico-muted-color);
+}
+
+.tree-new-page {
+  white-space: nowrap;
+}
+
+.pages-tree-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 0.75rem;
+}
+
+.page-tree,
+.page-tree ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page-tree-children {
+  position: relative;
+  margin-left: 0.85rem;
+  padding-left: 1.15rem;
+}
+
+.page-tree-children::before {
+  position: absolute;
+  top: 0;
+  bottom: 0.8rem;
+  left: 0.35rem;
+  width: 1px;
+  background: var(--pico-muted-border-color);
+  content: "";
+}
+
+.page-tree-node {
+  position: relative;
+}
+
+.page-tree-children > .page-tree-node::before {
+  position: absolute;
+  top: 1.1rem;
+  left: -0.8rem;
+  width: 0.8rem;
+  height: 1px;
+  background: var(--pico-muted-border-color);
+  content: "";
+}
+
+.page-tree-row {
+  display: grid;
+  grid-template-columns: 1.7rem minmax(0, 1fr) 0.7rem;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 1.8rem;
+}
+
+.page-tree-toggle,
+.page-tree-toggle-placeholder {
+  display: inline-flex;
+  width: 1.55rem;
+  height: 1.55rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-tree-toggle {
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.page-tree-toggle:hover {
+  background: var(--pico-secondary-background);
+}
+
+.page-tree-toggle.is-loading {
+  opacity: 0.5;
+}
+
+.page-tree-link {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+  padding: 0.2rem 0.55rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.page-tree-link:hover,
+.page-tree-link.is-selected {
+  background: var(--pico-secondary-background);
+}
+
+.page-tree-link.is-selected {
+  box-shadow: inset 3px 0 0 var(--pico-primary);
+}
+
+.page-tree-slug {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-tree-uri {
+  overflow: hidden;
+  color: var(--pico-muted-color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-tree-status {
+  display: block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+}
+
+.page-tree-status.is-published {
+  background: #2f9e44;
+}
+
+.page-tree-status.is-draft {
+  border: 1px solid var(--pico-muted-color);
+  background: transparent;
+}
+
+.page-editor-panel {
+  min-width: 0;
+  overflow: auto;
+}
+
+.page-editor-placeholder {
+  display: grid;
+  min-height: 100%;
+  padding: 2rem;
+  place-content: center;
+  color: var(--pico-muted-color);
+  text-align: center;
+}
+
+.page-editor-content {
+  padding: 1.5rem;
+}
+
+.page-editor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.page-editor-header h2 {
+  margin-bottom: 0.25rem;
+}
+
+.page-editor-header p {
+  margin: 0;
+  color: var(--pico-muted-color);
+}
+
+.page-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .pages-workspace {
+    display: block;
+    height: auto;
+  }
+
+  .pages-tree-panel {
+    max-height: 45vh;
+    border-right: 0;
+    border-bottom: 1px solid var(--pico-muted-border-color);
+  }
+
+  .page-editor-panel {
+    min-height: 50vh;
+  }
+}
+
+
+</style>

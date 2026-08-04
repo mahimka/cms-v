@@ -1,0 +1,110 @@
+<%# views/pages/_form.erb %>
+
+<% page = @page %>
+
+<% action =
+     if page.persisted?
+       "/admin/pages/#{page.id}"
+     else
+       "/admin/pages"
+     end
+%>
+
+<% if page.errors.any? %>
+  <article class="message is-danger mb-5">
+    <div class="message-header">
+      <p>Страница не сохранена</p>
+    </div>
+    <div class="message-body">
+      <div class="content">
+        <ul>
+          <% page.errors.full_messages.each do |message| %>
+            <li><%= Rack::Utils.escape_html(message) %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </article>
+<% end %>
+
+<form action="<%= action %>" method="post">
+
+  <%# Для update через PATCH %>
+  <% if page.persisted? %>
+    <input type="hidden" name="_method" value="patch">
+  <% end %>
+
+  <%# Родительская страница %>
+  <div class="field mb-4">
+    <label class="label" for="page_parent_id">Родительская страница</label>
+    <div class="control">
+      <div class="select is-fullwidth">
+        <select id="page_parent_id" name="page[parent_id]">
+          <option value="">Без родительской страницы</option>
+
+          <% @parent_pages.each do |parent| %>
+            <% next if page.persisted? && parent.id == page.id %>
+
+            <option
+              value="<%= parent.id %>"
+              <%= "selected" if page.parent_id == parent.id %>
+            >
+              <%= Rack::Utils.escape_html(parent.uri.to_s) %>
+              (<%= parent.lang %>)
+            </option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <%# Slug %>
+  <div class="field mb-4">
+    <label class="label" for="page_slug">Slug</label>
+    <div class="control">
+      <input
+        id="page_slug"
+        class="input"
+        type="text"
+        name="page[slug]"
+        value="<%= Rack::Utils.escape_html(page.slug.to_s) %>"
+        placeholder="my-product"
+        autocomplete="off"
+      >
+    </div>
+  </div>
+
+  <%# Полный URI (только для чтения) %>
+  <% if page.respond_to?(:uri) %>
+    <div class="field mb-5">
+      <label class="label" for="page_uri">Полный URI</label>
+      <div class="control">
+        <input
+          id="page_uri"
+          class="input is-static"
+          type="text"
+          value="<%= Rack::Utils.escape_html(page.uri.to_s) %>"
+          readonly
+        >
+      </div>
+      <p class="help">
+        URI строится автоматически из родительской страницы и slug.
+      </p>
+    </div>
+  <% end %>
+
+  <%# Кнопки действий %>
+  <div class="field is-grouped mt-5">
+    <div class="control">
+      <button type="submit" class="button is-link">
+        <%= page.persisted? ? "Сохранить" : "Создать страницу" %>
+      </button>
+    </div>
+    <div class="control">
+      <a href="/admin/pages" class="button is-light">
+        Отмена
+      </a>
+    </div>
+  </div>
+
+</form>

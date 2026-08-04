@@ -1,0 +1,111 @@
+<% content_for :header_js do %>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="/javascripts/checkbox-ajax.js"></script>
+<% end %>
+
+<p><a class="button is-warning" href="/admin/tags/new">Add Tag</a></p>
+
+<div class="content m-3">
+
+<form method="GET" action="/admin/tags">
+
+  <div class="columns">
+
+<!--
+    <div class="column is-3">
+      <tag class="tag is-size-7">site_id_eq</tag>
+      <div class="control has-icons-left">
+        <%# list_values = {"": ""}.merge(Site.where(rival_site: true).order("domain ASC").select(:id, :domain).to_h {|site| [site.id, site.domain]}) %>
+        <%# list_values = Site.all.order("domain ASC").map{|s| "#{s.id}#{s.id.to_s.length == 6 ? '&nbsp;&nbsp;' : ' '}| #{s.name} | #{s.domain}" }.unshift("") %>
+        <%#= select(:q, :site_id_eq, list_values, options = {class: 'select input is-success is-small is-family-monospace', value: @q.site_id_eq}) %>
+        <span class="icon is-small is-left">
+          <i class="fas fa-caret-down"></i>
+        </span>
+      </div>          
+    </div>      
+-->
+
+    <div class="column is-2">
+      <tag class="tag is-size-7">profile_profileable_name_cont</tag>
+      <%#= input(:q, :profile_profileable_type_cont, options = {class: 'input is-small', value: @q.profile_profileable_type_cont, placeholder: ""}) %>
+    </div>
+
+
+    <div class="column is-2">
+      <tag class="tag is-size-7">name_cont</tag>
+      <%= input(:q, :name_cont, options = {class: 'input is-small', value: @q.name_cont, placeholder: ""}) %>
+    </div>
+
+  </div>
+
+  <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+    <div class="column is-1">
+      <b>blank: </b>
+    </div>
+
+    <div class="column is-1">
+      <input type="checkbox" name="q[name_blank]" value='1'  <%= @q.name_blank  ? "checked" : "" %>>
+      name_blank
+    </div>
+      
+  </div>
+
+  <div class="columns">
+    <div class="column is-12">
+      <%#= SnapShot.all.pluck(:tag).uniq %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-1">
+      <input type="submit" value="Filter" class="button is-warning">
+    </div>
+    <div class="column is-11">
+      Found/Total: <%= @tags_found %> / <%= SnapShot.all.size %> |
+      <%#= @tags.map{|tag| tag.response}.uniq.join(', ') %> |
+      <%#= @tags.map{|tag| tag.parsed_at}.uniq.join(', ') %> 
+    </div>
+  </div>    
+
+</form>
+
+<div class="content">
+
+  <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
+    <div class="column is-12">
+      <%= paginate @tags unless @tags.blank? %>
+    </div>
+  </div>   
+
+  <table class="tableis-narrow is-size-7 ">
+    <tr class="is-size-6 has-text-weight-semibold">
+      <td>active</td>
+      <td>position</td>
+      <td>parent_id</td>
+      <td>name</td>
+      <td>admin_notes</td>
+      <td></td>
+    </tr> 
+
+  <% @tags.each do |tag| %>
+    
+    <tr>
+      <td><%= checkbox_in_place(tag, :active) %></td>
+      <td><%= tag.position %></td>
+      <td><%= tag.parent_id %></td>
+      <td><%= tag.name %></td>
+      <td><%= tag.admin_notes %></td>
+      <td><a href="/admin/tags/<%= tag.id %>" class="button is-small" target='_blank'>tag</a></td>
+      <td><a href="/admin/tags/<%= tag.id %>/edit" class="button is-small" target='_blank'>edit</a></td>
+    </tr>   
+  
+  <% end %>
+
+  </table>  
+
+</div>
+
+</div>
+

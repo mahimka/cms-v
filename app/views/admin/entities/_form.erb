@@ -1,0 +1,86 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:entity, :name, "name", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:entity, :name, options = {class: 'input is-success', value: @entity.name, placeholder: "enter entity name"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:entity, :schema_id, "schema", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <% @schemas_for_select = {"": ""}.merge(Schema.active.order(:ancestry, :position, :name).to_h { |schema| [schema.id, ("— " * schema.depth) + schema.name] }) %>
+    <%= select(:entity, :schema_id, @schemas_for_select, options = {class: 'select input is-success', value: @entity.schema_id}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:entity, :parent_id, "parent_id", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <% @entities_for_select = {"": ""}.merge(Entity.where.not(id: @entity.id).order(:name).to_h {|entity| [entity.id, entity.name]}) %>
+    <%= select(:entity, :parent_id, @entities_for_select, options = {class: 'select input is-success', value: @entity.parent_id}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:entity, :address, "address", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:entity, :address, options = {class: 'input is-success', value: @entity.address, placeholder: "enter address"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:entity, :latitude, "latitude", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:entity, :latitude, options = {class: 'input is-success', value: @entity.latitude, placeholder: "enter latitude"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:entity, :longitude, "longitude", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:entity, :longitude, options = {class: 'input is-success', value: @entity.longitude, placeholder: "enter longitude"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:entity, :active, "active", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="entity[active]" value="0">
+    <input type="checkbox" name="entity[active]" value="1" <%= @entity.active ? "checked" : "" %>>
+  </div>
+
+</div>

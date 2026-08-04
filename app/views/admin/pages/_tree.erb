@@ -1,0 +1,11 @@
+<% if @tree_rows.any? %>
+  <ul class="page-tree page-tree-root">
+    <%= erb :"/pages/_tree_nodes",
+            layout: false,
+            views: settings.views_admin %>
+  </ul>
+<% else %>
+  <p class="tree-empty">
+    Страницы ещё не созданы.
+  </p>
+<% end %>

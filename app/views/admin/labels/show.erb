@@ -1,0 +1,32 @@
+<h1 class='title is-4'><%= ("— " * @label.depth) + @label.name %></h1>
+
+<a href="/admin/labels/<%= @label.id %>/edit" class="button is-small">edit</a>
+
+<table class='table is-size-7'>
+  <tr>
+    <td>slug</td>
+    <td><%= @label.slug %></td>
+  </tr>
+  <tr>
+    <td>field_type</td>
+    <td><%= @label.field_type %></td>
+  </tr>
+  <tr>
+    <td>parent</td>
+    <td><%= @label.parent&.name %></td>
+  </tr>
+</table>
+
+<h2 class='title is-4 mt-4'>used by schemas</h2>
+<ul>
+  <% @label.schemas.each do |schema| %>
+    <li><a href="/admin/schemas/<%= schema.id %>"><%= schema.name %></a>
+  <% end %>
+</ul>
+
+<h2 class='title is-4 mt-4'>children</h2>
+<ul>
+  <% @label.children.each do |child| %>
+    <li><a href="/admin/labels/<%= child.id %>"><%= child.name %></a>
+  <% end %>
+</ul>

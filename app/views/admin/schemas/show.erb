@@ -1,0 +1,39 @@
+<h1 class='title is-4'><%= ("— " * @schema.depth) + @schema.name %></h1>
+
+<a href="/admin/schemas/<%= @schema.id %>/edit" class="button is-small">edit</a>
+
+<table class='table is-size-7'>
+  <tr>
+    <td>slug</td>
+    <td><%= @schema.slug %></td>
+  </tr>
+  <tr>
+    <td>schema_org_url</td>
+    <td><a href="<%= @schema.schema_org_url %>" target="_blank"><%= @schema.schema_org_url %></a></td>
+  </tr>
+  <tr>
+    <td>parent</td>
+    <td><%= @schema.parent&.name %></td>
+  </tr>
+</table>
+
+<h2 class='title is-4 mt-4'>effective tags (свои + унаследованные)</h2>
+<ul>
+  <% @schema.effective_tags.each do |tag| %>
+    <li><%= tag.name %>
+  <% end %>
+</ul>
+
+<h2 class='title is-4 mt-4'>effective labels (свои + унаследованные)</h2>
+<ul>
+  <% @schema.effective_labels.each do |label| %>
+    <li><%= label.name %>
+  <% end %>
+</ul>
+
+<h2 class='title is-4 mt-4'>children</h2>
+<ul>
+  <% @schema.children.each do |child| %>
+    <li><a href="/admin/schemas/<%= child.id %>"><%= child.name %></a>
+  <% end %>
+</ul>

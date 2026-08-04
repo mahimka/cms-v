@@ -1,0 +1,128 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:schema, :parent_id, "parent_id", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <% @schemas_for_select = {"": ""}.merge(Schema.where.not(id: @schema.id).order(:ancestry, :position, :name).to_h { |schema| [schema.id, ("— " * schema.depth) + schema.name] }) %>
+    <%= select(:schema, :parent_id, @schemas_for_select, options = {class: 'select input is-success', value: @schema.parent_id}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:schema, :name, "name", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:schema, :name, options = {class: 'input is-success', value: @schema.name, placeholder: "например, Hotel"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:schema, :slug, "slug", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:schema, :slug, options = {class: 'input is-success', value: @schema.slug, placeholder: "hotel"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:schema, :schema_org_url, "schema_org_url", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:schema, :schema_org_url, options = {class: 'input is-success', value: @schema.schema_org_url, placeholder: "https://schema.org/Hotel"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:schema, :json_ld_template, "json_ld_template", options = {class: 'label'}) %>
+    <p class="help">шаблон JSON-LD, может ссылаться на ключи из details</p>
+  </div>
+
+  <div class="column is-9">
+    <%= textarea(:schema, :json_ld_template, @schema.json_ld_template, options = {class: 'textarea is-success', rows: 8, placeholder: '{"@type": "Hotel", "name": "{{name}}"}'}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:schema, :position, "position", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:schema, :position, options = {class: 'input is-success', value: @schema.position, placeholder: "enter position"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:schema, :active, "active", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="schema[active]" value="0">
+    <input type="checkbox" name="schema[active]" value="1" <%= @schema.active ? "checked" : "" %>>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <p class="label">tags</p>
+    <p class="help">собственные теги этого узла (без учёта родителей)</p>
+  </div>
+
+  <div class="column is-9">
+    <% Tag.active.order(:parent_id, :position, :name).group_by(&:parent).each do |parent, children| %>
+      <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
+      <% children.each do |tag| %>
+        <label class="checkbox mr-3">
+          <input type="checkbox" name="tag_ids[]" value="<%= tag.id %>" <%= "checked" if @schema.tag_ids.include?(tag.id) %>>
+          <%= tag.name %>
+        </label>
+      <% end %>
+    <% end %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <p class="label">labels</p>
+    <p class="help">собственные ключи details этого узла (без учёта родителей)</p>
+  </div>
+
+  <div class="column is-9">
+    <% Label.active.order(:ancestry, :position, :name).group_by(&:parent).each do |parent, children| %>
+      <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
+      <% children.each do |lbl| %>
+        <label class="checkbox mr-3">
+          <input type="checkbox" name="label_ids[]" value="<%= lbl.id %>" <%= "checked" if @schema.label_ids.include?(lbl.id) %>>
+          <%= lbl.name %>
+        </label>
+      <% end %>
+    <% end %>
+  </div>
+
+</div>

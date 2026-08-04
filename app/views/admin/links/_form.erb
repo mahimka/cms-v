@@ -1,0 +1,104 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :linkable_type, "linkable_type", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <% @linkable_types_for_select = {"": ""}.merge(LinksController::LINKABLE_TYPES.to_h { |type| [type, type] }) %>
+    <%= select(:link, :linkable_type, @linkable_types_for_select, options = {class: 'select input is-success', value: @link.linkable_type}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :linkable_id, "linkable_id", options = {class: 'label'}) %>
+    <% if @link.linkable %>
+      <p class="help">сейчас: <%= @link.linkable.name %></p>
+    <% end %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:link, :linkable_id, options = {class: 'input is-success', value: @link.linkable_id, placeholder: "id записи (Entity/Item)"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :label_id, "label", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <% @labels_for_select = {"": ""}.merge(Label.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("— " * l.depth) + l.name] }) %>
+    <%= select(:link, :label_id, @labels_for_select, options = {class: 'select input is-success', value: @link.label_id}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :url, "url", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:link, :url, options = {class: 'input is-success', value: @link.url, placeholder: "https://..."}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :ready, "ready", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="link[ready]" value="0">
+    <input type="checkbox" name="link[ready]" value="1" <%= @link.ready ? "checked" : "" %>>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :published, "published", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="link[published]" value="0">
+    <input type="checkbox" name="link[published]" value="1" <%= @link.published ? "checked" : "" %>>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :active, "active", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="link[active]" value="0">
+    <input type="checkbox" name="link[active]" value="1" <%= @link.active ? "checked" : "" %>>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :response, "response", options = {class: 'label'}) %>
+    <p class="help">заполняется автоматической проверкой (пока — вручную)</p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:link, :response, options = {class: 'input is-success', value: @link.response, placeholder: "например, 200"}) %>
+  </div>
+
+</div>

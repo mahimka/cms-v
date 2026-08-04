@@ -1,0 +1,188 @@
+<% content_for :header_js do %>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="/javascripts/checkbox-ajax.js"></script>
+<% end %>
+
+
+
+<div class="content m-3">
+
+<form method="GET" action="/admin/snap_shots">
+
+  <div class="columns">
+
+<!--
+    <div class="column is-3">
+      <label class="label is-size-7">site_id_eq</label>
+      <div class="control has-icons-left">
+        <%# list_values = {"": ""}.merge(Site.where(rival_site: true).order("domain ASC").select(:id, :domain).to_h {|site| [site.id, site.domain]}) %>
+        <%# list_values = Site.all.order("domain ASC").map{|s| "#{s.id}#{s.id.to_s.length == 6 ? '&nbsp;&nbsp;' : ' '}| #{s.name} | #{s.domain}" }.unshift("") %>
+        <%#= select(:q, :site_id_eq, list_values, options = {class: 'select input is-success is-small is-family-monospace', value: @q.site_id_eq}) %>
+        <span class="icon is-small is-left">
+          <i class="fas fa-caret-down"></i>
+        </span>
+      </div>
+    </div>
+-->
+
+    <div class="column is-2">
+      <label class="label is-size-7">profile_profileable_name_cont</label>
+      <%= input(:q, :profile_profileable_type_cont, options = {class: 'input is-small', value: @q.profile_profileable_type_cont, placeholder: ""}) %>
+    </div>
+
+    <div class="column is-2">
+      <label class="label is-size-7">param_1_cont</label>
+      <%= input(:q, :param_1_cont, options = {class: 'input is-small', value: @q.param_1_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <label class="label is-size-7">param_2_cont</label>
+      <%= input(:q, :param_2_cont, options = {class: 'input is-small', value: @q.param_2_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <label class="label is-size-7">param_3_cont</label>
+      <%= input(:q, :param_3_cont, options = {class: 'input is-small', value: @q.param_3_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <label class="label is-size-7">param_4_cont</label>
+      <%= input(:q, :param_4_cont, options = {class: 'input is-small', value: @q.param_4_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <label class="label is-size-7">param_5_cont</label>
+      <%= input(:q, :param_5_cont, options = {class: 'input is-small', value: @q.param_5_cont, placeholder: ""}) %>
+    </div>
+
+</div>
+
+<div class="columns">
+    <div class="column is-2">
+      <label class="label is-size-7">html_content_cont</label>
+      <%= input(:q, :html_content_cont, options = {class: 'input is-small', value: @q.html_content_cont, placeholder: ""}) %>
+    </div>
+
+
+    <div class="column is-1">
+       <label class="label is-size-7">page_h1_cont</label>
+       <%#= input(:q, :page_h1_cont, options = {class: 'input is-small', value: @q.page_h1_cont, placeholder: "page_h1_cont"}) %>
+    </div>
+
+    <div class="column is-1">
+       <label class="label is-size-7">event_name_cont</label>
+       <%#= input(:q, :event_name_cont, options = {class: 'input is-small', value: @q.event_name_cont, placeholder: "event_name_cont"}) %>
+    </div>
+
+</div>
+
+<div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+    <div class="column is-1">
+      <b>blank: </b>
+    </div>
+
+    <div class="column is-1">
+      <input type="checkbox" name="q[param_1_blank]" value='1'  <%= @q.param_1_blank  ? "checked" : "" %>>
+      param_1
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[param_2_blank]" value='1'  <%= @q.param_2_blank  ? "checked" : "" %>>
+      param_2
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[param_3_blank]" value='1'  <%= @q.param_3_blank  ? "checked" : "" %>>
+      param_3
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[param_4_blank]" value='1'  <%= @q.param_4_blank  ? "checked" : "" %>>
+      param_4
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[param_5_blank]" value='1'  <%= @q.param_5_blank  ? "checked" : "" %>>
+      param_5
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[html_content_blank]" value='1'  <%= @q.html_content_blank  ? "checked" : "" %>>
+      html_content
+    </div>
+
+</div>
+
+<div class="columns">
+  <div class="column is-12">
+    <%#= SnapShot.all.pluck(:label).uniq %>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column is-1">
+    <input type="submit" value="Filter" class="button is-warning">
+  </div>
+  <div class="column is-11">
+    Found/Total: <%= @snap_shots_found %> / <%= SnapShot.all.size %> |
+    <%#= @snap_shots.map{|snap_shot| snap_shot.response}.uniq.join(', ') %> |
+    <%#= @snap_shots.map{|snap_shot| snap_shot.parsed_at}.uniq.join(', ') %>
+  </div>
+</div>
+
+</form>
+
+
+<div class="content">
+
+
+  <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
+    <div class="column is-12">
+      <%= paginate @snap_shots unless @snap_shots.blank? %>
+    </div>
+  </div>
+
+  <table class="tableis-narrow is-size-7 ">
+    <tr class="is-size-6 has-text-weight-semibold">
+      <td>param_1</td>
+      <td>volume</td>
+      <td>capacity</td>
+      <td>param_2</td>
+      <td>param_5</td>
+      <td>param_3</td>
+      <td>param_4</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>html</td>
+      <td>labels</td>
+
+    </tr>
+
+  <% @snap_shots.each do |snap_shot| %>
+
+    <tr>
+    <!-- <tr <%#= "class='has-background-success-light'" if !snap_shot.listing_id.blank? %>> -->
+
+      <%#= checkbox_in_place snap_shot, :ready %>
+      <%#= checkbox_in_place snap_shot, :published %>
+      <td width='500'><%= input_in_place snap_shot, :param_1 %><%#= snap_shot&.labels['Description'] if snap_shot&.labels %></td>
+      <td><%= snap_shot&.labels['vol'] if snap_shot&.labels %></td>
+      <td><%= snap_shot&.labels['capacity'] if snap_shot&.labels %></td>
+      <td width='30'><%= input_in_place snap_shot, :param_2 %></td>
+      <td><%= input_in_place snap_shot, :param_5 %></td>
+      <td><%= input_in_place snap_shot, :param_3 %></td>
+      <td><%= input_in_place snap_shot, :param_4 %></td>
+      <td><%#= input_in_place snap_shot, :param_6 %></td>
+
+      <td><a href="/admin/snap_shots/<%= snap_shot.id %>" class="button is-small" target='_blank'>shot</a></td>
+      <td><a href="/admin/profiles/<%= snap_shot.profile_id %>" target='_blank'>profile</a></td>
+      <td><a href="<%= snap_shot.profile.url %>" target='_blank'>sourcr</a></td>
+      <td><%= snap_shot.html_content.length %></td>
+      <td><%= snap_shot.labels&.length %></td>
+
+
+
+    </tr>
+
+  <% end %>
+
+  </table>
+
+</div>
+
+</div>
+

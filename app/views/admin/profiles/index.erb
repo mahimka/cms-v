@@ -1,0 +1,200 @@
+<% content_for :header_js do %>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<% end %>
+
+<%#= input(:q, :name_cont, options = {class: 'input is-small', value: @q.name_cont, placeholder: "enter name"}) %>
+
+<form method="GET" action="/admin/profiles">
+
+<div class="columns mb-0 ">
+  <div class="column is-1">
+    <p class="help is-size-7 has-text-weight-bold mt-0">url_cont</p>
+    <%= input(:q, :url_cont, options = {class: 'input is-small', value: @q.url_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">profileable_type_cont</p>
+    <%= input(:q, :profileable_type_cont, options = {class: 'input is-small', value: @q.profileable_type_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-1">
+    <p class="help is-size-7 has-text-weight-bold mt-0">notes_cont</p>
+    <%= input(:q, :notes_cont, options = {class: 'input is-small', value: @q.notes_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-1">
+    <p class="help is-size-7 has-text-weight-bold mt-0">status_cont</p>
+    <%= input(:q, :status_cont, options = {class: 'input is-small', value: @q.status_cont, placeholder: ""}) %>
+  </div>
+
+
+
+</div>      
+
+<!--
+
+<div class="columns mb-0 ">
+  <div class="column is-1">
+    <p class="help is-size-7 has-text-weight-bold mt-0">notes_cont</p>
+    <%#= input(:q, :notes_cont, options = {class: 'input is-small', value: @q.notes_cont, placeholder: ""}) %>
+  </div>
+
+
+</div>    
+
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+      <div class="column is-1">
+        <b>present: </b>
+      </div>
+
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[pictures_filename_present]" value='1'  <%#= @q.pictures_filename_present  ? "checked" : "" %>>
+        pictures
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[faq_present]" value='1'  <%#= @q.faq_present  ? "checked" : "" %>>
+        faq
+      </div>
+
+
+    </div>
+
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+      <div class="column is-1">
+        <b>not present:</b>
+      </div>
+
+
+
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[pictures_filename_blank]" value='1'  <%#= @q.pictures_filename_blank  ? "checked" : "" %>>
+        pictures
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[lang_ref_blank]" value='1'  <%#= @q.lang_ref_blank  ? "checked" : "" %>>
+        lang_ref
+      </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+      <div class="column is-1">
+        <b>true: </b>
+      </div>
+
+      <div class="column is-1">
+        <span class='tag'>
+          <input type="checkbox" name="q[translated_page_id_null]" value='1'  <%#= @q.translated_page_id_null  ? "checked" : "" %>>
+          is_translated_page_id?
+        </span>
+      </div>
+
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[ready_true]" value='1'  <%#= @q.ready_true  ? "checked" : "" %>>
+        ready 
+      </div>
+
+
+    </div>
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+      <div class="column is-1">
+        <b>false: </b>
+      </div>
+
+      <div class="column is-1">
+        <span class='tag'>
+          <input type="checkbox" name="q[translated_page_id_not_null]" value='1'  <%#= @q.translated_page_id_not_null  ? "checked" : "" %>>
+          is_base?
+        </span> 
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[ready_false]" value='1'  <%#= @q.ready_false  ? "checked" : "" %>>
+        ready 
+      </div>
+
+    </div>
+
+-->
+
+    <hr class="my-2">
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+      <div class="column is-1">
+        <input type="submit" value="Filter" class="button is-warning">
+
+      </div>
+
+      <div class="column is-3">
+        <h6 class="title is-size-6 mt-2">Found/Total: <%= @profiles_found.size %> / <%= Profile.all.size %></h6>
+      </div>
+
+
+
+    </div>
+
+    <hr class="my-0">
+
+</div>    
+
+</form>
+
+
+<div class="content is-size-7">
+  <%= paginate(@profiles) %>
+</div> 
+
+<div class="content">
+
+  <table class="table is-size-7">
+    <tr>
+      <td></td>
+      <td>url</td>
+      <td>p_type</td>
+      <td>p_id</td>
+      <td>status</td>
+      <td>scraped_at</td>
+      <td></td>
+
+    </tr> 
+
+  <% @profiles.each do |profile| %>
+    
+    <tr>
+      <td><%= checkbox_in_place profile, :active %></td> 
+      <td><%= profile.url %></td>
+      <td><%= profile.profileable_type %></td>
+      <td><%= profile.profileable_id %></td>
+      <td><%= profile.status %></td>
+      <td><%= profile.scraped_at %></td>
+
+      <td><a href="/admin/profiles/<%= profile.id %>/edit" class='button is-small'>edit</a></td>
+
+      
+    </tr>   
+  
+  <% end %>
+
+  </table>  
+
+</div>
+
+</div>
+

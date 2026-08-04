@@ -1,0 +1,31 @@
+  <% if flash.has?(:notice) %>
+
+    <div class="container">
+      <div class="notification is-success">
+        <button class="delete"></button>
+        <%= flash[:notice] %>
+      </div>
+    </div>
+
+  <% end %>
+
+    <% if flash.has?(:error_title) %>
+
+    <div class="container">
+      <div class="notification is-warning">
+        <button class="delete"></button>
+        <h3 class="title"><%= flash[:error_title] %></h3>
+        <h3 class="subtitle"><%= flash[:last_node] %></h3>
+        <% if flash.has?(:errors) %>
+          <ul>
+          <% flash[:errors].each do |error| %>
+            <li><%= error %>
+          <% end %>
+          </ul>
+        <% end %>  
+      </div>
+    </div>
+
+  <% end %>
+
+  <p>&nbsp;</p>

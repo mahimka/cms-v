@@ -1,0 +1,30 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @link.label&.name || "link" %></h1>
+  <p class="subtitle is-6"><%= @link.url %></p>
+
+  <form method="POST" action="/admin/links/<%= @link.id %>">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <%= erb :'/links/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Update Link" class="button is-link is-warning">
+      </div>
+      <div class="control">
+        <a href="/admin/links/<%= @link.id %>" class="button">Show</a>
+      </div>
+      <div class="control">
+        <form action="/admin/links/<%= @link.id %>" method="post">
+          <input type="hidden" name="_method" value="delete">
+          <input type="submit" value="Delete" class="button is-danger" onclick="return confirm('Are you sure?')">
+        </form>
+      </div>
+    </div>
+
+  </form>
+
+</div>

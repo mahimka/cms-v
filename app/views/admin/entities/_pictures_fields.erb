@@ -1,0 +1,36 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <p class="label">pictures</p>
+    <p class="help">галерея — детали (alt, переводы, теги, размеры) редактируются на отдельной странице картинки</p>
+  </div>
+
+  <div class="column is-9">
+
+    <div class="columns is-multiline">
+      <% @entity.pictures.each do |picture| %>
+        <div class="column is-3">
+          <div class="box p-2">
+            <figure class="image is-4by3">
+              <img src="<%= picture.file %>" alt="<%= picture.alt %>">
+            </figure>
+            <p class="is-size-7 mt-1"><%= picture.alt %></p>
+            <p class="is-size-7 has-text-grey"><%= picture.tags.map(&:name).join(', ') %></p>
+            <div class="buttons are-small mt-1">
+              <a href="/admin/pictures/<%= picture.id %>/edit" class="button is-small is-info">edit</a>
+              <form method="POST" action="/admin/pictures/<%= picture.id %>" onsubmit="return confirm('Delete this picture?')">
+                <input type="hidden" name="_method" value="DELETE">
+                <input type="hidden" name="redirect_to" value="/admin/entities/<%= @entity.id %>/edit">
+                <button type="submit" class="button is-small is-danger">&times;</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <a href="/admin/pictures/new?imageable_type=Entity&imageable_id=<%= @entity.id %>&redirect_to=/admin/entities/<%= @entity.id %>/edit" class="button is-small is-success">+ add picture</a>
+
+  </div>
+
+</div>

@@ -1,0 +1,29 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @picture.alt || @picture.file %></h1>
+
+  <form method="POST" action="/admin/pictures/<%= @picture.id %>">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <%= erb :'/pictures/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Update Picture" class="button is-link is-warning">
+      </div>
+      <div class="control">
+        <a href="/admin/pictures/<%= @picture.id %>" class="button">Show</a>
+      </div>
+      <div class="control">
+        <form action="/admin/pictures/<%= @picture.id %>" method="post" onsubmit="return confirm('Are you sure?')">
+          <input type="hidden" name="_method" value="delete">
+          <input type="submit" value="Delete" class="button is-danger">
+        </form>
+      </div>
+    </div>
+
+  </form>
+
+</div>

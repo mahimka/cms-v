@@ -1,0 +1,26 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @label.name %></h1>
+
+  <form method="POST" action="/admin/labels/<%= @label.id %>">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <%= erb :'/labels/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Update Label" class="button is-link is-warning">
+      </div>
+      <div class="control">
+        <a href="/admin/labels/<%= @label.id %>" class="button">Show</a>
+      </div>
+      <div class="control">
+        <a href="/admin/labels/new?parent_id=<%= @label.id %>" class="button is-info">+ child label</a>
+      </div>
+    </div>
+
+  </form>
+
+</div>

@@ -1,0 +1,29 @@
+<h1 class="title">
+  <%= @page.h1 %>
+</h1>
+<p class="subtitle">
+  <strong>url:</strong><%= @page.url %>
+</p>
+
+<%= @page.body %>
+
+
+<%= form('/users', :post) %>
+
+<!--
+#label(obj, field, display = "", options = {})
+-->
+
+<%= label(:page, :url, display = "ISPLAYED", options = {class: 'label'}) %>
+<%= input(:user, :last_name) %>
+
+<%= input(:user, :email, :size => 40) %>
+
+<%= password(:user, :password) %>
+<%= password(:user, :confirm_password) %>
+
+<%= radio(:user, :gender, ['M', 'F']) %>
+
+<%= submit %>
+
+

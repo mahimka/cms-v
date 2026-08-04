@@ -1,0 +1,98 @@
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :position, "position", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:tag, :position, options = {class: 'input is-success', value: @tag.position, placeholder: "enter tag position"}) %>
+  </div>
+
+</div>  
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :parent_id, "parent_id", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%#= input(:tag, :parent_id, options = {class: 'input is-success', value: @tag.parent_id, placeholder: "enter tag parent_id"}) %>
+    <% @tags_for_select = {"": ""}.merge(Tag.where(parent_id: [nil, 0]).to_h {|tag| [tag.id, tag.name]}) %>
+    <%= select(:tag, :parent_id, @tags_for_select, options = {class: 'select input is-success', value: @tag.parent_id}) %>
+  </div>
+
+</div>  
+
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :name, "name", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:tag, :name, options = {class: 'input is-success', value: @tag.name, placeholder: "enter tag name"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <p class="label">translations</p>
+    <p class="help">перевод name на каждый язык (используется в видах вместо оригинала)</p>
+  </div>
+
+  <div class="column is-9">
+    <% settings.languages.each do |lang_code, lang_info| %>
+      <% lang_code = lang_code.to_s %>
+      <div class="field has-addons mb-1">
+        <div class="control">
+          <span class="button is-small is-static"><%= lang_info[:icon] %> <%= lang_code.upcase %></span>
+        </div>
+        <div class="control is-expanded">
+          <input type="text" class="input is-small" name="tag[translations][<%= lang_code %>]" value="<%= fast_escape_html(@tag.translations&.dig(lang_code)) %>" placeholder="<%= fast_escape_html(@tag.name) %>">
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :short, "short", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:tag, :short, options = {class: 'input is-success', value: @tag.short, placeholder: "enter tag short"}) %>
+  </div>
+
+</div>  
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :slug, "slug", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:tag, :slug, options = {class: 'input is-success', value: @tag.slug, placeholder: "enter tag slug"}) %>
+  </div>
+
+</div>  
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :admin_notes, "notes", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:tag, :admin_notes, options = {class: 'input is-success', value: @tag.admin_notes, placeholder: "enter tag admin_notes"}) %>
+  </div>
+
+</div>  

@@ -1,0 +1,44 @@
+<% @tree_rows.each do |row| %>
+  <% page = row[:page] %>
+  <% has_children = row[:has_children] %>
+
+  <li
+    class="page-tree-node"
+    data-page-id="<%= page.id %>"
+  >
+    <div class="page-tree-row">
+      <% if has_children %>
+        <button
+          type="button"
+          class="page-tree-toggle"
+          data-tree-toggle
+          aria-expanded="false"
+        >
+          <span>+</span>
+        </button>
+      <% else %>
+        <span class="page-tree-toggle-placeholder"></span>
+      <% end %>
+
+      <button
+        type="button"
+        class="page-tree-link"
+        data-page-open
+      >
+        <% if page.root? %>
+          <%= page.uri %>
+        <% else %>
+          /<%= page.effective_slug %>
+        <% end %>
+      </button>
+    </div>
+
+    <% if has_children %>
+      <ul
+        class="page-tree-children"
+        data-tree-children
+        hidden
+      ></ul>
+    <% end %>
+  </li>
+<% end %>

@@ -1,0 +1,396 @@
+<% content_for :header_js do %>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<% end %>
+
+<%#= input(:q, :name_cont, options = {class: 'input is-small', value: @q.name_cont, placeholder: "enter name"}) %>
+
+<form method="GET" action="/admin/pages">
+
+<div class="columns mb-0 ">
+  <div class="column is-1">
+    <p class="help is-size-7 has-text-weight-bold mt-0">lang_cont</p>
+    <%= input(:q, :lang_cont, options = {class: 'input is-small', value: @q.lang_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">uri_cont</p>
+    <%= input(:q, :uri_cont, options = {class: 'input is-small', value: @q.uri_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">title_cont</p>
+    <%= input(:q, :title_cont, options = {class: 'input is-small', value: @q.title_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+     <p class="help is-size-7 has-text-weight-bold mt-0">h1_cont</p>
+     <%= input(:q, :h1_cont, options = {class: 'input is-small', value: @q.h1_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+     <p class="help is-size-7 has-text-weight-bold mt-0">body_cont</p>
+     <%= input(:q, :body_cont, options = {class: 'input is-small', value: @q.body_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+     <p class="help is-size-7 has-text-weight-bold mt-0">faq_cont</p>
+     <%= input(:q, :faq_cont, options = {class: 'input is-small', value: @q.faq_cont, placeholder: ""}) %>
+  </div>
+</div>      
+<div class="columns mb-0 ">
+  <div class="column is-1">
+    <p class="help is-size-7 has-text-weight-bold mt-0">category_cont</p>
+    <%#= input(:q, :category_cont, options = {class: 'input is-small', value: @q.category_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">item_name_cont</p>
+    <%#= input(:q, :item_name_cont, options = {class: 'input is-small', value: @q.item_name_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">view_cont</p>
+    <%= input(:q, :view_cont, options = {class: 'input is-small', value: @q.view_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">tags_name_cont</p>
+    <%#= input(:q, :tags_name_cont, options = {class: 'input is-small', value: @q.tags_name_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">schema_id_cont</p>
+    <%#= input(:q, :schema_id_cont, options = {class: 'input is-small', value: @q.schema_id_cont, placeholder: ""}) %>
+  </div>
+
+</div>    
+
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+      <div class="column is-1">
+        <b>present: </b>
+      </div>
+
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[pictures_filename_present]" value='1'  <%#= @q.pictures_filename_present  ? "checked" : "" %>>
+        pictures
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[faq_present]" value='1'  <%= @q.faq_present  ? "checked" : "" %>>
+        faq
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[schema_present]" value='1'  <%= @q.schema_present  ? "checked" : "" %>>
+        schema
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[hero_1_present]" value='1'  <%= @q.hero_1_present  ? "checked" : "" %>>
+        hero_1
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[hero_2_present]" value='1'  <%= @q.hero_2_present  ? "checked" : "" %>>
+        hero_2
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[hero_3_present]" value='1'  <%= @q.hero_3_present  ? "checked" : "" %>>
+        hero_3
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[sidebar_1_present]" value='1'  <%= @q.sidebar_1_present  ? "checked" : "" %>>
+        sidebar_1
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[sidebar_2_present]" value='1'  <%= @q.sidebar_2_present  ? "checked" : "" %>>
+        sidebar_2
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[sidebar_3_present]" value='1'  <%= @q.sidebar_3_present  ? "checked" : "" %>>
+        sidebar_3
+      </div>
+
+    </div>
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+      <div class="column is-1">
+        <b></b>
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[body_present]" value='1'  <%= @q.body_present  ? "checked" : "" %>>
+        body 
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[footer_1_present]" value='1'  <%= @q.footer_1_present  ? "checked" : "" %>>
+        footer_1 
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[footer_2_present]" value='1'  <%= @q.footer_2_present  ? "checked" : "" %>>
+        footer_2
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[footer_3_present]" value='1'  <%= @q.footer_3_present  ? "checked" : "" %>>
+        footer_3
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[block_1_present]" value='1'  <%= @q.block_1_present  ? "checked" : "" %>>
+        block_1
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[block_2_present]" value='1'  <%= @q.block_2_present  ? "checked" : "" %>>
+        block_2
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[block_3_present]" value='1'  <%= @q.block_3_present  ? "checked" : "" %>>
+        block_3
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[block_4_present]" value='1'  <%#= @q.block_4_present  ? "checked" : "" %>>
+        block_4
+      </div>
+
+
+    </div>
+
+
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+      <div class="column is-1">
+        <b>not present:</b>
+      </div>
+
+
+
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[pictures_filename_blank]" value='1'  <%#= @q.pictures_filename_blank  ? "checked" : "" %>>
+        pictures
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[lang_ref_blank]" value='1'  <%#= @q.lang_ref_blank  ? "checked" : "" %>>
+        lang_ref
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[body_blank]" value='1'  <%= @q.body_blank  ? "checked" : "" %>>
+        body
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[schema_blank]" value='1'  <%= @q.schema_blank  ? "checked" : "" %>>
+        schema
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[faq_blank]" value='1'  <%= @q.faq_blank  ? "checked" : "" %>>
+        faq
+      </div>
+
+
+    </div>
+
+
+
+
+
+
+
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+      <div class="column is-1">
+        <b>true: </b>
+      </div>
+
+      <div class="column is-1">
+        <span class='tag'>
+          <input type="checkbox" name="q[master_id_null]" value='1'  <%= @q.master_id_null  ? "checked" : "" %>>
+          is_master_id_null?
+        </span>
+      </div>
+
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[ready_true]" value='1'  <%= @q.ready_true  ? "checked" : "" %>>
+        ready 
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[published_true]" value='1'  <%= @q.published_true  ? "checked" : "" %>>
+        published
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[is_top_true]" value='1'  <%#= @q.is_top_true  ? "checked" : "" %>>
+        is_top
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[has_feed_true]" value='1'  <%= @q.has_feed_true  ? "checked" : "" %>>
+        has_feed
+      </div>
+
+    </div>
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+      <div class="column is-1">
+        <b>false: </b>
+      </div>
+
+      <div class="column is-1">
+        <span class='tag'>
+          <input type="checkbox" name="q[master_id_not_null]" value='1'  <%= @q.master_id_not_null  ? "checked" : "" %>>
+          is_base?
+        </span> 
+      </div>
+
+      <div class="column is-1">
+        <input type="checkbox" name="q[ready_false]" value='1'  <%= @q.ready_false  ? "checked" : "" %>>
+        ready 
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[published_false]" value='1'  <%= @q.published_false  ? "checked" : "" %>>
+        published
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[is_top_false]" value='1'  <%#= @q.is_top_false  ? "checked" : "" %>>
+        is_top
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[has_feed_false]" value='1'  <%= @q.has_feed_false  ? "checked" : "" %>>
+        has_feed
+      </div>
+    </div>
+
+
+
+    <hr class="my-2">
+
+    <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+      <div class="column is-1">
+        <input type="submit" value="Filter" class="button is-success is-small">
+      </div>
+
+      <div class="column is-3">
+        <h6 class="title is-size-6 mt-2">Found/Total: <%= @pages_found.size %> / <%= Page.all.size %></h6>
+      </div>
+
+      <div class="column is-1">
+
+      <% unless Page.exists?(
+           uri: "/",
+           master_id: nil,
+           lang: settings.home_language
+         ) %>
+        <form
+          method="post"
+          action="/admin/pages/setup-root"
+        >
+          <button
+            type="submit"
+            class="button is-danger is-small"
+          >
+            Создать корневую страницу
+          </button>
+        </form>
+      <% end %>
+
+      </div>
+
+
+    </div>
+
+    <hr class="my-0">
+
+</div>    
+
+</form>
+
+
+<div class="content is-size-7">
+  <%= paginate(@pages) %>
+</div> 
+
+<div class="content">
+
+  <table class="table is-size-7">
+    <tr>
+      <td></td>
+      <!--<td>id</td>-->
+      <!--<td>lang_ref</td>-->
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <!--
+      <td>title</td>
+      <td>h1</td>
+      <td>sub</td>
+      <td>anchor_1</td>
+      <td>anchor_2</td>
+      <td>anchor_3</td>
+      <td>category</td>
+      <td>item</td>
+      <td>view</td>
+      -->
+    </tr> 
+
+  <% @pages.each do |page| %>
+
+    <%# is_base_page = page.base_page.blank? %>
+    <%# is_base_page %>
+    <%# disabled = is_base_page ? "" : "pointer-events: none; background-color: lightgrey;" %>
+
+    
+    <tr>
+      <!--<td><%= page.id %></td>-->
+      <!--<td width='50'><%#= input_in_place page, :lang_ref %></td>-->
+
+
+      <td><%= page.lang %></td>
+      <td><%= page.master_id %></td>
+
+      <td><%= checkbox_in_place page, :ready %></td> 
+      <td><%= checkbox_in_place page, :published %></td> 
+
+      <td><%#= page.pictures.length %></td>
+      
+      <td><a href="/admin/pages/<%= page.id %>/edit-in-place" class='button is-small'>edit</a></td>
+      <td><a href="/admin/pages/new?source_page_id=<%= page.id %>&sub=true" class='button is-small is-warning'>sub</a></td>
+      <td><a href="/admin/pages/new?source_page_id=<%= page.id %>&copy=true" class='button is-small is-warning'>copy</a></td>
+  
+      <td><a href='<%= page.uri %>'><%= page.uri %></a></td>
+      <td><%= input_in_place page, :title %></td>
+
+      <!--
+      <td><%#= input_in_place page, :h1 %></td>
+      <td><%#= input_in_place page, :subtitle %></td>
+      <td><%#= input_in_place page, :anchor_1 %></td>
+      <td><%#= input_in_place page, :anchor_2 %></td>
+      <td><%#= input_in_place page, :anchor_3 %></td>
+      -->
+
+      <td>
+          <%#= select_in_place page, :category, Page::PAGE_CATEGORIES, style: 'disabled' %> 
+      </td>    
+
+      <td>
+        <% #values = Item.all.to_h {|item| [item.id, item.ancestors_and_item]} %>
+        <%#= select_in_place page, :item_id, values, style: 'disabled' %> 
+      </td>
+
+      <td>
+        <%# values = Dir.glob("*.*", base: "app/views").sort %>
+        <%#= select_in_place page, :view, values, style: 'disabled' %>
+      </td>
+
+    </tr>   
+  
+  <% end %>
+
+  </table>  
+
+</div>
+
+</div>
+

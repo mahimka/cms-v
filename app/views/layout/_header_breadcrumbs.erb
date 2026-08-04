@@ -1,0 +1,38 @@
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="/">home</a>
+
+    <% if !@page.ancestry.blank? && !@page.ancestry.nil?  %>
+
+      <% @page.ancestors.each_with_index do |page, index| %>
+        <% next if page.ancestry.blank? %>
+        <li><a href="<%= page.uri %>"><%= page.anchor_1 %></a></li>
+      <% end %>
+
+      <li class="is-active"><a href="#" aria-current="page"><%= @page.anchor_1 %></a></li>
+
+    <% end %>
+  </ul>
+</nav>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

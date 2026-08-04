@@ -1,0 +1,66 @@
+<h1 class='title is-4'>Profile</h1>
+<table class='table is-size-7'>
+	<tr>
+		<td>url</td>
+		<td><a href="<%= @snap_shot.profile.url %>"><%= @snap_shot.profile.url %></a></td>
+	</tr>
+	<tr>
+		<td>scraped_at</td>
+		<td><%= @snap_shot.profile.active %> - <%= @snap_shot.profile.status %> - <%= @snap_shot.profile.scraped_at %> </td>
+	</tr>
+	<tr>
+		<td>profileable_type</td>
+		<td><%= @snap_shot.profile.profileable_type %> - <%= @snap_shot.profile.profileable_id ? "<a href=''>SHOW</a>" : 'NO PRODCT' %></td>
+	</tr>
+	<tr>
+		<td>redirected_to</td>
+		<td><%= @snap_shot.profile.redirected_to %></td>
+	</tr>
+</table>
+
+<h1 class='title is-4'>SnapShot</h1>
+<table class='table is-size-7'>
+	<tr>
+		<td>param_1</td>
+		<td><%= @snap_shot.param_1 %></td>
+	</tr>
+	<tr>
+		<td>param_2</td>
+		<td><%= @snap_shot.param_2 %></td>
+	</tr>
+	<tr>
+		<td>param_3</td>
+		<td><%= @snap_shot.param_3 %></td>
+	</tr>
+	<tr>
+		<td>param_4</td>
+		<td><%= @snap_shot.param_4 %></td>
+	</tr>
+	<tr>
+		<td>param_5</td>
+		<td><%= @snap_shot.param_5 %></td>
+	</tr>
+	<tr>
+		<td>param_6</td>
+		<td><%#= @snap_shot.param_6 %></td>
+	</tr>
+</table>
+
+<p></p>
+
+<% @snap_shot.labels.each do |key, value| %>
+  <p>
+  	<strong><%= key %></strong><br>
+  	<% if value.is_a? String %>
+  	  <br>
+  	  <%= value %>
+  	<% elsif value.is_a? Array %>
+  	  <ul>
+  	  <% value.each do |value| %>
+  	    <li><%= value %>
+  	  <% end %>
+  	  </ul>
+  	<% end %>
+
+  </p>
+<% end %>
