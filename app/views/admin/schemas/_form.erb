@@ -89,18 +89,18 @@
 
   <div class="column is-2">
     <p class="label">tags</p>
-    <p class="help">собственные теги этого узла (без учёта родителей)</p>
+    <p class="help">группы тегов этого узла (без учёта родителей); при выборе группы все её теги становятся доступны для entity/item</p>
   </div>
 
   <div class="column is-9">
-    <% Tag.active.order(:parent_id, :position, :name).group_by(&:parent).each do |parent, children| %>
-      <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
-      <% children.each do |tag| %>
-        <label class="checkbox mr-3">
-          <input type="checkbox" name="tag_ids[]" value="<%= tag.id %>" <%= "checked" if @schema.tag_ids.include?(tag.id) %>>
-          <%= tag.name %>
+    <% Tag.parenttags.order(:position, :name).each do |group| %>
+      <div class="mb-2">
+        <label class="checkbox">
+          <input type="checkbox" name="tag_ids[]" value="<%= group.id %>" <%= "checked" if @schema.tag_ids.include?(group.id) %>>
+          <%= group.name %>
+          <span class="has-text-grey is-size-7">(<%= Tag.active.where(parent_id: group.id).count %>)</span>
         </label>
-      <% end %>
+      </div>
     <% end %>
   </div>
 

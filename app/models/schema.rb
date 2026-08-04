@@ -19,10 +19,16 @@ class Schema < ActiveRecord::Base
     ["parent", "children"]
   end
 
-  # Теги, допустимые для этого узла: свои + унаследованные от всех
-  # предков (Hotel получает то, что назначено на LodgingBusiness и Organization).
-  def effective_tags
+  # Группы тегов, привязанные к этому узлу целиком: свои + унаследованные
+  # от всех предков (Hotel получает группы, назначенные на LodgingBusiness и Organization).
+  # schema_tags хранит id родительских тегов (групп), а не отдельных тегов.
+  def effective_tag_groups
     Tag.joins(:schema_tags).where(schema_tags: { schema_id: path_ids }).distinct
+  end
+
+  # Конкретные теги, допустимые для этого узла — активные дочерние теги привязанных групп.
+  def effective_tags
+    Tag.active.where(parent_id: effective_tag_groups.select(:id)).distinct
   end
 
   # Ключи details, допустимые для этого узла, с тем же наследованием по цепочке предков.
