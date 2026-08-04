@@ -40,7 +40,7 @@ class Schema < ActiveRecord::Base
   # Ключи details, допустимые для этого узла — активные дочерние лейблы привязанных групп,
   # с тем же наследованием по цепочке предков.
   def effective_labels
-    group_ids = effective_label_groups.pluck(:id).map(&:to_s)
-    Label.active.where(ancestry: group_ids).distinct
+    child_ids = effective_label_groups.flat_map(&:child_ids)
+    Label.active.where(id: child_ids).distinct
   end
 end
