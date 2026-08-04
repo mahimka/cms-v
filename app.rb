@@ -156,7 +156,7 @@ class App < Sinatra::Base
     # puts $timing.to_s
   end
   # === end of timing ====
-
+  
 
   # helpers BreadcrumbHelpers
   helpers InPlaceEditingHelpers
