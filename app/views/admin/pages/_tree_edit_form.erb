@@ -219,26 +219,420 @@
         </div>
       </div>
 
-      <div class="field">
-        <label class="label is-small">
-          conditions (страница-список)
-        </label>
-        <p class="help">
-          object: Entity | Item | Event | Picture<br>
-          tags: ["and"|"or", ...] / ["not", left, right] — вложенно<br>
-          schema: slug из Schema (с потомками по иерархии)<br>
-          start_at / end_at: только для Event<br>
-          details: {"key": "value"}
+      <div class="field" id="page-conditions-editor">
+        <div class="level mb-1">
+          <div class="level-left">
+            <label class="label is-small mb-0">conditions (страница-список)</label>
+          </div>
+          <div class="level-right">
+            <a href="#" class="is-size-7" data-conditions-toggle>raw JSON</a>
+          </div>
+        </div>
+
+        <%
+          conditions_schemas = Schema.active.order(:ancestry, :position, :name)
+          conditions_schema_tag_ids = Schema.effective_tag_ids_map(conditions_schemas)
+          conditions_tags = Tag.active.includes(:parent).order(:name)
+        %>
+
+        <script type="application/json" data-conditions-data>
+          <%
+            conditions_data = {
+              objectTypes: ListQuery::ALLOWED_OBJECT_TYPES,
+              schemas: conditions_schemas.map { |s| { id: s.id, name: s.name, depth: s.depth } },
+              schemaTagIds: conditions_schema_tag_ids,
+              tags: conditions_tags.map { |t| { id: t.id, name: t.name, group: t.parent&.name } }
+            }
+          %>
+          <%= conditions_data.to_json.gsub("</", '<\/') %>
+        </script>
+
+        <div data-conditions-widget>
+          <div class="columns mb-0">
+            <div class="column is-3">
+              <label class="label is-small">object</label>
+              <div class="select is-small is-fullwidth">
+                <select data-conditions-object>
+                  <option value="">—</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="column is-9" data-conditions-schema-column>
+              <label class="label is-small">
+                schema
+                <span class="has-text-weight-normal has-text-grey">— только чтобы отобрать список тегов ниже, в conditions не сохраняется</span>
+              </label>
+              <div data-conditions-schema-list style="max-height:110px; overflow-y:auto; border:1px solid #dbdbdb; border-radius:4px; padding:0.4rem;"></div>
+            </div>
+          </div>
+
+          <p class="help is-size-7" data-conditions-need-object>сначала выберите object</p>
+
+          <div class="columns mb-0" data-conditions-tags-columns style="display:none;">
+            <div class="column">
+              <p class="help is-size-7 has-text-weight-bold mt-0">
+                включить —
+                <span class="select is-small">
+                  <select data-conditions-include-op>
+                    <option value="and">И все теги (and)</option>
+                    <option value="or">Любой из тегов (or)</option>
+                  </select>
+                </span>
+                <span data-conditions-include-chips class="tags are-small ml-1" style="display:inline-flex; vertical-align:middle;"></span>
+              </p>
+              <div data-conditions-include-list style="max-height:220px; overflow-y:auto;"></div>
+            </div>
+
+            <div class="column">
+              <p class="help is-size-7 has-text-weight-bold mt-0">
+                исключить (not)
+                <span class="has-text-weight-normal has-text-grey">— учитывается, только если выбран хотя бы один тег слева</span>
+                <span data-conditions-exclude-chips class="tags are-small ml-1" style="display:inline-flex; vertical-align:middle;"></span>
+              </p>
+              <div data-conditions-exclude-list style="max-height:220px; overflow-y:auto;"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="help is-size-7" data-conditions-fallback-note style="display:none;">
+          Текущие conditions используют поля (schema/start_at/end_at/details), не поддержанные конструктором —
+          редактируйте JSON вручную. Переключение на конструктор их отбросит.
         </p>
-        <div class="control">
+
+        <div class="control" data-conditions-raw-control style="display:none;">
           <textarea
             class="textarea is-size-7"
             name="page[conditions]"
             rows="8"
             style="font-family: monospace;"
+            data-conditions-raw
           ><%= @page.conditions.presence ? JSON.pretty_generate(@page.conditions) : '' %></textarea>
         </div>
       </div>
+
+      <script>
+        (function () {
+          var $root = $('#page-conditions-editor');
+          var data = JSON.parse($root.find('[data-conditions-data]').text());
+
+          var $objectSelect   = $root.find('[data-conditions-object]');
+          var $schemaColumn   = $root.find('[data-conditions-schema-column]');
+          var $schemaList     = $root.find('[data-conditions-schema-list]');
+          var $needObject     = $root.find('[data-conditions-need-object]');
+          var $tagsColumns    = $root.find('[data-conditions-tags-columns]');
+          var $includeOp      = $root.find('[data-conditions-include-op]');
+          var $includeList    = $root.find('[data-conditions-include-list]');
+          var $includeChips   = $root.find('[data-conditions-include-chips]');
+          var $excludeList    = $root.find('[data-conditions-exclude-list]');
+          var $excludeChips   = $root.find('[data-conditions-exclude-chips]');
+          var $widget         = $root.find('[data-conditions-widget]');
+          var $rawControl     = $root.find('[data-conditions-raw-control]');
+          var $raw            = $root.find('[data-conditions-raw]');
+          var $fallbackNote   = $root.find('[data-conditions-fallback-note]');
+          var $toggle         = $root.find('[data-conditions-toggle]');
+
+          var tagsById = {};
+          data.tags.forEach(function (tag) { tagsById[tag.id] = tag; });
+
+          // Схемы Entity/Item/Event имеют schema_id, у Picture его нет —
+          // для Picture отбор по schema не имеет смысла, список тегов всегда полный.
+          var SCHEMA_LESS_OBJECTS = { Picture: true };
+
+          data.objectTypes.forEach(function (type) {
+            $objectSelect.append($('<option></option>').attr('value', type).text(type));
+          });
+
+          data.schemas.forEach(function (schema) {
+            var $label = $('<label class="checkbox mr-3 is-size-7"></label>')
+              .css('margin-left', (schema.depth * 12) + 'px')
+              .css('display', 'inline-block');
+
+            $('<input type="checkbox">')
+              .val(schema.id)
+              .appendTo($label);
+
+            $label.append(' ' + schema.name);
+            $schemaList.append($label).append('<br>');
+          });
+
+          function escapeHtml(text) {
+            return $('<div></div>').text(text).html();
+          }
+
+          function checkedValues($container) {
+            return $container.find('input:checked').map(function () { return this.value; }).get();
+          }
+
+          // ["Hotel", "Izola"] без явного оператора — тоже валидный AST
+          // (TagExpression трактует как and), но конструктор всегда пишет
+          // оператор явно — распознаём обе формы при разборе.
+          function isFlatStringList(node) {
+            return Array.isArray(node) && node.length > 0 && node.every(function (n) { return typeof n === 'string'; });
+          }
+
+          function parseSimpleTags(node) {
+            if (node === undefined || node === null) return { includeOp: 'and', includeNames: [], excludeNames: [] };
+            if (typeof node === 'string') return { includeOp: 'and', includeNames: [node], excludeNames: [] };
+            if (!Array.isArray(node) || node.length === 0) return null;
+
+            if (node[0] === 'not') {
+              if (node.length !== 3) return null;
+
+              var left = node[1];
+              var right = node[2];
+              var includeOp = 'and';
+              var includeNames;
+
+              if (typeof left === 'string') {
+                includeNames = [left];
+              } else if (Array.isArray(left) && (left[0] === 'and' || left[0] === 'or') && isFlatStringList(left.slice(1))) {
+                includeOp = left[0];
+                includeNames = left.slice(1);
+              } else if (isFlatStringList(left)) {
+                includeNames = left;
+              } else {
+                return null;
+              }
+
+              var excludeNames;
+
+              if (typeof right === 'string') {
+                excludeNames = [right];
+              } else if (Array.isArray(right) && (right[0] === 'and' || right[0] === 'or') && isFlatStringList(right.slice(1))) {
+                excludeNames = right.slice(1);
+              } else if (isFlatStringList(right)) {
+                excludeNames = right;
+              } else {
+                return null;
+              }
+
+              return { includeOp: includeOp, includeNames: includeNames, excludeNames: excludeNames };
+            }
+
+            if (node[0] === 'and' || node[0] === 'or') {
+              if (!isFlatStringList(node.slice(1))) return null;
+              return { includeOp: node[0], includeNames: node.slice(1), excludeNames: [] };
+            }
+
+            if (isFlatStringList(node)) return { includeOp: 'and', includeNames: node, excludeNames: [] };
+
+            return null;
+          }
+
+          function buildTagsNode(includeOp, includeNames, excludeNames) {
+            if (includeNames.length === 0) return null;
+
+            var left = includeNames.length === 1 ? includeNames[0] : [includeOp].concat(includeNames);
+
+            if (excludeNames.length === 0) return left;
+
+            var right = excludeNames.length === 1 ? excludeNames[0] : ['or'].concat(excludeNames);
+
+            return ['not', left, right];
+          }
+
+          function renderChips($chips, names, $list) {
+            $chips.empty();
+
+            names.forEach(function (name) {
+              var $chip = $('<span class="tag is-info"></span>').text(name);
+              var $remove = $('<a class="delete is-small ml-1"></a>');
+
+              $remove.on('click', function (event) {
+                event.preventDefault();
+                $list.find('input').filter(function () { return this.value === name; }).prop('checked', false);
+                refreshTagLists();
+              });
+
+              $chip.append($remove);
+              $chips.append($chip);
+            });
+          }
+
+          function renderTagList($list, tagIds, selectedNames) {
+            var grouped = {};
+
+            tagIds.forEach(function (id) {
+              var tag = tagsById[id];
+              if (!tag) return;
+
+              var groupName = tag.group || '—';
+              (grouped[groupName] = grouped[groupName] || []).push(tag);
+            });
+
+            var groupNames = Object.keys(grouped).sort();
+
+            if (groupNames.length === 0) {
+              $list.html('<p class="help is-size-7">теги не найдены — выберите schema выше</p>');
+              return;
+            }
+
+            var html = '';
+
+            groupNames.forEach(function (groupName) {
+              var tags = grouped[groupName].sort(function (a, b) { return a.name.localeCompare(b.name); });
+              var groupHasSelected = tags.some(function (tag) { return selectedNames.indexOf(tag.name) !== -1; });
+
+              html += '<details' + (groupHasSelected ? ' open' : '') + '><summary class="has-text-weight-semibold is-size-7" style="cursor:pointer;">' + escapeHtml(groupName) + '</summary><div class="pl-4 pt-1">';
+
+              tags.forEach(function (tag) {
+                var checked = selectedNames.indexOf(tag.name) !== -1 ? ' checked' : '';
+                html += '<label class="checkbox mr-3 is-size-7"><input type="checkbox" value="' + escapeHtml(tag.name) + '"' + checked + '> ' + escapeHtml(tag.name) + '</label>';
+              });
+
+              html += '</div></details>';
+            });
+
+            $list.html(html);
+          }
+
+          function availableTagIds(selectedNames) {
+            var objectType = $objectSelect.val();
+
+            if (!objectType) return [];
+
+            if (SCHEMA_LESS_OBJECTS[objectType]) return data.tags.map(function (tag) { return tag.id; });
+
+            var checkedSchemaIds = checkedValues($schemaList).map(Number);
+            var ids = {};
+
+            checkedSchemaIds.forEach(function (schemaId) {
+              (data.schemaTagIds[schemaId] || []).forEach(function (id) { ids[id] = true; });
+            });
+
+            // Уже выбранные теги не должны пропадать из списка, даже если
+            // их schema сейчас не отмечена — иначе снятие галки со schema
+            // молча стирало бы часть условия.
+            data.tags.forEach(function (tag) {
+              if (selectedNames.indexOf(tag.name) !== -1) ids[tag.id] = true;
+            });
+
+            return Object.keys(ids).map(Number);
+          }
+
+          function refreshTagLists() {
+            var includeNames = checkedValues($includeList);
+            var excludeNames = checkedValues($excludeList);
+
+            renderTagList($includeList, availableTagIds(includeNames), includeNames);
+            renderTagList($excludeList, availableTagIds(excludeNames), excludeNames);
+
+            renderChips($includeChips, checkedValues($includeList), $includeList);
+            renderChips($excludeChips, checkedValues($excludeList), $excludeList);
+
+            syncTextarea();
+          }
+
+          function updateObjectVisibility() {
+            var objectType = $objectSelect.val();
+
+            $schemaColumn.toggle(!!objectType && !SCHEMA_LESS_OBJECTS[objectType]);
+            $needObject.toggle(!objectType);
+            $tagsColumns.toggle(!!objectType);
+          }
+
+          function syncTextarea() {
+            var conditions = {};
+            var objectType = $objectSelect.val();
+
+            if (objectType) conditions.object = objectType;
+
+            var tagsNode = buildTagsNode($includeOp.val(), checkedValues($includeList), checkedValues($excludeList));
+            if (tagsNode !== null && objectType) conditions.tags = tagsNode;
+
+            $raw.val(Object.keys(conditions).length ? JSON.stringify(conditions, null, 2) : '');
+          }
+
+          function applyState(objectType, state) {
+            $objectSelect.val(objectType || '');
+            $includeOp.val(state.includeOp);
+
+            updateObjectVisibility();
+
+            renderTagList($includeList, availableTagIds(state.includeNames), state.includeNames);
+            renderTagList($excludeList, availableTagIds(state.excludeNames), state.excludeNames);
+
+            renderChips($includeChips, state.includeNames, $includeList);
+            renderChips($excludeChips, state.excludeNames, $excludeList);
+          }
+
+          // Источник истины для текущего режима — data-атрибут, а не
+          // видимость $widget: jQuery :visible смотрит на layout
+          // (offsetWidth/Height), это не всегда надёжно и не работает
+          // в безголовых окружениях без рендера (например в тестах).
+          var mode = 'simple';
+
+          function showWidget() {
+            mode = 'simple';
+            $widget.show();
+            $rawControl.hide();
+            $fallbackNote.hide();
+            $toggle.text('raw JSON');
+          }
+
+          function showRaw(note) {
+            mode = 'raw';
+            $widget.hide();
+            $rawControl.show();
+            $fallbackNote.toggle(!!note);
+            $toggle.text('вернуться к конструктору');
+          }
+
+          function tryEnterSimpleMode() {
+            var parsed;
+
+            try {
+              parsed = $raw.val().trim() === '' ? {} : JSON.parse($raw.val());
+            } catch (e) {
+              return false;
+            }
+
+            var unsupportedKeys = Object.keys(parsed).filter(function (key) { return ['object', 'tags'].indexOf(key) === -1; });
+            if (unsupportedKeys.length > 0) return false;
+
+            var state = parseSimpleTags(parsed.tags);
+            if (state === null) return false;
+
+            applyState(parsed.object, state);
+            showWidget();
+            syncTextarea();
+            return true;
+          }
+
+          $schemaList.on('change', 'input', refreshTagLists);
+          $includeList.on('change', 'input', refreshTagLists);
+          $excludeList.on('change', 'input', refreshTagLists);
+          $includeOp.on('change', syncTextarea);
+          $objectSelect.on('change', function () {
+            updateObjectVisibility();
+            refreshTagLists();
+          });
+
+          $toggle.on('click', function (event) {
+            event.preventDefault();
+
+            if (mode === 'simple') {
+              showRaw(false);
+              return;
+            }
+
+            if (tryEnterSimpleMode()) return;
+
+            if (!confirm('Часть JSON (schema/start_at/end_at/details или сложное вложенное выражение) не поддержана конструктором и будет потеряна. Продолжить?')) return;
+
+            applyState($objectSelect.val(), { includeOp: 'and', includeNames: [], excludeNames: [] });
+            showWidget();
+            syncTextarea();
+          });
+
+          if (tryEnterSimpleMode()) {
+            showWidget();
+          } else {
+            showRaw(true);
+          }
+        })();
+      </script>
     <% end %>
 
     <%# Основной контент страницы %>
