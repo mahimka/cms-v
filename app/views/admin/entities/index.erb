@@ -42,21 +42,60 @@
 
 <div class="columns mb-0">
   <div class="column">
-    <p class="help is-size-7 has-text-weight-bold mt-0">tags (все выбранные одновременно)</p>
+    <p class="help is-size-7 has-text-weight-bold mt-0">
+      tags (все выбранные одновременно):
+      <span id="selected-tags-list" class="tags are-small ml-1" style="display:inline-flex; vertical-align:middle;"></span>
+    </p>
 
     <% grouped_tags = Tag.active.includes(:parent).order(:name).group_by(&:parent) %>
 
-    <% grouped_tags.each do |parent, children| %>
-      <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
-      <% children.each do |tag| %>
-        <label class="checkbox mr-3 is-size-7">
-          <input type="checkbox" name="tag_names[]" value="<%= tag.name %>" <%= "checked" if @filter_tag_names.include?(tag.name) %>>
-          <%= tag.name %>
-        </label>
+    <div style="display:flex; flex-wrap:wrap; gap: 0.25rem 1.25rem;">
+      <% grouped_tags.each do |parent, children| %>
+        <% group_has_selected = children.any? { |tag| @filter_tag_names.include?(tag.name) } %>
+        <details style="flex: 0 0 auto;" <%= "open" if group_has_selected %>>
+          <summary class="has-text-weight-semibold is-size-7" style="cursor:pointer;"><%= parent&.name || "—" %></summary>
+          <div class="pl-4 pt-1">
+            <% children.each do |tag| %>
+              <label class="checkbox mr-3 is-size-7 tag-filter-checkbox">
+                <input type="checkbox" name="tag_names[]" value="<%= tag.name %>" <%= "checked" if @filter_tag_names.include?(tag.name) %>>
+                <%= tag.name %>
+              </label>
+            <% end %>
+          </div>
+        </details>
       <% end %>
-    <% end %>
+    </div>
   </div>
 </div>
+
+<script>
+  (function () {
+    function renderSelectedTags() {
+      var $list = $('#selected-tags-list');
+      $list.empty();
+
+      $('.tag-filter-checkbox input:checked').each(function () {
+        var $checkbox = $(this);
+        var $chip = $('<span class="tag is-info"></span>').text($checkbox.val());
+        var $remove = $('<a class="delete is-small ml-1"></a>');
+
+        $remove.on('click', function (e) {
+          e.preventDefault();
+          $checkbox.prop('checked', false);
+          renderSelectedTags();
+        });
+
+        $chip.append($remove);
+        $list.append($chip);
+      });
+    }
+
+    $(function () {
+      renderSelectedTags();
+      $('.tag-filter-checkbox input').on('change', renderSelectedTags);
+    });
+  })();
+</script>
 
 <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
   <div class="column is-1">
