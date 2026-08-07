@@ -50,11 +50,15 @@
 
 
 <h2 class='title is-4 mt-4'>pages</h2>
-<ul>
-	<% @entity.pages.each do |page| %>
-	  <li><%= page.uri %> - <%= page.title %>
-	<% end %>
-</ul>
+<% if @entity.pages.any? %>
+  <ul>
+    <% @entity.pages.each do |page| %>
+      <li><a href="<%= page.uri %>" target="_blank"><%= page.uri %></a> - <%= page.title %>
+    <% end %>
+  </ul>
+<% else %>
+  <a href="/admin/pages/new?pageable_type=Entity&pageable_id=<%= @entity.id %>" class="button is-small is-info">+ create page</a>
+<% end %>
 
 
 <h2 class='title is-4 mt-4'>profiles</h2>

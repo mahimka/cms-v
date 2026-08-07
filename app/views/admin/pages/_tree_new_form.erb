@@ -20,6 +20,13 @@
         </p>
       <% end %>
 
+      <% if @page.pageable_id.present? %>
+        <p class="subtitle is-6 has-text-grey">
+          Страница для <%= @page.pageable_type %>:
+          <strong><%= @page.pageable&.name %></strong>
+        </p>
+      <% end %>
+
       <% if @page.errors.any? %>
         <div class="notification is-danger is-light">
           <ul>
@@ -251,8 +258,13 @@
                   type="text"
                   name="page[pageable_type]"
                   value="<%= @page.pageable_type %>"
+                  <%= "readonly" if @page.pageable_id.present? %>
                 >
               </div>
+
+              <% if @page.pageable_id.present? %>
+                <input type="hidden" name="page[pageable_id]" value="<%= @page.pageable_id %>">
+              <% end %>
             </div>
           </div>
         </div>

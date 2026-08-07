@@ -120,7 +120,11 @@ class PagesController < App
 
       @page = Page.new(lang: settings.home_language)
 
-      if params[:source_page_id].present?
+      if params[:pageable_type].present? && params[:pageable_id].present?
+        assign_pageable_defaults(@page, params[:pageable_type], params[:pageable_id])
+        @parent_pages = Page.selectable_as_pageable_parent.order(:uri)
+
+      elsif params[:source_page_id].present?
         source_page = Page.masters.find(params[:source_page_id])
 
         if params[:sub] == 'true'
@@ -257,7 +261,13 @@ class PagesController < App
         end
       else
         @page.errors.add(:conditions, conditions_error) if conditions_error
-        @parent_pages = Page.masters.order(:uri)
+
+        @parent_pages =
+          if @page.pageable_id.present?
+            Page.selectable_as_pageable_parent.order(:uri)
+          else
+            Page.masters.order(:uri)
+          end
 
         if request.xhr?
           status 422
@@ -266,7 +276,7 @@ class PagesController < App
               layout: false,
               views: settings.views_admin
         else
-          erb :"/pages/new",
+          erb :"/pages/_tree_new_form",
               layout: :"/layout/wide",
               views: settings.views_admin
         end
@@ -774,6 +784,28 @@ class PagesController < App
   # end
 
   private
+
+  # Модели, для которых допустимо создавать detail-страницу через
+  # /pages/new?pageable_type=...&pageable_id=... (see PAGEABLE concern).
+  PAGEABLE_TYPES = %w[Entity Item Event].freeze
+
+  # Предзаполняет новую master-страницу данными сущности, для которой она
+  # создаётся: title/h1 — entity.name, slug — транслитерированное имя,
+  # layout/view — "default", pageable_type/pageable_id — сама сущность.
+  def assign_pageable_defaults(page, pageable_type, pageable_id)
+    return unless PAGEABLE_TYPES.include?(pageable_type)
+
+    pageable = pageable_type.constantize.find_by(id: pageable_id)
+    return unless pageable
+
+    page.title         = pageable.name
+    page.h1            = pageable.name
+    page.slug          = SlugGenerator.call(pageable.name)
+    page.layout        = "default"
+    page.view          = "default"
+    page.pageable_type = pageable_type
+    page.pageable_id   = pageable.id
+  end
 
   # page[conditions] приходит из textarea сырым JSON-текстом, а
   # serialize :conditions, JSON на модели ждёт уже распарсенный Hash —

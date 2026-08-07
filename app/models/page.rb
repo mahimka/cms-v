@@ -44,6 +44,14 @@ class Page < ActiveRecord::Base
   scope :translations_only, -> { where.not(master_id: nil) }
   scope :published, -> { where(published: true) }
 
+  # Мастер-страницы, годные в родители для новой detail-страницы сущности
+  # (Entity/Item/Event): не detail-страница другой сущности (там уже задан
+  # pageable_id) — но страница-список (со своими conditions) годится, в неё
+  # осмысленно вложить detail-страницу (например /hotels/my-hotel).
+  scope :selectable_as_pageable_parent, -> {
+    masters.where(pageable_id: nil).or(masters.where.not(conditions: [nil, ""]))
+  }
+
   # URI не вводится вручную.
   # Он вычисляется перед каждой проверкой модели.
   before_validation :assign_calculated_uri

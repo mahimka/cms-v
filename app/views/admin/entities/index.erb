@@ -255,7 +255,7 @@
           <a href='<%= entity.page.uri %>'>uri</a>
         <% elsif entity.page.present? %>
         <% else %>
-          <a href='/admin/pages/new' class='button is-small is-warning'>+</a>
+          <a href='/admin/pages/new?pageable_type=Entity&pageable_id=<%= entity.id %>' class='button is-small is-warning'>+</a>
         <% end %>
       </td>
       <td width=300><%= input_in_place(entity, :name) %></td>
