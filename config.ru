@@ -13,6 +13,7 @@ use Rack::MethodOverride
 # порядок имеет значение!!
 use AdminController
 use ProfilesController
+use SitesController
 use SnapShotsController
 use MarkersController
 use TagsController

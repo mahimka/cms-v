@@ -1,28 +1,19 @@
-<div id="edit_page_form">
+<%= erb :'/layout/_flash', views: settings.views %>
 
-<form method="POST" action="/admin/pages">
+<div class="content m-3">
 
-<!--
-<div class="columns"> 
-  <div class="column is-12">
-    <input type="submit" value="Create Page" class="button is-link is-warning">
-    <hr>
-  </div>
-</div>
--->
-<dddddddddddddddddddddddd>
-  
-<%= erb :'pages/_form' %>
+  <h1 class="title">New profile</h1>
 
-<!--
-<div class="field is-grouped">
-  <div class="control">
-    <hr>
-    <input type="submit" value="Create Page" class="button is-link is-warning">
-  </div>
-</div>
--->
+  <form method="POST" action="/admin/profiles">
 
-</form>
+    <%= erb :'/profiles/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Create Profile" class="button is-warning">
+      </div>
+    </div>
+
+  </form>
 
 </div>

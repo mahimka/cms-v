@@ -1,0 +1,33 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<p><a class="button is-warning" href="/admin/sites/new">Add Site</a></p>
+
+<div class="content m-3">
+
+  <div class="content">
+    <%= paginate(@sites) unless @sites.blank? %>
+  </div>
+
+  <table class="table is-narrow is-size-7">
+    <tr class="is-size-6 has-text-weight-semibold">
+      <td>name</td>
+      <td>domain</td>
+      <td>url</td>
+      <td>profiles</td>
+      <td></td>
+    </tr>
+
+    <% @sites.each do |site| %>
+      <tr>
+        <td><%= site.name %></td>
+        <td><%= site.domain %></td>
+        <td><%= site.url %></td>
+        <td><%= site.profiles.size %></td>
+        <td>
+          <a href="/admin/sites/<%= site.id %>/edit" class="button is-small">edit</a>
+        </td>
+      </tr>
+    <% end %>
+  </table>
+
+</div>

@@ -1,544 +1,93 @@
-<!--посмотри https://stackoverflow.com/questions/1899072/getting-a-list-of-folders-in-a-directory-->
-<!--
-<%= Dir.glob("**", base: './display') %> </br>
-<%= Dir.glob("*.erb", base: './display/layouts') %> </br>
-<%= Dir.glob("*.erb", base: './display/views') %> </br>
-<%#= Dir.entries('./display') %><br>
--->
-
-<style>
-   .label {
-      font-size:0.75em;
-      margin: 0.6em  0 0.2em  0.2em ;
-   }  
-   .column {
-      padding:0 0.15em 0.1em 0;
-   }
-   .input, .textarea {
-      font-size:0.75em;
-      margin: 0 0.2em  0 0.2em;
-   }
-   .icon {
-      font-size:0.75em; 
-   }
-
-   hr {
-    padding: 0em;
-    margin: 0.1em 0 1.5em 0; 
-   }
-
-</style>
-
-<div class="columns" >
-  <div class="column is-12"> 
-     <div id="flash"></div>
- </div>  
-</div>
-
-
-<script>
-  $(document).ready(function(){
-   $( "#page_kind" ).change(function() {
-    
-    var selected = "";
-    $( "#page_kind option:selected" ).each(function() {
-      selected += $( this ).text();
-      //alert(selected);
-    });
-
-    if (selected == "pageable"){
-      //alert(selected);
-
-      $( "#pageable_fields" ). removeClass( 'is-hidden');
-      $( "#list_fields" ).     addClass( 'is-hidden');
-      $( "#list_fields_2" ).   addClass( 'is-hidden');
-
-      // очищаю поля (reset здесь не то, он сбрасывает до исходных!)
-      $("#page_list_item").val(1);
-      $("#page_list_tags").val('');
-      $("#page_list_tags_option").val(1);
-      $("#page_list_page_template_id").val(1);
-      $("#page_list_pagination").val(1);
-      $("#page_list_partial").val(1);
-      $("#page_list_order").val(1);
-      $("#page_list_per_page").val();
-    
-    }
-    else if (selected == "list"){
-      //alert(selected);
-      $( "#list_fields" ).     removeClass ( 'is-hidden');
-      $( "#list_fields_2" ).   removeClass ( 'is-hidden');
-      $( "#pageable_fields" ). addClass( 'is-hidden');
-
-      // очищаю поля (reset здесь не то, он сбрасывает до исходных!)
-      $("#page_pageable_type").val(1);
-      $("#page_pageable_id").val('');
-      
-    } else {
-      $( "#pageable_fields" ). addClass( 'is-hidden');
-      $( "#list_fields" ).     addClass ( 'is-hidden');
-      $( "#list_fields_2" ).   addClass ( 'is-hidden');
-    }
-     //$( "#template_kind_fields" ).text( str );
-  })
-  .trigger( "change" );
-
-});
-</script>
-
-<input id="hidden" type="hidden" name="url_original"  value="<%= @page.url %>">
-<input id="hidden" type="hidden" name="page[lang]"    value="<%= @page.lang %>">
-<input id="hidden" type="hidden" name="page[base_id]" value="<%= @page.base_id %>">
-
 <div class="columns">
-
-<div class="column is-1"> 
-  <% if @page.persisted? %>
-    <input type="submit" value="Update" class="button is-link is-warning is-small">
-  <% else %>
-    <input type="submit" value="Create" class="button is-link is-warning is-small">
-  <% end %>
-</div>  
-
- <input id="hidden" type="hidden" name="page[id]" value="<%= @page.id %>">
-
-  <div class="column is-1">   
-      <input value="<%#= @page.ready == true  ? "0" : "1" %>" type="hidden" name="page[ready]">
-      <label class="checkbox label" >
-        <input type="checkbox" id="page_ready" name="page[ready]" <%= @page.ready == true ? "checked='checked'" : '' %>>
-        ready       
-      </label>
-   </div>
-
-  <div class="column is-2">   
-      <input value="<%#= @page.published == true  ? "0" : "1" %>" type="hidden" name="page[published]">
-      <label class="checkbox label" >
-        <input type="checkbox" id="page_published" name="page[published]" <%= @page.published == true  ? "checked='checked'" : '' %>>
-        published
-      </label>
-  </div>  
-
-  <!--
-  <div class="column is-1"> 
-    <%= label(:page, :ancestry, "ancestry", options = {class: 'label', style: 'padding-left:0.5em;'}) %>
-  </div>
-  -->
 
   <div class="column is-2">
-    <% @disabled = @page.base_page.blank? ? '' : 'pointer-events: none; background-color: lightgrey;' %> 
-    <span class=''> <%= input(:page, :ancestry, options = {class: 'input is-success', value: @page.ancestry, placeholder: "enter ANCESTRY", title: "ancestry", style: @disabled}) %></span>
-  </div>  
+    <%= label(:profile, :site_id, "site", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <% @sites_for_select = {"": ""}.merge(Site.order(:name).to_h { |site| [site.id, site.name.presence || site.domain] }) %>
+    <%= select(:profile, :site_id, @sites_for_select, options = {class: 'select input is-success', value: @profile.site_id}) %>
+    <p class="help">нет нужного сайта? <a href="/admin/sites/new" target="_blank">создать</a></p>
+  </div>
+
+</div>
+
+<div class="columns">
 
   <div class="column is-2">
-    <% if @page.parent %>
-      <span class="is-size-7">&nbsp;<a href="/admin/pages/<%= @page.parent.id %>/edit" title="Parent page"><%= @page.parent.url %></a></span> 
-    <% else %>
-      <span class="is-size-7">&nbsp;it's ROOT!!</span>
-    <% end %>  
+    <%= label(:profile, :profileable_type, "profileable", options = {class: 'label'}) %>
   </div>
 
-  <div class="column is-1">   
-    <input value="<%#= @page.is_top == true ? '0' : '1' %>" type="hidden" name="page[is_top]">
-    <label class="checkbox label" >
-      <input type="checkbox" id="page_is_top" name="page[is_top]" <%= @page.is_top == true  ? "checked='checked'" : '' %> <%= @page.base_page.blank? ? '' : 'disabled' %> >
-      is_top
-    </label>
-
+  <div class="column is-9">
+    <input type="hidden" name="profile[profileable_type]" value="<%= @profile.profileable_type %>">
+    <input type="hidden" name="profile[profileable_id]" value="<%= @profile.profileable_id %>">
+    <p class="input is-static">
+      <%= @profile.profileable_type %> #<%= @profile.profileable_id %>
+      <% if @profile.profileable %>
+        — <a href="/admin/<%= @profile.profileable.class.name.underscore.pluralize %>/<%= @profile.profileable.id %>/edit" target="_blank"><%= @profile.profileable.name %></a>
+      <% end %>
+    </p>
   </div>
-
-  <div class="column is-1">  
-    <div class="control">
-      <%= input(:page, :position, options = {class: 'input is-success', value: @page.position, placeholder: "position", title: "position", style: @disabled}) %>
-    </div>
-  </div>  
-
- 
-
-</div>  
-
-<div class="columns">
-  <div class="column is-1">
-    <%= label(:page, :url, "url", options = {class: 'label'}) %>
-  </div>
-  <div class="column is-6">
-    <%= input(:page, :url, options = {class: 'input is-success', value: @page.url, placeholder: "enter url", style: @disabled}) %>
-  </div>
-
-  <div class="column is-5">  
-    <div class="control">
-      <%= input(:page, :schema_id, options = {class: 'input is-success', value: @page.schema_id, placeholder: "schema_id", title: "schema_id", style: @disabled}) %>
-    </div>
-  </div>  
 
 </div>
 
 <div class="columns">
-  <div class="column is-1">
-  </div>  
 
   <div class="column is-2">
-  <%= label(:page, :category, "category", options = {class: 'label mb-0'}) %>
-    <div class="control has-icons-left"> 
-      <%= select(:page, :category, Page::PAGE_CATEGORIES, options = {class: 'select input is-success ', value: @page.category, style: @disabled}) %>
-      <span class="icon is-small is-left">
-        <i class="fas fa-caret-down"></i>
-      </span>
-    </div>
-  </div>
- 
-   <div class="column is-2">
-  <%= label(:page, :item_id, "item:", options = {class: 'label mb-0'}) %>
-    <div class="control has-icons-left"> 
-
-
-      <% @items_for_select = {"": ""}.merge(Item.all.to_h {|item| [item.id, item.ancestors_and_item]}) %>
-      <%= select(:page, :item_id, @items_for_select, options = {class: 'select input is-success ', value: @page.item_id, style: @disabled}) %>
-
-      <%# values = Page::PAGE_ITEMS.unshift("") %>
-      <%#= select(:page, :item, Page::PAGE_ITEMS, options = {class: 'select input is-success ', value: @page.item}) %>
-      <span class="icon is-small is-left">
-        <i class="fas fa-caret-down"></i>
-      </span>
-    </div>
-  </div>
-   
-  <div class="column is-2">
-  <%= label(:page, :layout, "layout:", options = {class: 'label mb-0'}) %>
-    <div class="control has-icons-left"> 
-      <% values = Dir.glob("**", base: "app/views/layout").unshift("") %>
-      <%= select(:page, :layout, values, options = {class: 'select input is-success', value: @page.layout, style: @disabled}) %>
-      <span class="icon is-small is-left">
-        <i class="fas fa-caret-down"></i>
-      </span>
-    </div>
-  </div>
- 
-  <div class="column is-4">
-    <%= label(:page, :view, "view:", options = {class: 'label mb-0'}) %>
-    <div class="control has-icons-left">
-      <% values = Dir.glob("*.*", base: "app/views").sort %>
-      <%= select(:page, :view, values.unshift(""), options = {class: 'select input is-success', value: @page.view, style: @disabled}) %>
-      <span class="icon is-small is-left">
-        <i class="fas fa-caret-down"></i>
-      </span>
-    </div>
+    <%= label(:profile, :url, "url", options = {class: 'label'}) %>
   </div>
 
-  <div class="column is-1">   
-
-    <label class="label mb-0" for="page_has_feed">has_feed: </label>
-  
-      <input value="<%#= @page.has_feed == true  ? false : true %>" type="hidden" name="page[has_feed]">
-      <label class="checkbox label" >
-        <input type="checkbox" id="page_has_feed" name="page[has_feed]" <%= @page.has_feed == true ? "checked='checked'" : '' %> <%= @page.base_page.blank? ? '' : 'disabled' %>>
-      </label>
-
+  <div class="column is-9">
+    <%= input(:profile, :url, options = {class: 'input is-success', value: @profile.url, placeholder: "https://..."}) %>
   </div>
 
 </div>
 
 <div class="columns">
-  <div class="column is-1">
-  </div> 
-  <div class="column is-5">
-    <%= label(:page, :tags, "lits tags:", options = {class: 'label mb-0'}) %>
-    <% if ['list', 'index'].any?(@page.category)  && @page.tags.length > 0 %>
-      <%= @page.tags.map{|tag| "<span class='tag is-success'>#{tag.name}</span>"}.join(' ') %>
-    <% elsif @page.category == 'list'  %>
-      <span class='tag is-danger'>list is not tagged !!! </span>
-    <% end %>
-      
-
-    <%#= input(:page, :tagged_with, options = {class: 'input is-success', value: @page.tagged_with, placeholder: "enter tags", style: @disabled}) %>
-  </div>  
-  <div class="column is-1">
-    <%= label(:page, :tagged_option, "option:", options = {class: 'label mb-0'}) %>
-    <div class="control has-icons-left">
-      <% values = ['all', 'any'] %>
-      <%= select(:page, :tagged_option, values, options = {class: 'select input is-success', value: @page.tagged_option, style: @disabled}) %>
-      <span class="icon is-small is-left">
-        <i class="fas fa-caret-down"></i>
-      </span>
-    </div>
-  </div>  
-
-  <div class="column is-3">
-    <%= label(:page, :list_partial, "list_partial:", options = {class: 'label mb-0'}) %>
-    <div class="control has-icons-left">
-      <% files = Dir.glob("*.*", base: "app/views/partials").sort %>
-      <% files = files.reject{|file| !file.starts_with?('_list_item_')} %>
-      <%= select(:page, :list_partial, files.unshift(""), options = {class: 'select input is-success', value: @page.list_partial, style: @disabled}) %>
-      <%#= select(:page, :list_partial, files.unshift(""), options = {class: 'select input is-success', value: @page.list_partial, style: @disabled}) %>
-      <span class="icon is-small is-left">
-        <i class="fas fa-caret-down"></i>
-      </span>
-    </div>
-
-
-  </div> 
 
   <div class="column is-2">
-    <%= label(:page, :list_order, "list_order:", options = {class: 'label mb-0'}) %>
-    <%= input(:page, :list_order, options = {class: 'input is-success', value: @page.list_order, placeholder: "id DESC", style: @disabled}) %>
-  </div> 
-
-</div>
-
-<hr>
-
-<div class="columns">
-  <div class="column is-1"><%= label(:page, :title, "title", options = {class: 'label'}) %></div>  
-  <div class="column is-10"><%= input(:page, :title, options = {class: 'input is-success ', value: @page.title, placeholder: ""}) %></div>  
-  <div class="column is-1"><%= translate_input(@page, :title) %></div>  
-</div>  
-
-<div class="columns">
-  <div class="column is-1"><%= label(:page, :h1, "h1", options = {class: 'label'}) %></div>  
-  <div class="column is-10"><%= input(:page, :h1, options = {class: 'input is-success ' , value: @page.h1, placeholder: ""}) %></div>  
-  <div class="column is-1"><%= translate_input(@page, :h1) %></div>  
-</div>
-
-<div class="columns">
-  <div class="column is-1"><%= label(:page, :sub, "sub", options = {class: 'label'}) %></div>  
-  <div class="column is-10"><%= input(:page, :sub, options = {class: 'input is-success ' , value: @page.sub, placeholder: ""}) %></div>  
-  <div class="column is-1"><%= translate_input(@page, :sub) %></div>  
-</div>
-
-<div class="columns">
-  <div class="column is-1"><%= label(:page, :meta_description, "meta_d", options = {class: 'label'}) %></div>  
-  <div class="column is-10"><%= textarea(:page, :meta_description, content = "#{@page.meta_description}", options = {class: 'textarea is-success ' , value: @page.meta_description, placeholder: ""}) %></div>  
-  <div class="column is-1"><%= translate_input(@page, :meta_description) %></div>  
-</div>
-
-<div class="columns">
-  <div class="column is-1"><%= label(:page, :anchors, "anchors", options = {class: 'label'}) %></div>  
-  <div class="column is-3">
-    <%#= label(:page, :anchor_1, "anchor_1", options = {class: 'label'}) %>
-    <%= input(:page, :anchor_1, options = {class: 'input is-success ' , value: @page.anchor_1, placeholder: "anchor_1" }) %>
+    <%= label(:profile, :notes, "notes", options = {class: 'label'}) %>
   </div>
-  <div class="column is-1"><%= translate_input(@page, :anchor_1) %></div>  
-  <div class="column is-3">
-    <%#= label(:page, :anchor_2, "anchor_2", options = {class: 'label'}) %>
-    <%= input(:page, :anchor_2, options = {class: 'input is-success ' , value: @page.anchor_2, placeholder: "anchor_3"}) %>
+
+  <div class="column is-9">
+    <%= textarea(:profile, :notes, content = "#{@profile.notes}", options = {class: 'textarea is-success', rows: 3}) %>
   </div>
-  <div class="column is-1"><%= translate_input(@page, :anchor_2) %></div>  
+
+</div>
+
+<div class="columns">
+
   <div class="column is-2">
-    <%#= label(:page, :anchor_3, "anchor_3", options = {class: 'label'}) %>
-    <%= input(:page, :anchor_3, options = {class: 'input is-success ' , value: @page.anchor_3, placeholder: "anchor_3"}) %>
-  </div>
-  <div class="column is-1"><%= translate_input(@page, :anchor_3) %></div>  
-</div>  
-
-<div class="columns mt-0 pt-0"> 
-  <div class="column is-1">
-
-    <% if @page.persisted? %>
-      <input type="submit" value="Update" class="button is-link is-warning is-small">
-    <% else %>
-      <input type="submit" value="Create" class="button is-link is-warning is-small">
-    <% end %>
+    <%= label(:profile, :status, "status", options = {class: 'label'}) %>
   </div>
 
-
-
-  <div class="column is-3">
-    <input type="date" id="when" value="<%= @page.edited_at.try(:strftime, '%Y-%m-%d') %>" class="input is-small" name="page[edited_at]">
+  <div class="column is-9">
+    <%= input(:profile, :status, options = {class: 'input is-success', value: @profile.status, placeholder: "enter status"}) %>
   </div>
-
 
 </div>
 
 <div class="columns">
-  <div class="column is-1"><%= label(:page, :body, "body #{@page.body&.lines&.count }", options = {class: 'label'}) %></div>  
-  <%# protected = @page.protected_columns.include?('body') ? "has-background-grey-light" : '' %>
-  <div class="column is-10"><%= textarea(:page, :body, content = "#{@page.body}", options = {class: 'textarea is-success', placeholder: "", rows: "#{@page.body&.lines&.count&.+ 1}"}) %></div>  
-  <div class="column is-1"><%= translate_input(@page, :body) %></div>  
-</div>
 
-
-
-<div class="columns">
-  <div class="column is-1"><%= label(:page, :schema, "schema #{@page.schema&.lines&.count }", options = {class: 'label'}) %></div>  
-  <%# protected = @page.protected_columns.include?('schema') ? "has-background-grey-light" : '' %>
-  <div class="column is-10"><%= textarea(:page, :schema, content = "#{@page.schema}", options = {class: 'textarea is-success', placeholder: "", rows: "#{@page.schema&.lines&.count&.+ 1}"}) %></div>  
-  <div class="column is-1"><%#= translate_input(@page, :schema) %></div>  
-</div>
-
-
-
-
-<div class="columns">
-  <div class="column is-1"><%#= label(:page, :author, "author", options = {class: 'label'}) %></div>  
-  <div class="column is-3"><%#= input(:page, :author, options = {class: 'input is-success ' , value: @page.author, placeholder: ""}) %></div> 
-  <div class="column is-8"><%#= input(:page, :author_url, options = {class: 'input is-success ' , value: @page.author_url, placeholder: ""}) %></div>  
-</div>
-
-<hr>
-
-<div class="columns mt-0 pt-0"> 
-  <div class="column is-12">
-
-    <% if @page.persisted? %>
-      <input type="submit" value="Update" class="button is-link is-warning is-small">
-    <% else %>
-      <input type="submit" value="Create" class="button is-link is-warning is-small">
-    <% end %>
-  </div>
-</div>
-
-<hr>
-
-
-<div class="columns">
-  <div class="column is-1">
-    <%= label(:page, :faq, "faq", options = {class: 'label'}) %>
-  </div>
-  <div class="column is-10">
-    <%= textarea(:page, :faq, content = "#{@page.faq}", options = {class: 'textarea is-success ', rows: "#{@page.faq&.lines&.count&.+ 1}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :faq) %>
+  <div class="column is-2">
+    <%= label(:profile, :redirected_to, "redirected_to", options = {class: 'label'}) %>
   </div>
 
-
+  <div class="column is-9">
+    <%= input(:profile, :redirected_to, options = {class: 'input is-success', value: @profile.redirected_to, placeholder: "https://..."}) %>
+  </div>
 
 </div>
 
 <div class="columns">
-  <div class="column is-11">
-    <%= label(:page, :hero_1, "hero_1", options = {class: 'label'}) %>
-    <%= textarea(:page, :hero_1, content = "#{@page.hero_1}", options = {class: 'textarea is-success ', rows: "#{@page.hero_1&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :hero_1) %>
-  </div>  
-</div>
-<div class="columns">  
-  <div class="column is-11">
-    <%= label(:page, :hero_2, "hero_2", options = {class: 'label'}) %>
-    <%= textarea(:page, :hero_2, content = "#{@page.hero_2}", options = {class: 'textarea is-success', rows: "#{@page.hero_2&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :hero_2) %>
-  </div>  
-</div>
-<div class="columns">
-  <div class="column is-11">
-    <%= label(:page, :hero_3, "hero_3", options = {class: 'label'}) %>
-    <%= textarea(:page, :hero_3, content = "#{@page.hero_3}", options = {class: 'textarea is-success ', rows: "#{@page.hero_3&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :hero_3) %>
-  </div>  
-</div>  
 
-<div class="columns">
-  <div class="column is-11">
-    <%= label(:page, :sidebar_1, "sidebar_1", options = {class: 'label'}) %>
-    <%= textarea(:page, :sidebar_1, content = "#{@page.sidebar_1}", options = {class: 'textarea is-success ', rows: "#{@page.sidebar_1&.lines&.count&.+ 2}" }) %>
+  <div class="column is-2">
+    <%= label(:profile, :active, "active", options = {class: 'label'}) %>
   </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :sidebar_1) %>
-  </div>  
-</div>
-<div class="columns">  
-  <div class="column is-11">
-    <%= label(:page, :sidebar_2, "sidebar_2", options = {class: 'label'}) %>
-    <%= textarea(:page, :sidebar_2, content = "#{@page.sidebar_2}", options = {class: 'textarea is-success ', rows: "#{@page.sidebar_2&.lines&.count&.+ 2}" }) %>
+
+  <div class="column is-9">
+    <input type="hidden" name="profile[active]" value="0">
+    <input type="checkbox" name="profile[active]" value="1" <%= @profile.active ? "checked" : "" %>>
   </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :sidebar_2) %>
-  </div>  
-</div>
-<div class="columns">
-  <div class="column is-11">
-    <%= label(:page, :sidebar_3, "sidebar_3", options = {class: 'label'}) %>
-    <%= textarea(:page, :sidebar_3, content = "#{@page.sidebar_3}", options = {class: 'textarea is-success ', rows: "#{@page.sidebar_3&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :sidebar_3) %>
-  </div>  
-</div>
 
-<div class="columns">
-  <div class="column is-11">
-    <%= label(:page, :footer_1, "footer_1", options = {class: 'label'}) %>
-    <%= textarea(:page, :footer_1, content = "#{@page.footer_1}", options = {class: 'textarea is-success ', rows: "#{@page.footer_1&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :footer_1) %>
-  </div>  
-</div>
-<div class="columns">  
-  <div class="column is-11">
-    <%= label(:page, :footer_2, "footer_2", options = {class: 'label'}) %>
-    <%= textarea(:page, :footer_2, content = "#{@page.footer_2}", options = {class: 'textarea is-success ', rows: "#{@page.footer_2&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :footer_2) %>
-  </div>  
-</div>
-<div class="columns">
-  <div class="column is-11">
-    <%= label(:page, :footer_3, "footer_3", options = {class: 'label'}) %>
-    <%= textarea(:page, :footer_3, content = "#{@page.footer_3}", options = {class: 'textarea is-success ', rows: "#{@page.footer_3&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :footer_3) %>
-  </div>  
-</div>
-
-
-<div class="columns">  
-  <div class="column is-11">
-    <%= label(:page, :block_1, "block_1", options = {class: 'label'}) %>
-    <%= textarea(:page, :block_1, content = "#{@page.block_1}", options = {class: 'textarea is-success ', rows: "#{@page.block_1&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :block_1) %>
-  </div>  
-</div>
-
-
-<div class="columns">
-  <div class="column is-11">
-    <%= label(:page, :block_2, "block_2", options = {class: 'label'}) %>
-    <%= textarea(:page, :block_2, content = "#{@page.block_2}", options = {class: 'textarea is-success ', rows: "#{@page.block_2&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :block_2) %>
-  </div>  
-</div>
-
-<div class="columns">
-  <div class="column is-11">
-    <%= label(:page, :block_3, "block_3", options = {class: 'label'}) %>
-    <%= textarea(:page, :block_3, content = "#{@page.block_3}", options = {class: 'textarea is-success ', rows: "#{@page.block_3&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :block_3) %>
-  </div>  
-</div>
-
-<div class="columns">
-  <div class="column is-11">
-    <%= label(:page, :block_4, "block_4", options = {class: 'label'}) %>
-    <%= textarea(:page, :block_4, content = "#{@page.block_4}", options = {class: 'textarea is-success ', rows: "#{@page.block_4&.lines&.count&.+ 2}" }) %>
-  </div>
-  <div class="column is-1">
-    <%= translate_input(@page, :block_4) %>
-  </div>  
-</div>
-
-
-
-<div class="columns mt-0 pt-0"> 
-  <div class="column is-12">
-
-    <% if @page.persisted? %>
-      <input type="submit" value="Update" class="button is-link is-warning is-small">
-    <% else %>
-      <input type="submit" value="Create" class="button is-link is-warning is-small">
-    <% end %>
-  </div>
 </div>

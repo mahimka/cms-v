@@ -1,0 +1,20 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <h1 class="title">New site</h1>
+
+  <form method="POST" action="/admin/sites">
+    <input type="hidden" name="redirect_to" value="<%= params[:redirect_to] %>">
+
+    <%= erb :'/sites/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Create Site" class="button is-warning">
+      </div>
+    </div>
+
+  </form>
+
+</div>

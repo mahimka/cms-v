@@ -1,5 +1,8 @@
 class Item < ActiveRecord::Base
-  # acts_as_taggable_on #:tags
+  include Taggable
+  include SchemaIdentifiable
+  include Pageable
+
   serialize :details, JSON
 
   validates :name, presence: true
@@ -12,9 +15,6 @@ class Item < ActiveRecord::Base
   # accepts_nested_attributes_for :profiles, allow_destroy: true, :reject_if => proc { |attributes| attributes['url'].blank? }
   # validates_associated :profiles
   # has_many :ratings
-
-  has_many :taggings, as: :taggable, dependent: :destroy
-  has_many :tags, through: :taggings
 
   has_many :links, as: :linkable, dependent: :destroy
   has_many :pictures, as: :imageable, dependent: :destroy

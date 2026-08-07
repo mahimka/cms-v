@@ -1,0 +1,20 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @site.name %></h1>
+
+  <form method="POST" action="/admin/sites/<%= @site.id %>">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <%= erb :'/sites/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Update Site" class="button is-link is-warning">
+      </div>
+    </div>
+
+  </form>
+
+</div>

@@ -1,29 +1,23 @@
-<h1 class="title">
-  <%= @page.h1 %>
-</h1>
-<p class="subtitle">
-  <strong>url:</strong><%= @page.url %>
-</p>
+<%= erb :'/layout/_flash', views: settings.views %>
 
-<%= @page.body %>
+<div class="content m-3">
 
+  <h1 class="title">Profile #<%= @profile.id %></h1>
 
-<%= form('/users', :post) %>
+  <p><strong>site:</strong> <%= @profile.site&.name %></p>
+  <p><strong>url:</strong> <a href="<%= @profile.url %>" target="_blank"><%= @profile.url %></a></p>
+  <p>
+    <strong>profileable:</strong>
+    <%= @profile.profileable_type %> #<%= @profile.profileable_id %>
+    <% if @profile.profileable %>
+      — <a href="/admin/<%= @profile.profileable.class.name.underscore.pluralize %>/<%= @profile.profileable.id %>/edit"><%= @profile.profileable.name %></a>
+    <% end %>
+  </p>
+  <p><strong>status:</strong> <%= @profile.status %></p>
+  <p><strong>notes:</strong> <%= @profile.notes %></p>
+  <p><strong>scraped_at:</strong> <%= @profile.scraped_at %></p>
 
-<!--
-#label(obj, field, display = "", options = {})
--->
+  <a href="/admin/profiles/<%= @profile.id %>/edit" class="button is-small">Edit</a>
+  <a href="/admin/profiles" class="button is-small">Back</a>
 
-<%= label(:page, :url, display = "ISPLAYED", options = {class: 'label'}) %>
-<%= input(:user, :last_name) %>
-
-<%= input(:user, :email, :size => 40) %>
-
-<%= password(:user, :password) %>
-<%= password(:user, :confirm_password) %>
-
-<%= radio(:user, :gender, ['M', 'F']) %>
-
-<%= submit %>
-
-
+</div>

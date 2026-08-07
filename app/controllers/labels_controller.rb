@@ -55,6 +55,19 @@ class LabelsController < App
       end
     end
 
+    # Пересортировать детей группы по name — как строки ("string") или
+    # как числа ("float", для лейблов вроде "0.01", "0.5", "3", "44").
+    post '/labels/:id/sort_children' do
+      group = Label.find(params[:id])
+      children = group.children.to_a
+
+      sorted = params[:by] == 'float' ? children.sort_by { |l| l.name.to_f } : children.sort_by { |l| l.name.to_s }
+
+      sorted.each_with_index { |label, index| label.update_column(:position, index) }
+
+      redirect back
+    end
+
     delete '/labels/:id' do
       @label = Label.find(params[:id])
       if @label.destroy

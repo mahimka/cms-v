@@ -1,0 +1,59 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <p class="label">profiles</p>
+    <p class="help">профили на внешних площадках (booking.com, tripadvisor и т.п.), каждый привязан к сайту</p>
+  </div>
+
+  <div class="column is-9">
+
+    <% sites_for_select = {"": ""}.merge(Site.order(:name).to_h { |s| [s.id, s.name.presence || s.domain] }) %>
+
+    <% @entity.profiles.each do |profile| %>
+      <div class="columns is-mobile mb-1">
+
+        <form method="POST" action="/admin/profiles/<%= profile.id %>" class="column is-11 field has-addons mb-0">
+          <input type="hidden" name="_method" value="PATCH">
+          <input type="hidden" name="redirect_to" value="/admin/entities/<%= @entity.id %>/edit">
+          <div class="control">
+            <%= select(:profile, :site_id, sites_for_select, options = {class: 'select input is-small', value: profile.site_id}) %>
+          </div>
+          <div class="control is-expanded">
+            <input type="text" class="input is-small" name="profile[url]" value="<%= fast_escape_html(profile.url) %>" placeholder="https://...">
+          </div>
+          <div class="control">
+            <button type="submit" class="button is-small is-info">save</button>
+          </div>
+        </form>
+
+        <form method="POST" action="/admin/profiles/<%= profile.id %>" class="column is-1" onsubmit="return confirm('Delete this profile?')">
+          <input type="hidden" name="_method" value="DELETE">
+          <input type="hidden" name="redirect_to" value="/admin/entities/<%= @entity.id %>/edit">
+          <button type="submit" class="button is-small is-danger">&times;</button>
+        </form>
+
+      </div>
+    <% end %>
+
+    <hr class="my-2">
+
+    <form method="POST" action="/admin/profiles" class="field has-addons">
+      <input type="hidden" name="profile[profileable_type]" value="Entity">
+      <input type="hidden" name="profile[profileable_id]" value="<%= @entity.id %>">
+      <input type="hidden" name="redirect_to" value="/admin/entities/<%= @entity.id %>/edit">
+      <div class="control">
+        <%= select(:profile, :site_id, sites_for_select, options = {class: 'select input is-small'}) %>
+      </div>
+      <div class="control is-expanded">
+        <input type="text" class="input is-small" name="profile[url]" placeholder="https://...">
+      </div>
+      <div class="control">
+        <button type="submit" class="button is-small is-success">+ add profile</button>
+      </div>
+    </form>
+
+    <p class="help">нет нужного сайта? <a href="/admin/sites/new" target="_blank">создать</a></p>
+
+  </div>
+
+</div>

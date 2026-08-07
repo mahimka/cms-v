@@ -38,6 +38,7 @@ gem 'require_all'
 gem "rack-flash3", require: 'rack-flash'
 
 gem 'ancestry'
+gem 'geocoder'
 gem 'kaminari', require: 'kaminari'
 gem 'ransack', require: 'ransack'
 gem 'kramdown', require: 'kramdown'

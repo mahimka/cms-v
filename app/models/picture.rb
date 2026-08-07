@@ -1,4 +1,5 @@
 class Picture < ActiveRecord::Base
+  include Taggable
 
   serialize :translations, JSON
 
@@ -6,9 +7,6 @@ class Picture < ActiveRecord::Base
   scope :published, -> { where(published: true) }
 
   belongs_to :imageable, polymorphic: true
-
-  has_many :taggings, as: :taggable, dependent: :destroy
-  has_many :tags, through: :taggings
 
   validates :file, presence: true
 

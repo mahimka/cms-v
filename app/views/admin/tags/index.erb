@@ -82,21 +82,32 @@
   <table class="tableis-narrow is-size-7 ">
     <tr class="is-size-6 has-text-weight-semibold">
       <td>active</td>
+      <td title="запрещает менять name — на него ссылается List conditions (tags)">fixed 🔒</td>
       <td>position</td>
       <td>name</td>
       <td>admin_notes</td>
       <td></td>
     </tr>
 
-  <% grouped_tags = @tags.group_by { |t| (t.parent_id.presence && t.parent_id != 0) ? t.parent : t } %>
+  <%# t.parent может быть nil при "осиротевшем" parent_id (родитель удалён) — тогда сам t становится своей группой, а не крашит страницу %>
+  <% grouped_tags = @tags.group_by { |t| (t.parent_id.presence && t.parent_id != 0 && t.parent) ? t.parent : t } %>
   <% grouped_tags.sort_by { |group, _| [group.position || 0, group.name.to_s] }.each do |group, tags_in_group| %>
 
     <tr class="has-background-light">
       <td><%= checkbox_in_place(group, :active) %></td>
+      <td><%= checkbox_in_place(group, :fixed) %></td>
       <td><%= group.position %></td>
       <td class="has-text-weight-semibold"><%= group.name %></td>
       <td><%= group.admin_notes %></td>
       <td>
+        <form method="POST" action="/admin/tags/<%= group.id %>/sort_children" style="display:inline;">
+          <input type="hidden" name="by" value="string">
+          <button type="submit" class="button is-small" title="сортировать детей группы по имени как строки">S</button>
+        </form>
+        <form method="POST" action="/admin/tags/<%= group.id %>/sort_children" style="display:inline;">
+          <input type="hidden" name="by" value="float">
+          <button type="submit" class="button is-small" title="сортировать детей группы по имени как числа (0.01, 0.5, 3, 44)">F</button>
+        </form>
         <a href="/admin/tags/<%= group.id %>" class="button is-small" target='_blank'>tag</a>
         <a href="/admin/tags/<%= group.id %>/edit" class="button is-small" target='_blank'>edit</a>
       </td>
@@ -105,6 +116,7 @@
     <% (tags_in_group - [group]).sort_by { |t| [t.position || 0, t.name.to_s] }.each do |tag| %>
       <tr>
         <td><%= checkbox_in_place(tag, :active) %></td>
+        <td><%= checkbox_in_place(tag, :fixed) %></td>
         <td><%= tag.position %></td>
         <td class="pl-5"><%= tag.name %></td>
         <td><%= tag.admin_notes %></td>

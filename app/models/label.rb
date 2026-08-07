@@ -1,4 +1,8 @@
 class Label < ActiveRecord::Base
+  include FixedName
+  fixed_name_fields :name, :slug
+  include PreventDestroyWithChildren
+
   has_ancestry
 
   serialize :translations, JSON

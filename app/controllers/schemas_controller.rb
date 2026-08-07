@@ -57,6 +57,18 @@ class SchemasController < App
       end
     end
 
+    # Drag-n-drop сортировка внутри одной группы (одного parent_id).
+    # ids приходят уже в новом порядке — просто проставляем position
+    # по индексу, без валидаций/колбэков (это не смена данных, только
+    # порядок отображения).
+    post '/schemas/reorder' do
+      Array(params[:ids]).each_with_index do |id, index|
+        Schema.where(id: id).update_all(position: index)
+      end
+
+      status 200
+    end
+
     delete '/schemas/:id' do
       @schema = Schema.find(params[:id])
       if @schema.destroy

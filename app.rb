@@ -136,6 +136,48 @@ class App < Sinatra::Base
       # Рендерим без layout и передаем локальные переменные
       erb partial_sym, layout: false, views: "/", locals: options
     end
+
+    # Тег в HTML, если он есть в page_tags (по умолчанию — @page_tags
+    # текущей страницы), иначе пустая строка. page_tags — произвольный
+    # hash { tag_name => переведённое_значение }, поэтому подходит и для
+    # тегов текущей @page, и для тегов сущности из цикла (см. _card_room.erb).
+    def tag_by_lang(tag_name, options = {})
+      css_class  = options[:css_class]  || "tag is-light"
+      html_tag   = options[:html_tag]   || "span"
+      html_after = options[:html_after] || ""
+      page_tags  = options[:page_tags]  || @page_tags || {}
+
+      translated = page_tags[tag_name]
+
+      return "" unless translated
+
+      "<#{html_tag} class='#{css_class}'>#{translated}</#{html_tag}>#{html_after}"
+    end
+
+    # UI-строка по ключу label_name (например '_faq', 'season_low') на
+    # язык lang. Label#translation сам фолбэчит на label.name, если для
+    # lang нет перевода — здесь остаётся обработать только случай, когда
+    # такого Label вообще нет в базе.
+    def label_by_lang(label_name, lang = @page&.lang)
+      label = Label.find_by(name: label_name)
+
+      return label_name unless label
+
+      label.translation(lang)
+    end
+
+    # Тот же ListQuery, что у Page#list_objects, но без страницы вообще —
+    # для инлайн-подборок прямо в контенте.
+    #
+    #   objects_matching('Entity', ["and", "Hotel", "Izola"])
+    #   objects_matching('Event', ["or", "Concert", "Festival"], start_at: Time.current.iso8601)
+    def objects_matching(object_type, tags_expression = nil, **extra_conditions)
+      conditions = { "object" => object_type }
+      conditions["tags"] = tags_expression if tags_expression
+      extra_conditions.each { |key, value| conditions[key.to_s] = value }
+
+      ListQuery.new(conditions).objects
+    end
   end
 
   # === end of view rendering helpers ===
@@ -184,6 +226,7 @@ class App < Sinatra::Base
     also_reload './app/helpers/item_helpers.rb'
     also_reload './app/helpers/translation_helpers.rb'
     also_reload './project/helpers/project_helpers.rb'
+    also_reload './project/routes.rb'
     after_reload do
       #puts '===reloaded============================'
     end

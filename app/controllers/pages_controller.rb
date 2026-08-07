@@ -237,7 +237,8 @@ class PagesController < App
 
     # Создание новой страницы - различает обычные запрос и AJAX
     post '/pages' do
-      @page = Page.new(params[:page])
+      page_params, conditions_error = normalize_page_conditions(params[:page])
+      @page = Page.new(page_params)
 
       # Перевод присылает свои lang/master_id скрытыми полями формы.
       # Обычная master-страница — всегда домашний язык и без master.
@@ -246,7 +247,7 @@ class PagesController < App
         @page.master_id = nil
       end
 
-      if @page.save
+      if conditions_error.nil? && @page.save
         if request.xhr?
           headers "X-Page-Id" => @page.id.to_s
           status 201
@@ -255,6 +256,7 @@ class PagesController < App
           redirect "/admin/pages"
         end
       else
+        @page.errors.add(:conditions, conditions_error) if conditions_error
         @parent_pages = Page.masters.order(:uri)
 
         if request.xhr?
@@ -273,8 +275,9 @@ class PagesController < App
 
     patch '/pages/:id' do
       @page = Page.find(params[:id])
+      page_params, conditions_error = normalize_page_conditions(params[:page])
 
-      if @page.update(params[:page])
+      if conditions_error.nil? && @page.update(page_params)
         if request.xhr?
           headers "X-Page-Id" => @page.id.to_s
           status 200
@@ -283,6 +286,8 @@ class PagesController < App
           redirect "/admin/pages"
         end
       else
+        @page.assign_attributes(page_params.except("conditions")) if conditions_error
+        @page.errors.add(:conditions, conditions_error) if conditions_error
         @parent_pages = Page
           .where.not(id: @page.id)
           .order(:lang, :uri)
@@ -769,6 +774,31 @@ class PagesController < App
   # end
 
   private
+
+  # page[conditions] приходит из textarea сырым JSON-текстом, а
+  # serialize :conditions, JSON на модели ждёт уже распарсенный Hash —
+  # парсим здесь, до mass-assignment. Ошибку возвращаем отдельно, а не
+  # через @page.errors.add сразу: errors.clear происходит в начале
+  # valid?/save, так что добавленная до save ошибка иначе потеряется.
+  def normalize_page_conditions(raw_params)
+    attrs = (raw_params || {}).to_h
+    return [attrs, nil] unless attrs.key?("conditions")
+
+    raw_conditions = attrs["conditions"]
+
+    if raw_conditions.blank?
+      attrs["conditions"] = nil
+      [attrs, nil]
+    else
+      begin
+        attrs["conditions"] = JSON.parse(raw_conditions)
+        [attrs, nil]
+      rescue JSON::ParserError => e
+        attrs.delete("conditions")
+        [attrs, "невалидный JSON: #{e.message}"]
+      end
+    end
+  end
 
   # Сортировка корневых страниц в дереве: сначала главная страница
   # сайта (master root), затем переводы — в порядке, в котором языки

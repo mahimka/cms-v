@@ -22,42 +22,89 @@
 
 </form>
 
-<div class="content">
+<% if @q.name_cont.present? %>
 
-  <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
-    <div class="column is-12">
-      <%= paginate @schemas unless @schemas.blank? %>
+  <%# Поиск — по дереву искать неудобно, выдаём обычный плоский список найденного. %>
+  <div class="content">
+
+    <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
+      <div class="column is-12">
+        <%= paginate @schemas unless @schemas.blank? %>
+      </div>
     </div>
+
+    <table class="table is-narrow is-size-7">
+      <tr class="is-size-6 has-text-weight-semibold">
+        <td>active</td>
+        <td title="запрещает менять name/slug — на них ссылается List conditions (schema)">fixed 🔒</td>
+        <td>name</td>
+        <td>slug</td>
+        <td>schema_org_url</td>
+        <td>tags</td>
+        <td>labels</td>
+        <td></td>
+      </tr>
+
+    <% @schemas.each do |schema| %>
+
+      <tr>
+        <td><%= checkbox_in_place(schema, :active) %></td>
+        <td><%= checkbox_in_place(schema, :fixed) %></td>
+        <td><%= ("— " * schema.depth) + schema.name %></td>
+        <td><%= input_in_place(schema, :slug) %></td>
+        <td width=300><%= input_in_place(schema, :schema_org_url) %></td>
+        <td><%= schema.tags.size %></td>
+        <td><%= schema.labels.size %></td>
+        <td>
+          <a href="/admin/schemas/<%= schema.id %>" class="button is-small">show</a>
+          <a href="/admin/schemas/<%= schema.id %>/edit" class="button is-small">edit</a>
+        </td>
+      </tr>
+
+    <% end %>
+
+    </table>
+
   </div>
 
-  <table class="table is-narrow is-size-7">
-    <tr class="is-size-6 has-text-weight-semibold">
-      <td>active</td>
-      <td>name</td>
-      <td>slug</td>
-      <td>tags</td>
-      <td>labels</td>
-      <td></td>
-    </tr>
+<% else %>
 
-  <% @schemas.each do |schema| %>
+  <%# Без активного поиска — дерево по ancestry, сортировка перетаскиванием внутри каждой группы (одного parent_id). %>
+  <div class="content">
+    <ul class="schema-children" data-parent-id="">
+      <% Schema.roots.order(:position, :name).each do |root| %>
+        <%= erb :'/schemas/_tree_node', locals: { schema: root }, views: settings.views_admin %>
+      <% end %>
+    </ul>
+  </div>
 
-    <tr>
-      <td><%= checkbox_in_place(schema, :active) %></td>
-      <td><%= ("— " * schema.depth) + schema.name %></td>
-      <td><%= schema.slug %></td>
-      <td><%= schema.tags.size %></td>
-      <td><%= schema.labels.size %></td>
-      <td>
-        <a href="/admin/schemas/<%= schema.id %>" class="button is-small">show</a>
-        <a href="/admin/schemas/<%= schema.id %>/edit" class="button is-small">edit</a>
-      </td>
-    </tr>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+    $(function () {
+      $('.schema-children').sortable({
+        handle: '.icon-handle',
+        placeholder: 'schema-drag-placeholder',
+        forcePlaceholderSize: true,
+        stop: function () {
+          var ids = $(this).children('li').map(function () {
+            return $(this).data('schema-id');
+          }).get();
 
-  <% end %>
+          $.post('/admin/schemas/reorder', { ids: ids });
+        }
+      }).disableSelection();
+    });
+  </script>
 
-  </table>
+  <style>
+    .schema-drag-placeholder {
+      border: 2px dashed #ccc;
+      border-radius: 4px;
+      margin-bottom: 0.25rem;
+      height: 2.5rem;
+    }
+  </style>
 
-</div>
+<% end %>
 
 </div>

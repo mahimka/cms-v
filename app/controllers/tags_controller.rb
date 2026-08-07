@@ -66,6 +66,19 @@ class TagsController < App
       
     end
 
+    # Пересортировать детей группы по name — как строки ("string") или
+    # как числа ("float", для тегов вроде "0.01", "0.5", "3", "44").
+    post '/tags/:id/sort_children' do
+      group = Tag.find(params[:id])
+      children = group.children.to_a
+
+      sorted = params[:by] == 'float' ? children.sort_by { |t| t.name.to_f } : children.sort_by { |t| t.name.to_s }
+
+      sorted.each_with_index { |tag, index| tag.update_column(:position, index) }
+
+      redirect back
+    end
+
     # delete
     delete '/tags/:id' do
       set_tag

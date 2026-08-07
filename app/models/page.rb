@@ -1,6 +1,8 @@
 # app/models/page.rb
 
 class Page < ActiveRecord::Base
+  include Taggable
+
   has_ancestry
 
   TRANSLATABLE_FIELDS = %w[
@@ -17,7 +19,10 @@ class Page < ActiveRecord::Base
     view
     layout
     pageable_type
+    conditions
   ].freeze
+
+  serialize :conditions, JSON
 
   belongs_to :master,
              class_name: "Page",
@@ -122,6 +127,29 @@ class Page < ActiveRecord::Base
 
   def effective_pageable_type
     source_page.pageable_type
+  end
+
+  # conditions задаётся только у мастера (не зависит от языка) — переводы
+  # берут его через мастера, аналогично effective_pageable_type.
+  def effective_conditions
+    source_page.conditions
+  end
+
+  # Страница-список: резолвит effective_conditions в реальную выборку
+  # объектов через ListQuery.
+  def list_objects
+    ListQuery.new(effective_conditions).objects
+  end
+
+  # pageable_type — MASTER_ONLY_FIELDS (пустой у переводов), а pageable_id
+  # задан и у мастера, и у переводов. Поэтому обычный полиморфный
+  # belongs_to здесь не сработает на переводе (Rails возьмёт свой пустой
+  # pageable_type) — тип берём через effective_pageable_type у мастера,
+  # id — свой.
+  def pageable
+    return nil if pageable_id.blank?
+
+    effective_pageable_type&.safe_constantize&.find_by(id: pageable_id)
   end
 
   # Основная страница и все её переводы.

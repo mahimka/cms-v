@@ -205,7 +205,7 @@
         </div>
 -->
         <div class="column">
- 
+
             <label class="label is-small">pageable_type</label>
             <div class="control">
               <input
@@ -215,7 +215,28 @@
                 value="<%= @page.pageable_type %>"
               >
             </div>
-     
+
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label is-small">
+          conditions (страница-список)
+        </label>
+        <p class="help">
+          object: Entity | Item | Event | Picture<br>
+          tags: ["and"|"or", ...] / ["not", left, right] — вложенно<br>
+          schema: slug из Schema (с потомками по иерархии)<br>
+          start_at / end_at: только для Event<br>
+          details: {"key": "value"}
+        </p>
+        <div class="control">
+          <textarea
+            class="textarea is-size-7"
+            name="page[conditions]"
+            rows="8"
+            style="font-family: monospace;"
+          ><%= @page.conditions.presence ? JSON.pretty_generate(@page.conditions) : '' %></textarea>
         </div>
       </div>
     <% end %>

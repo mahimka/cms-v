@@ -1,0 +1,35 @@
+<div class="columns">
+  <div class="column is-2">
+    <%= label(:site, :name, "name", options = {class: 'label'}) %>
+  </div>
+  <div class="column is-9">
+    <%= input(:site, :name, options = {class: 'input is-success', value: @site.name, placeholder: "enter site name"}) %>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column is-2">
+    <%= label(:site, :domain, "domain", options = {class: 'label'}) %>
+  </div>
+  <div class="column is-9">
+    <%= input(:site, :domain, options = {class: 'input is-success', value: @site.domain, placeholder: "example.com"}) %>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column is-2">
+    <%= label(:site, :url, "url", options = {class: 'label'}) %>
+  </div>
+  <div class="column is-9">
+    <%= input(:site, :url, options = {class: 'input is-success', value: @site.url, placeholder: "https://..."}) %>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column is-2">
+    <%= label(:site, :notes, "notes", options = {class: 'label'}) %>
+  </div>
+  <div class="column is-9">
+    <%= textarea(:site, :notes, content = "#{@site.notes}", options = {class: 'textarea is-success', rows: 3}) %>
+  </div>
+</div>

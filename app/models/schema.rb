@@ -1,4 +1,7 @@
 class Schema < ActiveRecord::Base
+  include FixedName
+  fixed_name_fields :name, :slug
+
   has_ancestry
 
   scope :active, -> { where(active: true) }

@@ -1,4 +1,7 @@
 class Event < ActiveRecord::Base
+  include Taggable
+  include SchemaIdentifiable
+  include Pageable
 
   serialize :details, JSON
 
@@ -11,9 +14,7 @@ class Event < ActiveRecord::Base
   belongs_to :schema, optional: true
   belongs_to :venue, class_name: "Entity", optional: true
 
-  has_many :taggings, as: :taggable, dependent: :destroy
-  has_many :tags, through: :taggings
-
+  has_many :profiles, as: :profileable, dependent: :destroy
   has_many :links, as: :linkable, dependent: :destroy
   has_many :pictures, as: :imageable, dependent: :destroy
 

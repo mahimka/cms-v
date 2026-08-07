@@ -3,6 +3,12 @@
 <form method="GET" action="/admin/entities">
 
 <div class="columns mb-0 ">
+
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">tag_name_cont</p>
+    <input class="input is-small" type="text" name="q[tags_name_cont]" value="<%= @q.tags_name_cont %>" placeholder="enter name">
+  </div>
+
   <div class="column is-2">
     <p class="help is-size-7 has-text-weight-bold mt-0">name_cont</p>
     <input class="input is-small" type="text" name="q[name_cont]" value="<%= @q.name_cont %>" placeholder="enter name">
@@ -15,6 +21,123 @@
     <p class="help is-size-7 has-text-weight-bold mt-0">address_cont</p>
     <input class="input is-small" type="text" name="q[address_cont]" value="<%= @q.address_cont %>" placeholder="">
   </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">parent_name_cont</p>
+    <input class="input is-small" type="text" name="q[parent_name_cont]" value="<%= @q.parent_name_cont %>" placeholder="">
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[active_true]" value='1'  <%= @q.active_true  ? "checked" : "" %>>
+    active 
+  </div>
+
+  <div class="column is-2">
+    <input type="checkbox" name="q[active_blank]" value='1'  <%= @q.active_blank  ? "checked" : "" %>>
+    not active 
+  </div>
+
+
+
+</div>
+
+<div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+  <div class="column is-1">
+    <b>present: </b>
+  </div>
+  <div class="column is-1">
+    <input type="checkbox" name="q[with_page]" value='1' <%= params.dig(:q, :with_page) == '1' ? "checked" : "" %>>
+    page
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[schema_id_not_null]" value='1' <%= @q.schema_id_not_null ? "checked" : "" %>>
+    schema
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[address_present]" value='1' <%= @q.address_present ? "checked" : "" %>>
+    address
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[parent_id_not_null]" value='1' <%= @q.parent_id_not_null ? "checked" : "" %>>
+    parent_id
+  </div>
+  <div class="column is-1">
+    <input type="checkbox" name="q[details_present]" value='1' <%= @q.details_present ? "checked" : "" %>>
+    details
+  </div>
+  <div class="column is-1">
+    <input type="checkbox" name="q[tags_name_present]" value='1' <%= @q.tags_name_present ? "checked" : "" %>>
+    tags
+  </div>
+  <div class="column is-1">
+    <input type="checkbox" name="q[links_url_present]" value='1' <%= @q.links_url_present ? "checked" : "" %>>
+    links
+  </div>
+  <div class="column is-1">
+    <input type="checkbox" name="q[profiles_url_present]" value='1' <%= @q.profiles_url_present ? "checked" : "" %>>
+    profiles
+  </div>
+  <div class="column is-1">
+    <input type="checkbox" name="q[pictures_file_present]" value='1' <%= @q.pictures_file_present ? "checked" : "" %>>
+    pictures
+  </div>
+
+</div>
+
+<div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+  <div class="column is-1">
+    <b>not present:</b>
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[without_page]" value='1' <%= params.dig(:q, :without_page) == '1' ? "checked" : "" %>>
+    pages
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[schema_id_blank]" value='1' <%= @q.schema_id_blank ? "checked" : "" %>>
+    schema
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[address_blank]" value='1' <%= @q.address_blank ? "checked" : "" %>>
+    address
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[parent_id_blank]" value='1' <%= @q.parent_id_blank ? "checked" : "" %>>
+    parent_id
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[details_blank]" value='1' <%= @q.details_blank ? "checked" : "" %>>
+    details
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[tags_name_blank]" value='1' <%= @q.tags_name_blank ? "checked" : "" %>>
+    tags
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[links_url_blank]" value='1' <%= @q.links_url_blank ? "checked" : "" %>>
+    links
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[profiles_url_blank]" value='1' <%= @q.profiles_url_blank ? "checked" : "" %>>
+    profiles
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[pictures_file_blank]" value='1' <%= @q.pictures_file_blank ? "checked" : "" %>>
+    pictures
+  </div>
+
+
 </div>
 
 <hr class="my-2">
@@ -47,12 +170,17 @@
   <table class="table is-size-7">
     <tr>
       <td></td>
+      <td>page</td>
+      <td>web</td>
       <td>name</td>
       <td>schema</td>
       <td>address</td>
-      <td>parent</td>
-      <td>tags</td>
-      <td>details</td>
+      <td>par</td>
+      <td>tag</td>
+      <td>det</td>
+      <td>pic</td>
+      <td>lnk</td>
+      <td>prf</td>
       <td></td>
     </tr>
 
@@ -60,13 +188,29 @@
 
     <tr>
       <td><%= checkbox_in_place entity, :active %></td>
+      <td>
+        <% if entity.page %>
+          <a href='/admin/pages/<%= entity.page.id %>/edit-in-place'>page</a>
+        <% end %>
+      </td>
+      <td>
+        <% if entity.page&.published? %>
+          <a href='<%= entity.page.uri %>'>uri</a>
+        <% elsif entity.page.present? %>
+        <% else %>
+          <a href='/admin/pages/new' class='button is-small is-warning'>+</a>
+        <% end %>
+      </td>
       <td width=300><%= input_in_place(entity, :name) %></td>
       <% values = Schema.all.map{|schema| [schema.id, schema.name]}.to_h %>
-      <td width><%= select_in_place(entity, :schema_id, values) %></td>
-      <td width=300><%= input_in_place(entity, :address) %></td>
+      <td width=150><%= select_in_place(entity, :schema_id, values) %></td>
+      <td width=250><%= input_in_place(entity, :address) %></td>
       <td><%= entity.parent_id %></td>
       <td><%= entity&.tags&.size %></td>
       <td><%= entity&.details&.size %></td>
+      <td><%= entity&.pictures&.size %></td>
+      <td><%= entity&.links&.size %></td>
+      <td><%= entity&.profiles&.size %></td>
 
       <td>
         <a href="/admin/entities/<%= entity.id %>" class='button is-small'>show</a>

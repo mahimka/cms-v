@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_08_03_160000) do
+ActiveRecord::Schema.define(version: 2026_08_07_090000) do
 
   create_table "entities", force: :cascade do |t|
     t.boolean "active"
@@ -82,6 +82,7 @@ ActiveRecord::Schema.define(version: 2026_08_03_160000) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "translations"
+    t.boolean "fixed", default: false
     t.index ["ancestry"], name: "index_labels_on_ancestry"
     t.index ["slug"], name: "index_labels_on_slug", unique: true
   end
@@ -153,10 +154,10 @@ ActiveRecord::Schema.define(version: 2026_08_03_160000) do
     t.string "layout"
     t.string "pageable_type"
     t.integer "pageable_id"
-    t.integer "list_id"
     t.datetime "edited_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.text "conditions"
     t.index ["ancestry"], name: "index_pages_on_ancestry"
     t.index ["master_id", "lang"], name: "index_pages_on_master_and_lang", unique: true, where: "master_id IS NOT NULL"
     t.index ["master_id"], name: "index_pages_on_master_id"
@@ -204,7 +205,7 @@ ActiveRecord::Schema.define(version: 2026_08_03_160000) do
     t.string "redirected_to"
     t.string "status"
     t.datetime "scraped_at"
-    t.index ["profileable_type", "profileable_id"], name: "index_profiles_on_profileable_type_and_profileable_id", unique: true
+    t.index ["profileable_type", "profileable_id"], name: "index_profiles_on_profileable_type_and_profileable_id"
     t.index ["site_id"], name: "index_profiles_on_site_id"
   end
 
@@ -238,6 +239,7 @@ ActiveRecord::Schema.define(version: 2026_08_03_160000) do
     t.boolean "active", default: true
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "fixed", default: false
     t.index ["ancestry"], name: "index_schemas_on_ancestry"
     t.index ["slug"], name: "index_schemas_on_slug", unique: true
   end
@@ -291,6 +293,7 @@ ActiveRecord::Schema.define(version: 2026_08_03_160000) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "translations"
+    t.boolean "fixed", default: false
     t.index ["name"], name: "index_tags_on_name"
     t.index ["parent_id"], name: "index_tags_on_parent_id"
   end

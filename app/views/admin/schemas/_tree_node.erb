@@ -1,0 +1,28 @@
+<li data-schema-id="<%= schema.id %>">
+  <div class="level is-mobile mb-1 p-2" style="border: 1px solid #eee; border-radius: 4px;">
+    <div class="level-left">
+      <span class="icon-handle mr-2" style="cursor: grab;" title="перетащить для сортировки">☰</span>
+      <span class="<%= 'has-text-grey-light' unless schema.active %>"><%= schema.name %></span>
+      <span class="tag is-light is-size-7 ml-2"><%= schema.slug %></span>
+      <span class="ml-2 is-size-7" title="запрещает менять name/slug">
+        🔒 <%= checkbox_in_place(schema, :fixed) %>
+      </span>
+    </div>
+
+    <div class="level-right">
+      <span class="is-size-7 has-text-grey mr-2">tags: <%= schema.tags.size %> · labels: <%= schema.labels.size %></span>
+      <a href="/admin/schemas/<%= schema.id %>" class="button is-small">show</a>
+      <a href="/admin/schemas/<%= schema.id %>/edit" class="button is-small">edit</a>
+      <a href="/admin/schemas/new?parent_id=<%= schema.id %>" class="button is-small is-success">+ child</a>
+    </div>
+  </div>
+
+  <% children = schema.children.order(:position, :name) %>
+  <% if children.any? %>
+    <ul class="schema-children" data-parent-id="<%= schema.id %>" style="list-style: none; margin-left: 2rem;">
+      <% children.each do |child| %>
+        <%= erb :'/schemas/_tree_node', locals: { schema: child }, views: settings.views_admin %>
+      <% end %>
+    </ul>
+  <% end %>
+</li>

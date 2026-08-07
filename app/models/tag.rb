@@ -1,4 +1,7 @@
 class Tag < ActiveRecord::Base
+  include FixedName
+  fixed_name_fields :name
+  include PreventDestroyWithChildren
 
   serialize :translations, JSON
 
@@ -10,7 +13,7 @@ class Tag < ActiveRecord::Base
   scope :parenttags, -> { where(parent_id: [nil, 0]) }
 
   belongs_to :parent, class_name: "Tag", foreign_key: :parent_id, optional: true
-  has_many :children, class_name: "Tag", foreign_key: :parent
+  has_many :children, class_name: "Tag", foreign_key: :parent_id
 
 
   has_many :taggings, :dependent => :destroy

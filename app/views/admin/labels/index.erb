@@ -33,21 +33,33 @@
   <table class="table is-narrow is-size-7">
     <tr class="is-size-6 has-text-weight-semibold">
       <td>active</td>
+      <td title="запрещает менять name/slug — на них ссылаются label_by_lang и List conditions">fixed 🔒</td>
       <td>name</td>
       <td>slug</td>
       <td>field_type</td>
       <td></td>
     </tr>
 
-  <% grouped_labels = @labels.group_by { |l| l.root? ? l : l.parent } %>
+  <%# l.root? — корректно понимает формат ancestry "/" для root-узлов (Ancestry.default_ancestry_format = :materialized_path2 в app.rb).
+      l.parent.nil? добавлен на случай истинного "осиротевшего" потомка (после удаления родителя) — тогда сам l становится своей группой, а не крашит страницу %>
+  <% grouped_labels = @labels.group_by { |l| (l.root? || l.parent.nil?) ? l : l.parent } %>
   <% grouped_labels.sort_by { |group, _| [group.position || 0, group.name.to_s] }.each do |group, labels_in_group| %>
 
     <tr class="has-background-light">
       <td><%= checkbox_in_place(group, :active) %></td>
+      <td><%= checkbox_in_place(group, :fixed) %></td>
       <td class="has-text-weight-semibold"><%= group.name %></td>
       <td><%= group.slug %></td>
       <td><%= group.field_type %></td>
       <td>
+        <form method="POST" action="/admin/labels/<%= group.id %>/sort_children" style="display:inline;">
+          <input type="hidden" name="by" value="string">
+          <button type="submit" class="button is-small" title="сортировать детей группы по имени как строки">S</button>
+        </form>
+        <form method="POST" action="/admin/labels/<%= group.id %>/sort_children" style="display:inline;">
+          <input type="hidden" name="by" value="float">
+          <button type="submit" class="button is-small" title="сортировать детей группы по имени как числа (0.01, 0.5, 3, 44)">F</button>
+        </form>
         <a href="/admin/labels/<%= group.id %>" class="button is-small">show</a>
         <a href="/admin/labels/<%= group.id %>/edit" class="button is-small">edit</a>
       </td>
@@ -56,6 +68,7 @@
     <% (labels_in_group - [group]).sort_by { |l| [l.position || 0, l.name.to_s] }.each do |label| %>
       <tr>
         <td><%= checkbox_in_place(label, :active) %></td>
+        <td><%= checkbox_in_place(label, :fixed) %></td>
         <td class="pl-5"><%= label.name %></td>
         <td><%= label.slug %></td>
         <td><%= label.field_type %></td>
