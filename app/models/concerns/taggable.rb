@@ -14,11 +14,17 @@ module Taggable
       names = Array(names)
       return none if names.empty?
 
-      scope = joins(:tags).where(tags: { name: names }).distinct
+      return joins(:tags).where(tags: { name: names }).distinct if match == :any
 
-      match == :all ? scope.group("#{table_name}.id")
-                           .having("COUNT(DISTINCT tags.id) = ?", names.uniq.size)
-                    : scope
+      # GROUP BY/HAVING прямо на основной scope ломает .count/.size у вызывающего
+      # кода (Rails возвращает Hash вместо Integer при group) и мешает paginate —
+      # поэтому матчинг "все теги" делаем подзапросом, а наружу отдаём обычный scope.
+      matching_ids = joins(:tags).where(tags: { name: names })
+        .group("#{table_name}.id")
+        .having("COUNT(DISTINCT tags.id) = ?", names.uniq.size)
+        .select("#{table_name}.id")
+
+      where(id: matching_ids)
     end
   end
 

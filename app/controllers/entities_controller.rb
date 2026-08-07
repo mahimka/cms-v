@@ -6,8 +6,13 @@ class EntitiesController < App
     get '/entities' do
 
       @q = Entity.ransack(params[:q])
-      @entities_found = @q.result(distinct: true) # for index.rb
-      @entities       = @q.result(distinct: true).page(params[:page]).per(100)
+      @filter_tag_names = Array(params[:tag_names]).reject(&:blank?)
+
+      result = @q.result(distinct: true)
+      result = result.merge(Entity.tagged_with(@filter_tag_names, match: :all)) if @filter_tag_names.present?
+
+      @entities_found = result # for index.rb
+      @entities       = result.page(params[:page]).per(100)
 
       erb :"/entities/index", layout: :"/layout/wide", views: settings.views_admin
 
