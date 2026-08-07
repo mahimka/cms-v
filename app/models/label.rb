@@ -1,6 +1,6 @@
 class Label < ActiveRecord::Base
   include FixedName
-  fixed_name_fields :name, :slug
+  fixed_name_fields :name
   include PreventDestroyWithChildren
 
   has_ancestry
@@ -23,7 +23,7 @@ class Label < ActiveRecord::Base
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    ["active", "id", "name", "slug", "field_type", "position", "ancestry", "created_at", "updated_at"]
+    ["active", "id", "name", "field_type", "position", "ancestry", "created_at", "updated_at"]
   end
 
   def self.ransackable_associations(auth_object = nil)

@@ -13,7 +13,7 @@ class TagsController < App
 
     get '/tags/new' do 
       if params[:name]
-        @tag = Tag.new(name: params[:name], short: params[:short], slug: params[:name].parameterize, parent_id: params[:parent_id])
+        @tag = Tag.new(name: params[:name], short: params[:short], parent_id: params[:parent_id])
       elsif params[:parent_id]  
         @tag = Tag.new(parent_id: params[:parent_id])
       else

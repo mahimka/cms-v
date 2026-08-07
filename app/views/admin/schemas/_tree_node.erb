@@ -3,8 +3,7 @@
     <div class="level-left">
       <span class="icon-handle mr-2" style="cursor: grab;" title="перетащить для сортировки">☰</span>
       <span class="<%= 'has-text-grey-light' unless schema.active %>"><%= schema.name %></span>
-      <span class="tag is-light is-size-7 ml-2"><%= schema.slug %></span>
-      <span class="ml-2 is-size-7" title="запрещает менять name/slug">
+      <span class="ml-2 is-size-7" title="запрещает менять name">
         🔒 <%= checkbox_in_place(schema, :fixed) %>
       </span>
     </div>

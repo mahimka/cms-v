@@ -1,6 +1,6 @@
 class Schema < ActiveRecord::Base
   include FixedName
-  fixed_name_fields :name, :slug
+  fixed_name_fields :name
 
   has_ancestry
 
@@ -15,7 +15,7 @@ class Schema < ActiveRecord::Base
   validates :name, presence: true
 
   def self.ransackable_attributes(auth_object = nil)
-    ["active", "id", "name", "slug", "schema_org_url", "position", "ancestry", "created_at", "updated_at"]
+    ["active", "id", "name", "schema_org_url", "position", "ancestry", "created_at", "updated_at"]
   end
 
   def self.ransackable_associations(auth_object = nil)

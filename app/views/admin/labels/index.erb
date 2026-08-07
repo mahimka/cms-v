@@ -33,9 +33,8 @@
   <table class="table is-narrow is-size-7">
     <tr class="is-size-6 has-text-weight-semibold">
       <td>active</td>
-      <td title="запрещает менять name/slug — на них ссылаются label_by_lang и List conditions">fixed 🔒</td>
+      <td title="запрещает менять name — на него ссылается List conditions">fixed 🔒</td>
       <td>name</td>
-      <td>slug</td>
       <td>field_type</td>
       <td></td>
     </tr>
@@ -49,7 +48,6 @@
       <td><%= checkbox_in_place(group, :active) %></td>
       <td><%= checkbox_in_place(group, :fixed) %></td>
       <td class="has-text-weight-semibold"><%= group.name %></td>
-      <td><%= group.slug %></td>
       <td><%= group.field_type %></td>
       <td>
         <form method="POST" action="/admin/labels/<%= group.id %>/sort_children" style="display:inline;">
@@ -70,7 +68,6 @@
         <td><%= checkbox_in_place(label, :active) %></td>
         <td><%= checkbox_in_place(label, :fixed) %></td>
         <td class="pl-5"><%= label.name %></td>
-        <td><%= label.slug %></td>
         <td><%= label.field_type %></td>
         <td>
           <a href="/admin/labels/<%= label.id %>" class="button is-small">show</a>

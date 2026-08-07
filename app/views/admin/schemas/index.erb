@@ -36,9 +36,8 @@
     <table class="table is-narrow is-size-7">
       <tr class="is-size-6 has-text-weight-semibold">
         <td>active</td>
-        <td title="запрещает менять name/slug — на них ссылается List conditions (schema)">fixed 🔒</td>
+        <td title="запрещает менять name — на него ссылается List conditions (schema)">fixed 🔒</td>
         <td>name</td>
-        <td>slug</td>
         <td>schema_org_url</td>
         <td>tags</td>
         <td>labels</td>
@@ -51,7 +50,6 @@
         <td><%= checkbox_in_place(schema, :active) %></td>
         <td><%= checkbox_in_place(schema, :fixed) %></td>
         <td><%= ("— " * schema.depth) + schema.name %></td>
-        <td><%= input_in_place(schema, :slug) %></td>
         <td width=300><%= input_in_place(schema, :schema_org_url) %></td>
         <td><%= schema.tags.size %></td>
         <td><%= schema.labels.size %></td>

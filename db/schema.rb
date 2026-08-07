@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_08_07_090000) do
+ActiveRecord::Schema.define(version: 2026_08_07_100000) do
 
   create_table "entities", force: :cascade do |t|
     t.boolean "active"
@@ -75,7 +75,6 @@ ActiveRecord::Schema.define(version: 2026_08_07_090000) do
   create_table "labels", force: :cascade do |t|
     t.string "ancestry"
     t.string "name", null: false
-    t.string "slug"
     t.string "field_type", default: "string"
     t.integer "position"
     t.boolean "active", default: true
@@ -84,7 +83,6 @@ ActiveRecord::Schema.define(version: 2026_08_07_090000) do
     t.text "translations"
     t.boolean "fixed", default: false
     t.index ["ancestry"], name: "index_labels_on_ancestry"
-    t.index ["slug"], name: "index_labels_on_slug", unique: true
   end
 
   create_table "links", force: :cascade do |t|
@@ -232,7 +230,6 @@ ActiveRecord::Schema.define(version: 2026_08_07_090000) do
   create_table "schemas", force: :cascade do |t|
     t.string "ancestry"
     t.string "name", null: false
-    t.string "slug"
     t.string "schema_org_url"
     t.text "json_ld_template"
     t.integer "position"
@@ -241,7 +238,6 @@ ActiveRecord::Schema.define(version: 2026_08_07_090000) do
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "fixed", default: false
     t.index ["ancestry"], name: "index_schemas_on_ancestry"
-    t.index ["slug"], name: "index_schemas_on_slug", unique: true
   end
 
   create_table "sites", force: :cascade do |t|
@@ -286,7 +282,6 @@ ActiveRecord::Schema.define(version: 2026_08_07_090000) do
     t.integer "parent_id"
     t.integer "position"
     t.string "name"
-    t.string "slug"
     t.string "short"
     t.string "short_2"
     t.string "admin_notes"
