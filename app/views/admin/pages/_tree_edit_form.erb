@@ -4,7 +4,26 @@
     <div class="level-left">
       <div>
         <h2 class="title is-6 mb-2">
+          <label class="checkbox ">
+            <input type="checkbox"
+              name="page[ready]"
+              value="1"
+              <%= "checked" if @page.ready? %>
+            >
+            <span class="is-size-7 has-text-weight-light">ready</span>
+          </label>
+
+          <label class="checkbox ">
+            <input type="checkbox"
+              name="page[published]"
+              value="1"
+              <%= "checked" if @page.published? %>
+            >
+            <span class="is-size-7 has-text-weight-light">published</span>
+          </label>
+
           <a href='<%= @page.uri %>' target='_blank'><%= @page.uri %></a>
+
         </h2>
 
         <p class="subtitle is-7 text-muted">
@@ -17,7 +36,23 @@
               · перевод страницы      
             </span> <code><%= @page.master.uri %></code>
           <% end %>
+          
+          <% if @page.pageable_type && @page.pageable_id %>
+            <a href='/admin/<%= @page.pageable_type.pluralize.parameterize %>/<%= @page.pageable_id %>/edit'><span class="tag is-light"><%= @page.pageable_type %> : <%= @page.pageable_id %></span></a>
+          <% end %>
+          <label class="checkbox ">
+            <input type="checkbox"
+              name="page[published]"
+              value="1"
+              <%= "checked" if @page.has_feed? %>
+            >
+            <span class="is-size-7 has-text-weight-light">feed</span>
+          </label>
+
         </p>
+
+
+
       </div>
     </div>
 
@@ -32,6 +67,7 @@
         Edit fix на Отдельную
       </button>
 -->
+
 
 
       <% if @page.master? %>
@@ -126,31 +162,37 @@
         </div>
       </div>
 
-      <div class="field">
+<div class="columns">
+  <div class="column is-6">
+
         <label class="label is-small">Родительская страница</label>
-        <div class="control is-small">
-          <div class="select is-fullwidth">
+
             <select name="page[parent_id]" class="input is-small">
               <option value="">Корневая страница</option>
 
               <% @parent_pages.each do |parent_page| %>
-                <option
-                  value="<%= parent_page.id %>"
-                  <%= "selected" if @page.parent_id == parent_page.id %>
-                >
+                <option value="<%= parent_page.id %>" <%= "selected" if @page.parent_id == parent_page.id %> >
                   <%= parent_page.uri %>
                 </option>
               <% end %>
             </select>
-          </div>
-        </div>
-      </div>
 
-    <div class="field is-grouped mt-0 pt-0">
-        <button type="submit" class="button is-danger is-small has-text-white">
-          Save
-        </button>
-    </div>
+  </div>
+  <div class="column is-3">
+
+      <%= label(:page, :layout, "layout:", options = {class: 'label is-small'}) %>
+      <% values = Dir.glob("**", base: "project/views/layout").delete_if{|file| file.starts_with?("_")}.unshift("") %>
+      <%= select(:page, :layout, values, options = {class: 'select input is-success is-size-7', value: @page.layout}) %>
+
+  </div>
+  <div class="column is-3">
+
+      <%= label(:page, :view, "view:", options = {class: 'label is-small'}) %>
+      <% values = Dir.glob("**", base: "project/views").delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.unshift("") %>
+      <%= select(:page, :view, values, options = {class: 'select input is-success is-size-7', value: @page.view}) %>
+
+  </div>
+</div>
 
   <div class="columns">
 
@@ -169,25 +211,13 @@
     </div>
   </div>
 
+    <div class="field is-grouped mt-0 pt-0">
+        <button type="submit" class="button is-danger is-small has-text-white">
+          Save
+        </button>
+    </div>
       <div class="columns">
 
-        <div class="column">
-          <%= label(:page, :layout, "layout:", options = {class: 'label mb-0'}) %>
-          <% values = Dir.glob("**", base: "project/views/layout").delete_if{|file| file.starts_with?("_")}.unshift("") %>
-          <%= select(:page, :layout, values, options = {class: 'select input is-success is-size-7', value: @page.layout}) %>
-          <span class="icon is-small is-left">
-            <i class="fas fa-caret-down"></i>
-          </span>
-        </div>
-
-        <div class="column">
-          <%= label(:page, :view, "view:", options = {class: 'label mb-0'}) %>
-          <% values = Dir.glob("**", base: "project/views").delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.unshift("") %>
-          <%= select(:page, :view, values, options = {class: 'select input is-success is-size-7', value: @page.view}) %>
-          <span class="icon is-small is-left">
-            <i class="fas fa-caret-down"></i>
-          </span>
-        </div>
 
 <!--
         <div class="column">
@@ -204,65 +234,120 @@
           </div>
         </div>
 -->
-        <div class="column">
 
-            <label class="label is-small">pageable_type</label>
-            <div class="control">
-              <input
-                class="input is-small"
-                type="text"
-                name="page[pageable_type]"
-                value="<%= @page.pageable_type %>"
-              >
-            </div>
-
-        </div>
       </div>
+
+
+<% if @page.pageable_type.blank? %>
 
       <div class="field">
         <label class="label is-small">
           conditions (страница-список)
         </label>
         <p class="help">
-          object: Entity | Item | Event | Picture<br>
-          tags: ["and"|"or", ...] / ["not", left, right] — вложенно<br>
-          schema: slug из Schema (с потомками по иерархии)<br>
-          start_at / end_at: только для Event<br>
-          details: {"key": "value"}
+
         </p>
         <div class="control">
           <textarea
             class="textarea is-size-7"
             name="page[conditions]"
-            rows="8"
+            rows="5"
+
+            placeholder=
+"object: Entity | Item | Event | Picture<br>
+tags: ['and'|'or', ...] / ['not', left, right] — вложенно<br>
+schema: slug из Schema (с потомками по иерархии)<br>
+start_at / end_at: только для Event<br>
+details: {'key': 'value'}"
             style="font-family: monospace;"
           ><%= @page.conditions.presence ? JSON.pretty_generate(@page.conditions) : '' %></textarea>
         </div>
       </div>
     <% end %>
-
+<% end %>
     <%# Основной контент страницы %>
-    <div class="field">
-      <label class="label is-small">title</label>
-      <div class="control">
+
+
+    <div class="columns">
+      <div class="column is-1">
+        <label class="label is-small">title</label>
+      </div>
+      <div class="column is-11">
         <input
-          class="input is-small"
-          type="text"
-          name="page[title]"
-          value="<%= @page.title %>"
-        >
+            class="input is-small"
+            type="text"
+            name="page[title]"
+            value="<%= @page.title %>"
+          >
+      </div>
+    </div>
+    
+    <div class="columns">
+      <div class="column is-1">
+        <label class="label is-small">h1</label>
+      </div>
+      <div class="column is-11">
+        <input
+            class="input is-small"
+            type="text"
+            name="page[h1]"
+            value="<%= @page.h1 %>"
+          >
+      </div>
+    </div>
+
+    <div class="columns">
+      <div class="column is-1">
+        <label class="label is-small">subtitle</label>
+      </div>
+      <div class="column is-11">
+        <input
+            class="input is-small"
+            type="text"
+            name="page[subtitle]"
+            value="<%= @page.subtitle %>"
+          >
+      </div>
+    </div>
+
+    <div class="columns">
+      <div class="column is-1">
+        <label class="label is-small">anchors</label>
+      </div>
+      <div class="column is-3">
+        <input
+            class="input is-small"
+            type="text"
+            name="page[anchor_1]"
+            value="<%= @page.anchor_1 %>"
+          >
+      </div>
+      <div class="column is-4">
+        <input
+            class="input is-small"
+            type="text"
+            name="page[anchor_2]"
+            value="<%= @page.anchor_2 %>"
+          >
+      </div>
+      <div class="column is-4">
+        <input
+            class="input is-small"
+            type="text"
+            name="page[anchor_3]"
+            value="<%= @page.anchor_3 %>"
+          >
       </div>
     </div>
 
     <div class="field">
-      <label class="label is-small">h1</label>
+      <label class="label is-small">meta_description</label>
       <div class="control">
-        <input
-          class="input is-small"
-          type="text"
-          name="page[h1]"
-          value="<%= @page.h1 %>"
-        >
+        <textarea
+          class="textarea"
+          name="page[meta_description]"
+          rows="4"
+        ><%= @page.meta_description %></textarea>
       </div>
     </div>
 
@@ -277,46 +362,12 @@
       </div>
     </div>
 
+    <br>
+
     <hr class="dropdown-divider my-5">
 
     <%# SEO поля %>
-    <div class="field">
-      <label class="label">subtitle</label>
-      <div class="control">
-        <input
-          class="input is-small"
-          type="text"
-          name="page[subtitle]"
-          value="<%= @page.subtitle %>"
-        >
-      </div>
-    </div>
 
-    <div class="field">
-      <label class="label">meta_description</label>
-      <div class="control">
-        <textarea
-          class="textarea"
-          name="page[meta_description]"
-          rows="4"
-        ><%= @page.meta_description %></textarea>
-      </div>
-    </div>
-
-    <%# Чекбокс публикации %>
-    <div class="field my-4">
-      <div class="control">
-        <label class="checkbox">
-          <input
-            type="checkbox"
-            name="page[published]"
-            value="1"
-            <%= "checked" if @page.published? %>
-          >
-          <strong>Опубликована</strong>
-        </label>
-      </div>
-    </div>
 
     <%# Кнопки действия %>
     <div class="field is-grouped mt-5 pt-3">
