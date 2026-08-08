@@ -5,6 +5,7 @@
       <span class="<%= 'has-text-grey-light' unless schema.active %>"><%= schema.name %></span>
       <span class="ml-2 is-size-7" title="запрещает менять name">
         🔒 <%= checkbox_in_place(schema, :fixed) %>
+            <%= checkbox_in_place(schema, :active) %>
       </span>
     </div>
 
