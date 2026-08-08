@@ -230,7 +230,7 @@
         </div>
 
         <%
-          conditions_schemas = Schema.active.order(:ancestry, :position, :name)
+          conditions_schemas = Schema.active.where(fixed: true).order(:ancestry, :position, :name)
           conditions_schema_tag_ids = Schema.effective_tag_ids_map(conditions_schemas)
           conditions_tags = Tag.active.includes(:parent).order(:name)
         %>

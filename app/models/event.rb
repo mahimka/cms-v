@@ -6,12 +6,13 @@ class Event < ActiveRecord::Base
   serialize :details, JSON
 
   validates :name, presence: true
+  validates :schema, presence: true
 
   scope :active, -> { where(active: true) }
   scope :published, -> { where(published: true) }
   scope :upcoming, -> { where("start_at >= ?", Time.current) }
 
-  belongs_to :schema, optional: true
+  belongs_to :schema
   belongs_to :venue, class_name: "Entity", optional: true
 
   has_many :profiles, as: :profileable, dependent: :destroy

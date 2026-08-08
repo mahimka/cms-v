@@ -27,7 +27,7 @@
 
       <div class="column is-9">
         <% @schemas_for_select = {"": ""}.merge(Schema.active.order(:ancestry, :position, :name).to_h { |schema| [schema.id, ("— " * schema.depth) + schema.name] }) %>
-        <%= select(:entity, :schema_id, @schemas_for_select, options = {class: 'select input is-success', value: @entity.schema_id}) %>
+        <%= select(:entity, :schema_id, @schemas_for_select, options = {class: 'select input is-success', value: @entity.schema_id, required: true}) %>
       </div>
 
     </div>
