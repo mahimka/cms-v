@@ -46,4 +46,22 @@ class Schema < ActiveRecord::Base
     child_ids = effective_label_groups.flat_map(&:child_ids)
     Label.active.where(id: child_ids).distinct
   end
+
+  # { schema_id => [tag_id, ...] } — effective_tags сразу для набора схем,
+  # одним проходом по schema_tags/tags вместо N+1 от вызова #effective_tags
+  # у каждой схемы по отдельности. Нужен для конструктора conditions
+  # страниц-списков (там список тегов пересчитывается для всех активных
+  # схем сразу, на клиенте).
+  def self.effective_tag_ids_map(schemas)
+    group_ids_by_schema = SchemaTag.pluck(:schema_id, :tag_id)
+      .each_with_object(Hash.new { |h, k| h[k] = [] }) { |(schema_id, tag_id), h| h[schema_id] << tag_id }
+
+    child_ids_by_group = Tag.active.where.not(parent_id: nil).pluck(:parent_id, :id)
+      .each_with_object(Hash.new { |h, k| h[k] = [] }) { |(parent_id, id), h| h[parent_id] << id }
+
+    schemas.each_with_object({}) do |schema, map|
+      group_ids = schema.path_ids.flat_map { |id| group_ids_by_schema[id] }
+      map[schema.id] = group_ids.flat_map { |group_id| child_ids_by_group[group_id] }.uniq
+    end
+  end
 end
