@@ -6,10 +6,11 @@ class Item < ActiveRecord::Base
   serialize :details, JSON
 
   validates :name, presence: true
+  validates :schema, presence: true
 
   scope :active, -> { where(active: true) }
 
-  belongs_to :schema, optional: true
+  belongs_to :schema
 
   has_many :profiles, as: :profileable, dependent: :destroy
   # accepts_nested_attributes_for :profiles, allow_destroy: true, :reject_if => proc { |attributes| attributes['url'].blank? }

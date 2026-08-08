@@ -7,6 +7,7 @@ class Entity < ActiveRecord::Base
   serialize :details, JSON
 
   validates :name, presence: true
+  validates :schema, presence: true
 
   scope :active, -> { where(active: true) }
 
@@ -16,7 +17,7 @@ class Entity < ActiveRecord::Base
   extend Geocoder::Model::ActiveRecord
   reverse_geocoded_by :latitude, :longitude
 
-  belongs_to :schema, optional: true
+  belongs_to :schema
 
   # parent_id — колонка была, association — нет: ransack не мог
   # обратиться к "parent" (parent_name_cont и т.п.) без belongs_to.
