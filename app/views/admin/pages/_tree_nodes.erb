@@ -1,6 +1,7 @@
-<% @tree_rows.each do |row| %>
+<% @tree_rows[:rows].each do |row| %>
   <% page = row[:page] %>
   <% has_children = row[:has_children] %>
+  <% type_letter = tree_type_letter(page) %>
 
   <li
     class="page-tree-node"
@@ -20,15 +21,17 @@
         <span class="page-tree-toggle-placeholder"></span>
       <% end %>
 
+      <span class="page-tree-type<%= " tag" if type_letter %><%= " is-warning" if type_letter == "p" %><%= " is-link" if type_letter == "l" %>"><%= type_letter %></span>
+
       <button
         type="button"
         class="page-tree-link"
         data-page-open
       >
         <% if page.root? %>
-          <%= page.uri %>
+          <span class="page-tree-slug-text is-lang-root tag is-info"><%= page.uri %></span>
         <% else %>
-          /<%= page.effective_slug %>
+          <span class="page-tree-slug-text">/<%= page.effective_slug %></span>
         <% end %>
       </button>
     </div>
@@ -40,5 +43,17 @@
         hidden
       ></ul>
     <% end %>
+  </li>
+<% end %>
+
+<% if @tree_rows[:more] %>
+  <li class="page-tree-more">
+    <a
+      href="<%= @tree_rows[:more][:url] %>"
+      target="_blank"
+      class="page-tree-more-link"
+    >
+      more (+<%= @tree_rows[:more][:count] %>)
+    </a>
   </li>
 <% end %>

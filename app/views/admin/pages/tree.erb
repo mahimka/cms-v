@@ -130,10 +130,31 @@
 
 .page-tree-row {
   display: grid;
-  grid-template-columns: 1.7rem minmax(0, 1fr) 0.7rem;
+  grid-template-columns: 1.7rem 1.4rem minmax(0, 1fr) 0.7rem;
   align-items: center;
   gap: 0.3rem;
   min-height: 1.8rem;
+}
+
+.page-tree-type {
+  display: inline-flex;
+  width: 1.4rem;
+  height: 1.4rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 0.7rem;
+  line-height: 1;
+  text-transform: none;
+}
+
+.page-tree-more {
+  padding: 0.2rem 0 0.2rem 3.1rem;
+}
+
+.page-tree-more-link {
+  color: var(--pico-muted-color);
+  font-style: italic;
 }
 
 .page-tree-toggle,

@@ -110,10 +110,7 @@ $(function () {
       return;
     }
 
-    $(".page-tree-link.is-selected")
-      .removeClass("is-selected");
-
-    $link.addClass("is-selected");
+    activateTreeLink($link);
 
     openPageById(pageId);
   });
@@ -212,8 +209,19 @@ $(function () {
       return;
     }
 
-    $(".page-tree-link.is-selected")
-      .removeClass("is-selected");
+    const $targetNode = $tree.find(
+      `.page-tree-node[data-page-id="${targetPageId}"]`
+    );
+
+    if ($targetNode.length) {
+      activateTreeLink(
+        $targetNode
+          .children(".page-tree-row")
+          .find("[data-page-open]")
+      );
+    } else {
+      deactivateSelection();
+    }
 
     openPageById(targetPageId);
   });
@@ -356,12 +364,75 @@ $(function () {
   }
 
   /*
+   * Снимает выделение с активной страницы и подсветку её ветки.
+   */
+  function deactivateSelection() {
+    const $prevLink = $(".page-tree-link.is-selected");
+
+    $prevLink.removeClass("is-selected has-text-weight-bold");
+    unmarkActiveSlug($prevLink);
+
+    $(".page-tree-children.is-active-branch").each(function () {
+      const $ul = $(this);
+      $ul.removeClass("is-active-branch");
+
+      const $ownToggle = $ul
+        .closest(".page-tree-node")
+        .children(".page-tree-row")
+        .find("[data-tree-toggle]");
+
+      if ($ownToggle.attr("aria-expanded") !== "true") {
+        $ul.removeClass("has-background-grey-lighter");
+      }
+    });
+  }
+
+  /*
+   * Отмечает страницу активной: жирный текст, tag is-info на слаге
+   * и фоновая подсветка has-background-grey-lighter на всей ветке
+   * предков (активной ветке дерева).
+   */
+  function activateTreeLink($link) {
+    deactivateSelection();
+
+    $link.addClass("is-selected has-text-weight-bold");
+    markActiveSlug($link);
+
+    $link
+      .closest(".page-tree-node")
+      .parents("[data-tree-children]")
+      .addClass("is-active-branch has-background-grey-lighter");
+  }
+
+  /*
+   * Выделяет слаг активной страницы бейджем tag is-info.
+   */
+  function markActiveSlug($link) {
+    $link
+      .find(".page-tree-slug-text")
+      .addClass("tag is-info");
+  }
+
+  /*
+   * Снимает бейдж tag is-info со слага — кроме языковых корней,
+   * у которых это постоянное обозначение (см. is-lang-root).
+   */
+  function unmarkActiveSlug($link) {
+    const $slug = $link.find(".page-tree-slug-text");
+
+    if (!$slug.hasClass("is-lang-root")) {
+      $slug.removeClass("tag is-info");
+    }
+  }
+
+  /*
    * Раскрытие ветки
    */
   function expandNode($button, $children) {
     $children
       .prop("hidden", false)
-      .show();
+      .show()
+      .addClass("has-background-grey-lighter");
 
     $button
       .attr("aria-expanded", "true")
@@ -379,7 +450,8 @@ $(function () {
   function collapseNode($button, $children) {
     $children
       .prop("hidden", true)
-      .hide();
+      .hide()
+      .removeClass("has-background-grey-lighter");
 
     $button
       .attr("aria-expanded", "false")
@@ -469,6 +541,18 @@ $(function () {
           );
 
           return;
+        }
+
+        const $targetNode = $tree.find(
+          `.page-tree-node[data-page-id="${pageId}"]`
+        );
+
+        if ($targetNode.length) {
+          activateTreeLink(
+            $targetNode
+              .children(".page-tree-row")
+              .find("[data-page-open]")
+          );
         }
 
         openPageById(pageId);
