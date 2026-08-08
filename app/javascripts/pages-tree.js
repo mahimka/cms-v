@@ -309,20 +309,24 @@ $(function () {
   );
 
   /*
-   * Загрузка непосредственных детей узла
+   * Загрузка непосредственных детей узла.
+   *
+   * Возвращает promise — используется и по клику (fire-and-forget),
+   * и при восстановлении раскрытых веток после перезагрузки дерева
+   * (там нужно дождаться загрузки родителя, прежде чем идти глубже).
    */
   function loadChildren($node, $button, $children) {
     const pageId = $node.data("page-id");
 
     if (!pageId) {
-      return;
+      return $.Deferred().resolve().promise();
     }
 
     $button
       .prop("disabled", true)
       .addClass("is-loading");
 
-    $.ajax({
+    return $.ajax({
       url: `/admin/pages/${encodeURIComponent(pageId)}/children`,
       method: "GET",
       dataType: "html"
@@ -518,13 +522,21 @@ $(function () {
   }
 
   /*
-   * Обновление дерева после создания страницы
+   * Обновление дерева после создания/сохранения страницы.
+   *
+   * $tree.load() полностью заменяет разметку дерева свежим рендером
+   * (все ветки свёрнуты — какие узлы уже подгружали детей, хранится
+   * только в DOM через $children.data("loaded"), а не на сервере) —
+   * поэтому раскрытые ветки нужно запомнить до перезагрузки и раскрыть
+   * заново после неё.
    */
   function reloadTreeAndOpenPage(pageId) {
     if (!$tree.length) {
       openPageById(pageId);
       return;
     }
+
+    const expandedPageIds = collectExpandedPageIds();
 
     $tree.load(
       "/admin/pages/tree/nodes",
@@ -543,21 +555,72 @@ $(function () {
           return;
         }
 
-        const $targetNode = $tree.find(
+        restoreExpandedPageIds(expandedPageIds).always(function () {
+          const $targetNode = $tree.find(
+            `.page-tree-node[data-page-id="${pageId}"]`
+          );
+
+          if ($targetNode.length) {
+            activateTreeLink(
+              $targetNode
+                .children(".page-tree-row")
+                .find("[data-page-open]")
+            );
+          }
+
+          openPageById(pageId);
+        });
+      }
+    );
+  }
+
+  /*
+   * Id страниц, чьи ветки сейчас раскрыты — в порядке document order,
+   * то есть родители всегда идут раньше своих потомков (это важно для
+   * restoreExpandedPageIds: узел потомка появляется в DOM только после
+   * того, как загрузили и раскрыли его родителя).
+   */
+  function collectExpandedPageIds() {
+    const ids = [];
+
+    $tree
+      .find('[data-tree-toggle][aria-expanded="true"]')
+      .each(function () {
+        const pageId = $(this)
+          .closest(".page-tree-node")
+          .data("page-id");
+
+        if (pageId) {
+          ids.push(pageId);
+        }
+      });
+
+    return ids;
+  }
+
+  /*
+   * Раскрывает заново узлы по списку id, последовательно (родитель
+   * должен подгрузиться раньше, чем мы сможем найти в DOM его ребёнка).
+   * Узлы, которых больше нет в дереве (удалены, переехали, потеряли
+   * детей), молча пропускаются.
+   */
+  function restoreExpandedPageIds(pageIds) {
+    return pageIds.reduce(function (promise, pageId) {
+      return promise.then(function () {
+        const $node = $tree.find(
           `.page-tree-node[data-page-id="${pageId}"]`
         );
 
-        if ($targetNode.length) {
-          activateTreeLink(
-            $targetNode
-              .children(".page-tree-row")
-              .find("[data-page-open]")
-          );
+        const $button = $node.children(".page-tree-row").find("[data-tree-toggle]");
+        const $children = $node.children("[data-tree-children]");
+
+        if (!$button.length || !$children.length) {
+          return $.Deferred().resolve().promise();
         }
 
-        openPageById(pageId);
-      }
-    );
+        return loadChildren($node, $button, $children);
+      });
+    }, $.Deferred().resolve().promise());
   }
 
   /*
