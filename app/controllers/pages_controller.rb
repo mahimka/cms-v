@@ -336,7 +336,7 @@ class PagesController < App
     # Страница с деревом и правой панелью
     get '/pages/tree' do
       root_pages = sort_root_pages(Page.roots.to_a)
-      @tree_rows = prepare_tree_rows(root_pages)
+      @tree_rows = prepare_tree_rows(root_pages, parent: nil)
 
       erb :"/pages/tree",
           layout: :"/layout/wide",
@@ -347,7 +347,7 @@ class PagesController < App
       parent = Page.find(params[:id])
       pages = parent.children.order(:uri).to_a
 
-      @tree_rows = prepare_tree_rows(pages)
+      @tree_rows = prepare_tree_rows(pages, parent: parent)
 
       erb :"/pages/_tree_nodes",
           layout: false,
@@ -371,7 +371,7 @@ class PagesController < App
     # для содержимого дерева
     get '/pages/tree/nodes' do
       root_pages = sort_root_pages(Page.roots.to_a)
-      @tree_rows = prepare_tree_rows(root_pages)
+      @tree_rows = prepare_tree_rows(root_pages, parent: nil)
 
       erb :"/pages/_tree",
           layout: false,
