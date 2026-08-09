@@ -45,13 +45,21 @@ class App < Sinatra::Base
   ]
   
   configure do
-    set :public_folder, 'public' 
-    set :views_admin,   File.dirname(__FILE__) + '/app/views/admin' 
+    set :public_folder, 'public'
+    set :views_admin,   File.dirname(__FILE__) + '/app/views/admin'
     set :views_project, File.dirname(__FILE__) + '/project/views'
-    set :views, File.dirname(__FILE__) + '/app/views' 
+    set :views, File.dirname(__FILE__) + '/app/views'
 
     # enable :logging
-    set :show_exceptions, :after_handler
+  end
+
+  # show_exceptions: true заставляет Sinatra сразу пере-raise'ить ошибку
+  # для своей debug-страницы с полным бэктрейсом и дампом ENV/COOKIES —
+  # это только для разработки (см. configure :development ниже).
+  # В остальных окружениях show_exceptions остаётся false (дефолт), чтобы
+  # сработал error 500 do...end и посетитель не увидел внутренности сервера.
+  error 500 do
+    erb :"errors/500", layout: false
   end
 
   # def show_timing(block_name)
@@ -219,6 +227,7 @@ class App < Sinatra::Base
   #set :session_secret, "secret"  # нужен секрет али нет?? где читать ?
 
   configure :development do |c|
+    set :show_exceptions, true
     register Sinatra::Reloader
     also_reload './app.rb'
     also_reload './app/helpers/breadcrumb_helpers.rb'
