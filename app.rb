@@ -42,7 +42,7 @@ class App < Sinatra::Base
     set :views_project, File.dirname(__FILE__) + '/project/views'
     set :views, File.dirname(__FILE__) + '/app/views'
 
-    show_exceptions: true #заставляет Sinatra сразу пере-raise'ить ошибку
+    set :show_exceptions, true #заставляет Sinatra сразу пере-raise'ить ошибку
     # enable :logging
   end
 
