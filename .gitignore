@@ -4,10 +4,21 @@
 cms.sublime-project
 cms.sublime-workspace
 
+config/*
+!config/_config.yml
+!config/_database.yml
+!config/_secret.yml
+!config/_languages.yml
+!config/_deploy.rb
+!config/_schedule.rb
+!config/_puma.rb
+
+config/certs/*
+
 Gemfile.lock
 main.db
-
-files/*
+*.db
+*.sqlite
 
 public/images/*
 !public/images/.gitkeep 
@@ -22,11 +33,3 @@ public/stylesheets/*
 !public/stylesheets/.gitkeep 
 #
 
-config/
-!_config.yml
-!_database.yml
-!_secret.yml
-!_languages.yml
-!_deploy.rb
-!_schedule.rb
-!_puma.rb

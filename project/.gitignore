@@ -1,11 +1,10 @@
 *
 !.gitignore
 
-!config/
 !helpers/
-!views/
 !lib/
 !tasks/
+!views/
 
 !_routes.rb
 !_project_methods.rb

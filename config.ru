@@ -26,7 +26,10 @@ use EntitiesController
 use EventsController
 use PagesController
 use HistoriesController
-use RoutesController
+
+use RoutesFirst
+use Routes
+use RoutesLast
 
 
 # use GeonamesController

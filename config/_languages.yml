@@ -1,0 +1,41 @@
+home_language: sl
+
+languages:
+  it: 
+    name:      Italian
+    self_name: Italiano
+    icon: 🇮🇹
+  sl: 
+    name:      Slovenian
+    self_name: Slovenscina
+    icon: 🇸🇮
+
+  de: 
+    name:      German
+    self_name: Deutsch
+    icon: 🇦🇹 🇩🇪
+
+  en: 
+    name:      English
+    self_name: English
+    icon: 🇬🇧
+
+  ru: 
+    name:      Russian
+    self_name: Русский
+    icon: 🇷🇺
+
+  pl: 
+    name:      Polish
+    self_name: Polski
+    icon: 🇵🇱
+  
+  cs: 
+    name:      Czech
+    self_name: Čeština
+    icon: 🇨🇿
+
+  hu: 
+    name:      Hungarian
+    self_name: Magyar
+    icon: 🇭🇺   

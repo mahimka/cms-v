@@ -55,6 +55,21 @@ gem 'puma'
 
 gem 'whenever', require: false
 
+gem 'deepl-rb'
+
+# for ajpes communications
+gem 'savon'
+gem 'dotenv'
+gem 'retryable'
+gem 'dry-schema'        # основной для Params
+gem 'dry-validation'    # если захочешь позже Contract + rules
+gem 'openssl'  # ← добавить
+
+gem 'google-apis-searchconsole_v1'
+gem 'googleauth'  
+
+gem 'chartkick'
+
 group :development do
   gem 'sinatra-contrib', require: 'sinatra/reloader'
   gem 'net-scp', '4.0.0'
@@ -68,7 +83,6 @@ group :development do
   gem 'ed25519', '>= 1.2', '< 2.0'
   gem 'bcrypt_pbkdf', '>= 1.0', '< 2.0'
 end
-
 
 # gem 'bcrypt', require: 'bcrypt'
 # gem 'pundit', require: 'pundit'

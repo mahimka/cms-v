@@ -12,6 +12,7 @@
   'config/config.yml',
   'config/secret.yml',
   'config/database.yml',
+  'config/languages.yml',
   # 'project/config/database_geoname.yml',
 ]
 
