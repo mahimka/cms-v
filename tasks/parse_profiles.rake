@@ -1,9 +1,3 @@
-require './config/environment'
-require 'sinatra/activerecord/rake'
-
-# 1 parfumo.com
-
-
 task :fetch_profiles do # rake fetch_profiles site_id=## profileable_type='Affprogram' / 'Operator'  rake fetch_profiles site_id=26 profileable_type='Operator'
     site = Site.find_by(id: ENV['site_id'])
 

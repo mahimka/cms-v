@@ -22,8 +22,11 @@ public/stylesheets/*
 !public/stylesheets/.gitkeep 
 #
 
-config.yml
-database.yml
-deploy.rb
-secret.yml
-schedule.rb
+config/
+!_config.yml
+!_database.yml
+!_secret.yml
+!_languages.yml
+!_deploy.rb
+!_schedule.rb
+!_puma.rb

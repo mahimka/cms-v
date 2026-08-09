@@ -39,7 +39,7 @@ class App < Sinatra::Base
   config_file [
     "./config/config.yml", 
     "./config/secret.yml",
-    # "./config/config_languages.yml", 
+    "./config/languages.yml" 
     # "./config/config_folders.yml", 
     # "./config/baza_objects.yml"
   ]
