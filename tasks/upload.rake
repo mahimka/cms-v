@@ -33,7 +33,7 @@ namespace :upload do
 	    #  end
 
 	      dir_files = Dir["./project/#{dir}*.*"]
-	      dir_files = dir_files.reject {|x| x.include? "_" || x == ".gitignore" }
+	      dir_files = dir_files.reject {|x| x.starts_with? "_" || x == ".gitignore" }
 	      
 	      dir_files.each do |file|
 	        result = sftp.upload("./#{file}", "/home/#{@user}/#{@app_name}/#{file}")

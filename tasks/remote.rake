@@ -16,8 +16,8 @@ namespace :remote do
     run_ssh_commands @commands
     @commands = []
 
-    Rake::Task["upload_config"].invoke
-    Rake::Task["upload_project"].invoke  
+    Rake::Task["upload:config"].invoke
+    Rake::Task["upload:project"].invoke  
 
     # @commands << "cd #{@app_name} && rake db:schema:load RACK_ENV=production"
     # @commands << "cd #{@app_name} && rake db:create RACK_ENV=production "
@@ -80,7 +80,7 @@ namespace :remote do
     end  
 
     task :config do
-      Rake::Task["upload_config"].invoke
+      Rake::Task["upload:config"].invoke
       
       @commands << "passenger-config restart-app #{@deploy_to}" if @server == 'passenger'
       @commands << "cd #{@app_name} && bundle exec pumactl -P #{@deploy_to}/tmp/puma.pid restart" if @server == 'puma'
@@ -89,7 +89,7 @@ namespace :remote do
     end
 
     task :project do
-      Rake::Task["upload_project"].invoke
+      Rake::Task["upload:project"].invoke
       
       @commands << "passenger-config restart-app #{@deploy_to}" if @server == 'passenger'
       @commands << "cd #{@app_name} && bundle exec pumactl -P #{@deploy_to}/tmp/puma.pid restart" if @server == 'puma'

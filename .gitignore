@@ -20,6 +20,9 @@ main.db
 *.db
 *.sqlite
 
+log/*
+!log/.gitkeep 
+
 public/images/*
 !public/images/.gitkeep 
 
