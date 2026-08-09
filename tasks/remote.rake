@@ -53,8 +53,8 @@ namespace :remote do
        run_ssh_commands @commands
        @commands = []
 
-      Rake::Task["upload_config"].invoke
-      Rake::Task["upload_project"].invoke
+      Rake::Task["upload:config"].invoke
+      Rake::Task["upload:project"].invoke
       
       @commands << "cd #{@app_name} && rake db:migrate RACK_ENV=production"
       

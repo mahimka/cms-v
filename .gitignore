@@ -23,6 +23,9 @@ main.db
 log/*
 !log/.gitkeep 
 
+tmp/*
+!tmp/.gitkeep 
+
 public/images/*
 !public/images/.gitkeep 
 
