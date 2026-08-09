@@ -9,7 +9,7 @@ namespace :remote do
         end
 
         task :update do 
-          Rake::Task["upload_schedule"].invoke
+          Rake::Task["upload:schedule"].invoke
           @commands << "cd #{@app_name} && bundle exec whenever --update-crontab"
           run_ssh_commands @commands
         end

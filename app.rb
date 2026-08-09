@@ -7,6 +7,17 @@ require "sinatra/namespace"
 
 Ancestry.default_ancestry_format = :materialized_path2
 
+
+
+# Подключение для статистики
+class GscRecord < ActiveRecord::Base
+  self.abstract_class = true
+  # establish_connection({ adapter: 'sqlite3', database: 'db/stats.sqlite3' })
+  establish_connection({ adapter: 'sqlite3', database: 'db/gsc.db' })
+end
+
+
+
 class App < Sinatra::Base    
 
   use Rack::MethodOverride
@@ -31,10 +42,10 @@ class App < Sinatra::Base
     set :views_project, File.dirname(__FILE__) + '/project/views'
     set :views, File.dirname(__FILE__) + '/app/views'
 
+    show_exceptions: true #заставляет Sinatra сразу пере-raise'ить ошибку
     # enable :logging
   end
 
-  # show_exceptions: true заставляет Sinatra сразу пере-raise'ить ошибку
   # для своей debug-страницы с полным бэктрейсом и дампом ENV/COOKIES —
   # это только для разработки (см. configure :development ниже).
   # В остальных окружениях show_exceptions остаётся false (дефолт), чтобы
