@@ -105,4 +105,43 @@ module MiscHelpers
   # === end of view rendering helpers ===
 
 
+  def link_to(schema_id, options={})
+    anchor_text   = options[:anchor_text] || ''
+    anchor_column = options[:anchor_column] || 'anchor_1' #h1
+    lang          = options[:lang] || @page.lang
+    css_class     = options[:css_class] || ''
+    title         = options[:title] || 'title'
+    
+    begin
+      # schema_id — uri мастер-страницы (например '/rooms/1', всегда lang
+      # мастера, обычно sl), НЕ конкретной языковой версии — искать нужно
+      # по нему одному, а на нужный язык переключает version_for ниже.
+      # find_by_..._and_lang требовал uri и lang сразу, а у uri уже свой
+      # lang — из-за этого на любой не-sl странице всегда получали nil.
+      page = Page.find_by(id: schema_id) if schema_id.is_a? Integer
+      page = Page.find_by(uri: schema_id) if schema_id.is_a? String
+
+      page = page&.version_for(lang)
+
+      if page
+        if anchor_text.blank?
+          anchor = page.send(anchor_column) 
+        else
+          anchor = anchor_text 
+        end
+
+        "<a href='#{page.uri}' class='#{css_class}' title='#{title}'>#{anchor}</a>"
+
+      else
+        "<!--page is not found-->"
+      end
+
+    rescue => e
+      
+      return '!! some error in link_to !!'
+
+    end
+
+  end
+
 end

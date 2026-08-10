@@ -102,6 +102,7 @@ class App < Sinatra::Base
   helpers PageTreeHelpers
   helpers TranslationHelpers
   helpers MiscHelpers
+  helpers FeedAndSitemapHelpers
   helpers ProjectHelpers
 
   helpers Sinatra::ContentFor
