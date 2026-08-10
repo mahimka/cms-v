@@ -5,6 +5,21 @@ class Routes < App
      '/test-routes'
     end
 
+    # .rss для списковых страниц (Page с conditions, например /beaches
+    # или /de/beaches) — последние объекты списка с проставленным вручную
+    # edited_at на их собственных детальных страницах.
+    get '*.rss' do |uri|
+
+      @page = Page.published.where(uri: uri).first
+
+      pass unless @page
+      pass unless @page.effective_conditions.present?
+
+      @items = feed_items_for_list_page(@page)
+
+      builder :'/feeds/list.rss', layout: false, views: settings.views
+    end
+
     get '*' do |uri|
 
        @page = Page.published.where(uri: uri).first

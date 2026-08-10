@@ -1,10 +1,18 @@
 <section class="section">
+    <form
+      method="post"
+      action="/admin/pages/<%= @page.id %>"
+      data-page-edit-form
+    >
+    <input type="hidden" name="_method" value="patch">
+
   <%# Шапка формы %>
   <div class="level mb-5">
     <div class="level-left">
       <div>
         <h2 class="title is-6 mb-2">
           <label class="checkbox ">
+            <input type="hidden" name="page[ready]" value="0">
             <input type="checkbox"
               name="page[ready]"
               value="1"
@@ -14,6 +22,7 @@
           </label>
 
           <label class="checkbox ">
+            <input type="hidden" name="page[published]" value="0">
             <input type="checkbox"
               name="page[published]"
               value="1"
@@ -41,8 +50,9 @@
             <a href='/admin/<%= @page.pageable_type.pluralize.parameterize %>/<%= @page.pageable_id %>/edit'><span class="tag is-light"><%= @page.pageable_type %> : <%= @page.pageable_id %></span></a>
           <% end %>
           <label class="checkbox ">
+            <input type="hidden" name="page[has_feed]" value="0">
             <input type="checkbox"
-              name="page[published]"
+              name="page[has_feed]"
               value="1"
               <%= "checked" if @page.has_feed? %>
             >
@@ -106,13 +116,6 @@
       </ul>
     </div>
   <% end %>
-
-    <form
-      method="post"
-      action="/admin/pages/<%= @page.id %>"
-      data-page-edit-form
-    >
-    <input type="hidden" name="_method" value="patch">
 
     <%# Блок системных полей (только для master-страницы) %>
     <% if @page.master? %>
@@ -208,6 +211,23 @@
           value="<%= @page.slug %>"
           <%= "required" if @page.non_root_master? %>
         >
+    </div>
+  </div>
+
+  <div class="columns">
+
+    <div class="column is-1">
+      <label class="label is-small">edited_at</label>
+    </div>
+
+    <div class="column is-11">
+      <input
+          class="input is-small"
+          type="date"
+          name="page[edited_at]"
+          value="<%= @page.edited_at&.strftime('%Y-%m-%d') %>"
+        >
+      <p class="help is-size-7">проставляется вручную при серьёзных изменениях — время добавится само при сохранении, используется как дата в .rss</p>
     </div>
   </div>
 

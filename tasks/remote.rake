@@ -66,7 +66,7 @@ namespace :remote do
 
     task :code do
       @commands << "cd #{@app_name} && git pull"
-      @commands << "cd #{@app_name} && bundle install"
+      # @commands << "cd #{@app_name} && bundle install"
 
       run_ssh_commands @commands
       @commands = []

@@ -814,6 +814,9 @@ class PagesController < App
   # valid?/save, так что добавленная до save ошибка иначе потеряется.
   def normalize_page_conditions(raw_params)
     attrs = (raw_params || {}).to_h
+
+    normalize_page_edited_at(attrs)
+
     return [attrs, nil] unless attrs.key?("conditions")
 
     raw_conditions = attrs["conditions"]
@@ -829,6 +832,21 @@ class PagesController < App
         attrs.delete("conditions")
         [attrs, "невалидный JSON: #{e.message}"]
       end
+    end
+  end
+
+  # <input type="date"> присылает только YYYY-MM-DD — время для edited_at
+  # неважно (это просто отметка "было серьёзное обновление" для .rss),
+  # поэтому дописываем время сохранения, а не молча ставим 00:00.
+  def normalize_page_edited_at(attrs)
+    return unless attrs.key?("edited_at")
+
+    value = attrs["edited_at"]
+
+    if value.blank?
+      attrs["edited_at"] = nil
+    elsif value.match?(/\A\d{4}-\d{2}-\d{2}\z/)
+      attrs["edited_at"] = "#{value} #{Time.now.strftime('%H:%M:%S')}"
     end
   end
 

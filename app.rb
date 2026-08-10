@@ -37,7 +37,7 @@ class App < Sinatra::Base
   ]
   
   configure do
-    set :public_folder, 'public'
+    set :public_folder, File.dirname(__FILE__) + '/public'
     set :views_admin,   File.dirname(__FILE__) + '/app/views/admin'
     set :views_project, File.dirname(__FILE__) + '/project/views'
     set :views, File.dirname(__FILE__) + '/app/views'
