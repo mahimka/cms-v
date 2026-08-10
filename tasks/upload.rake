@@ -44,6 +44,46 @@ namespace :upload do
 
     end
 
+	# public/{images,fonts,javascripts,stylesheets} — гитигнорены (см. .gitignore,
+	# внутри только .gitkeep), поэтому git pull их не привозит на сервер и
+	# про них легко забыть при деплое (как с cookieconsent.js/css) — заливаем
+	# отдельно, аналогично upload:project.
+	task :public do
+	  desc "Upload files from /public/{images,fonts,javascripts,stylesheets} (гитигнорены)"
+	  puts "Starts copying public assets"
+
+	  public_subdirs = %w[images fonts javascripts stylesheets]
+
+	  Net::SFTP.start(@domain, @user, :password => @password) do |sftp|
+	    public_subdirs.each do |subdir|
+	      base = "./public/#{subdir}"
+	      next unless Dir.exist?(base)
+
+	      dirs = [''] + Dir.glob("**/", base: base)
+
+	      dirs.each do |dir|
+	        remote_dir = "/home/#{@user}/#{@app_name}/public/#{subdir}/#{dir}".sub(%r{/+\z}, '')
+
+	        puts remote_dir.green
+
+	        begin
+	          sftp.mkdir!(remote_dir)
+	        rescue Net::SFTP::StatusException
+	          # папка уже существует на сервере — ок, не первый деплой
+	        end
+
+	        dir_files = Dir["#{base}/#{dir}*.*"].reject { |x| File.basename(x) == ".gitkeep" }
+
+	        dir_files.each do |file|
+	          remote_file = "/home/#{@user}/#{@app_name}/public/#{subdir}/#{dir}#{File.basename(file)}"
+	          sftp.upload!(file, remote_file)
+	          puts "  " + file
+	        end
+	      end
+	    end
+	  end
+	end
+
 end
 
 
