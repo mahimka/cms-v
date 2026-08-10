@@ -26,6 +26,8 @@ log/*
 tmp/*
 !tmp/.gitkeep 
 
+public/zts-eturizem.txt
+
 public/images/*
 !public/images/.gitkeep 
 
