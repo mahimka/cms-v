@@ -368,6 +368,28 @@ class PagesController < App
           views: settings.views_admin
     end
 
+    # Поиск страниц по h1 для @@-автокомплита в body/faq (см. pages-tree.js) —
+    # ищем в языке редактируемой страницы, чтобы найденный uri был сразу
+    # в нужном языке (link_to всё равно резолвит через version_for, но так
+    # результаты в списке понятнее автору).
+    get '/pages/search_by_h1' do
+      content_type :json
+
+      query = params[:q].to_s.strip
+      lang  = params[:lang].presence || settings.home_language
+
+      halt 200, [].to_json if query.blank?
+
+      pages = Page
+        .where(lang: lang)
+        .where("h1 LIKE ? ESCAPE '\\'", "%#{Page.sanitize_sql_like(query)}%")
+        .where.not(h1: [nil, ""])
+        .order(:h1)
+        .limit(10)
+
+      pages.map { |page| { uri: page.uri, h1: page.h1 } }.to_json
+    end
+
     # для содержимого дерева
     get '/pages/tree/nodes' do
       root_pages = sort_root_pages(Page.roots.to_a)

@@ -3,6 +3,7 @@
       method="post"
       action="/admin/pages/<%= @page.id %>"
       data-page-edit-form
+      data-page-lang="<%= @page.lang %>"
     >
     <input type="hidden" name="_method" value="patch">
 

@@ -138,6 +138,11 @@ class App < Sinatra::Base
     send_file File.dirname(__FILE__) + '/app/javascripts/pages-tree.js'
   end
 
+  get '/admin/javascripts/page-body-mentions.js' do
+    content_type 'application/javascript'
+    send_file File.dirname(__FILE__) + '/app/javascripts/page-body-mentions.js'
+  end
+
   get '/stats' do
     puts 'profiles Brand ' + Profile.where(profileable_type: 'Brand').count.to_s
     puts 'profiles Item ' + Profile.where(profileable_type: 'Item').count.to_s
