@@ -331,13 +331,22 @@ class PagesController < App
       results.map { |r| { lang: r.lang, ok: r.success?, error: r.error } }.to_json
     end
 
-    # Переводит одно поле мастер-страницы (params[:field]) и обновляет
-    # его во всех уже существующих переводах — для случая "мастер
-    # отредактировали, нужно протащить только изменившееся поле".
+    # Переводит одно поле (params[:field]) через Gemini.
+    #
+    # На мастер-странице — обновляет это поле во всех уже существующих
+    # переводах ("мастер отредактировали, протащить изменение дальше").
+    # На странице перевода — тянет значение поля из её мастера и
+    # переводит только в неё саму ("обновить/пересобрать этот конкретный
+    # перевод из мастера").
     post '/pages/:id/translate_field' do
-      master = Page.masters.find(params[:id])
+      page = Page.find(params[:id])
 
-      results = page_translator.propagate_field!(master, params[:field])
+      results =
+        if page.master?
+          page_translator.propagate_field!(page, params[:field])
+        else
+          [page_translator.translate_field_from_master!(page, params[:field])]
+        end
 
       content_type :json
       results.map { |r| { lang: r.lang, ok: r.success?, error: r.error } }.to_json

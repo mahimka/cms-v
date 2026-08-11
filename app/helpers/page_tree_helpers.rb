@@ -66,6 +66,40 @@ module PageTreeHelpers
     nil
   end
 
+  # Кнопка "перевести поле через Gemini" рядом с полем в форме страницы.
+  #
+  # На мастер-странице (у которой уже есть хотя бы один перевод) — берёт
+  # значение поля у самого мастера и обновляет его во ВСЕХ переводах.
+  # На странице перевода — берёт значение того же поля у её мастера и
+  # переводит только в неё саму (обновить/пересобрать этот конкретный
+  # перевод после правки мастера).
+  #
+  # Пустая строка (ничего не рендерится), если поле не входит в
+  # Page::TRANSLATABLE_FIELDS, нечего переводить (исходный текст пуст),
+  # или у мастера ещё нет ни одного перевода.
+  def translate_field_button(page, field)
+    field = field.to_s
+    return "" unless Page::TRANSLATABLE_FIELDS.include?(field)
+
+    if page.master?
+      return "" unless Page.exists?(master_id: page.id)
+
+      source_text = page[field]
+      tooltip = "Перевести #{field} и обновить во всех переводах"
+    else
+      source_text = page.master&.[](field)
+      tooltip = "Перевести #{field} из мастера в этот перевод"
+    end
+
+    return "" if source_text.blank?
+
+    <<~HTML
+      <button type="button" class="button is-small is-info is-light py-0 px-1"
+        data-page-translate-field data-field="#{field}" data-source-page-id="#{page.id}"
+        title="#{Rack::Utils.escape_html(tooltip)}">✨</button>
+    HTML
+  end
+
   private
 
   # Ссылка на /admin/pages с фильтром по родителю (или его отсутствию)

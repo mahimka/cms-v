@@ -5,12 +5,31 @@ class Page < ActiveRecord::Base
 
   has_ancestry
 
+  # "schema" (JSON-LD) сюда сознательно не входит — это разметка с
+  # фиксированными ключами schema.org, а не текст для перевода.
   TRANSLATABLE_FIELDS = %w[
     title
     h1
     body
     subtitle
     meta_description
+    faq
+    anchor_1
+    anchor_2
+    anchor_3
+    hero_1
+    hero_2
+    hero_3
+    sidebar_1
+    sidebar_2
+    sidebar_3
+    footer_1
+    footer_2
+    footer_3
+    block_1
+    block_2
+    block_3
+    block_4
   ].freeze
 
   # Эти поля заполняются только у основной страницы.

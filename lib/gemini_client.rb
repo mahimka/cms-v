@@ -1,14 +1,21 @@
 require 'net/http'
 require 'json'
 require 'uri'
+require 'retryable'
 
 # Тонкий клиент к Gemini API (Generative Language API) — без отдельного
 # гема, тем же приёмом, что и Beds24Client: голый Net::HTTP + JSON.
-# Ошибки не глотает, а поднимает наверх — ретраи (retryable) и лимиты
-# делает вызывающий код.
+# 429/5xx ретраятся сами (см. RETRYABLE_STATUSES) — на free tier это
+# обычный, ожидаемый ответ при пачке запросов подряд (например, кнопка
+# "перевести на все"), а не повод падать. Остальные ошибки поднимаются
+# наверх как есть.
 class GeminiClient
   BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models".freeze
   DEFAULT_MODEL = "gemini-flash-latest".freeze
+  RETRYABLE_STATUSES = %w[429 500 502 503 504].freeze
+  RETRY_TRIES = 5
+
+  RateLimitedError = Class.new(StandardError)
 
   def initialize(api_key:, model: DEFAULT_MODEL)
     @api_key = api_key
@@ -81,20 +88,26 @@ class GeminiClient
       generation_config[:responseSchema] = response_schema
     end
 
-    body = {
+    request_body = JSON.generate({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: generation_config
-    }
+    })
 
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
+    response = Retryable.retryable(tries: RETRY_TRIES, on: RateLimitedError, sleep: ->(n) { 2**n }) do
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
 
-    request = Net::HTTP::Post.new(uri)
-    request['content-type'] = 'application/json'
-    request['x-goog-api-key'] = @api_key
-    request.body = JSON.generate(body)
+      request = Net::HTTP::Post.new(uri)
+      request['content-type'] = 'application/json'
+      request['x-goog-api-key'] = @api_key
+      request.body = request_body
 
-    response = http.request(request)
+      resp = http.request(request)
+
+      raise RateLimitedError, "Gemini API #{resp.code}: #{resp.body}" if RETRYABLE_STATUSES.include?(resp.code)
+
+      resp
+    end
 
     raise "Gemini API Error: #{response.code} - #{response.body}" unless response.is_a?(Net::HTTPSuccess)
 
