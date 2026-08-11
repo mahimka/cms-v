@@ -318,6 +318,31 @@ class PagesController < App
       end
     end
 
+    # Создаёт переводы мастер-страницы на все языки, для которых
+    # перевода ещё нет (title/h1/body/subtitle/meta_description —
+    # через Gemini). Уже существующие переводы не трогает.
+    post '/pages/:id/translate_missing_languages' do
+      master = Page.masters.find(params[:id])
+
+      results = page_translator.create_missing_translations!(master)
+
+      content_type :json
+      headers "X-Page-Id" => master.id.to_s
+      results.map { |r| { lang: r.lang, ok: r.success?, error: r.error } }.to_json
+    end
+
+    # Переводит одно поле мастер-страницы (params[:field]) и обновляет
+    # его во всех уже существующих переводах — для случая "мастер
+    # отредактировали, нужно протащить только изменившееся поле".
+    post '/pages/:id/translate_field' do
+      master = Page.masters.find(params[:id])
+
+      results = page_translator.propagate_field!(master, params[:field])
+
+      content_type :json
+      results.map { |r| { lang: r.lang, ok: r.success?, error: r.error } }.to_json
+    end
+
 
     get '/pages/:id/edit/form' do
       @page = Page.find(params[:id])
@@ -806,6 +831,13 @@ class PagesController < App
   # end
 
   private
+
+  def page_translator
+    PageTranslator.new(
+      gemini_client: GeminiClient.new(api_key: settings.gemini_api_key),
+      languages: settings.languages.keys
+    )
+  end
 
   # Модели, для которых допустимо создавать detail-страницу через
   # /pages/new?pageable_type=...&pageable_id=... (see PAGEABLE concern).

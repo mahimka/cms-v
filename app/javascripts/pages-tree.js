@@ -246,6 +246,112 @@ $(function () {
   });
 
   /*
+   * Создать переводы сразу на все отсутствующие языки (через Gemini).
+   * В отличие от data-page-lang-create, ничего не открывает для ревью —
+   * переводит и сохраняет сразу, дерево+форма перезагружаются с результатом.
+   */
+  $(document).on("click", "[data-page-translate-all-langs]", function (event) {
+    event.preventDefault();
+
+    const $button = $(this);
+    const sourcePageId = $button.data("source-page-id");
+
+    if (!sourcePageId) {
+      showEditorError("Не удалось определить исходную страницу.");
+      return;
+    }
+
+    $button.prop("disabled", true).addClass("is-loading");
+
+    $.ajax({
+      url: `/admin/pages/${encodeURIComponent(sourcePageId)}/translate_missing_languages`,
+      method: "POST",
+      dataType: "json"
+    })
+      .done(function (results) {
+        const failed = results.filter(function (r) { return !r.ok; });
+
+        if (failed.length) {
+          console.error("Ошибки перевода:", failed);
+          window.alert(
+            "Не удалось создать перевод на: " +
+            failed.map(function (r) { return r.lang + " (" + r.error + ")"; }).join(", ")
+          );
+        }
+
+        reloadTreeAndOpenPage(sourcePageId);
+      })
+      .fail(function (xhr) {
+        console.error(
+          "Ошибка перевода страницы:",
+          xhr.status,
+          xhr.responseText
+        );
+
+        showEditorError("Не удалось создать переводы.");
+      })
+      .always(function () {
+        $button.prop("disabled", false).removeClass("is-loading");
+      });
+  });
+
+  /*
+   * Перевести одно поле мастер-страницы и обновить его во всех уже
+   * существующих переводах (не создаёт новые переводы, не трогает
+   * остальные поля). Обновляет только сам перевод в БД — открытая
+   * форма мастера не меняется, поэтому дерево/панель не перезагружаем.
+   */
+  $(document).on("click", "[data-page-translate-field]", function (event) {
+    event.preventDefault();
+
+    const $button = $(this);
+    const sourcePageId = $button.data("source-page-id");
+    const field = $button.data("field");
+
+    if (!sourcePageId || !field) {
+      showEditorError("Не удалось определить страницу или поле.");
+      return;
+    }
+
+    const originalHtml = $button.html();
+    $button.prop("disabled", true).addClass("is-loading");
+
+    $.ajax({
+      url: `/admin/pages/${encodeURIComponent(sourcePageId)}/translate_field`,
+      method: "POST",
+      data: { field: field },
+      dataType: "json"
+    })
+      .done(function (results) {
+        const failed = results.filter(function (r) { return !r.ok; });
+
+        $button.removeClass("is-loading").addClass(failed.length ? "is-danger" : "is-success");
+        $button.html(failed.length ? "✗" : "✓");
+
+        if (failed.length) {
+          console.error("Ошибки перевода поля:", failed);
+        }
+
+        setTimeout(function () {
+          $button
+            .prop("disabled", false)
+            .removeClass("is-danger is-success")
+            .html(originalHtml);
+        }, 2000);
+      })
+      .fail(function (xhr) {
+        console.error(
+          "Ошибка перевода поля:",
+          xhr.status,
+          xhr.responseText
+        );
+
+        $button.prop("disabled", false).removeClass("is-loading");
+        showEditorError("Не удалось перевести поле.");
+      });
+  });
+
+  /*
    * Отмена создания или копирования
    */
   $(document).on(

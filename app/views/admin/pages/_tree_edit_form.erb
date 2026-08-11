@@ -8,10 +8,10 @@
     <input type="hidden" name="_method" value="patch">
 
   <%# Шапка формы %>
-  <div class="level mb-5">
+  <div class="level mb-2">
     <div class="level-left">
       <div>
-        <h2 class="title is-6 mb-2">
+        <h2 class="title is-6 mb-3">
           <label class="checkbox ">
             <input type="hidden" name="page[ready]" value="0">
             <input type="checkbox"
@@ -50,15 +50,10 @@
           <% if @page.pageable_type && @page.pageable_id %>
             <a href='/admin/<%= @page.pageable_type.pluralize.parameterize %>/<%= @page.pageable_id %>/edit'><span class="tag is-light"><%= @page.pageable_type %> : <%= @page.pageable_id %></span></a>
           <% end %>
-          <label class="checkbox ">
-            <input type="hidden" name="page[has_feed]" value="0">
-            <input type="checkbox"
-              name="page[has_feed]"
-              value="1"
-              <%= "checked" if @page.has_feed? %>
-            >
-            <span class="is-size-7 has-text-weight-light">feed</span>
-          </label>
+
+
+
+
 
         </p>
 
@@ -121,8 +116,6 @@
     <%# Блок системных полей (только для master-страницы) %>
     <% if @page.master? %>
       <div class="field">
-        <label class="label is-small">Языки</label>
-
         <div class="buttons">
           <% settings.languages.each do |lang_code, lang_info| %>
             <% lang_code = lang_code.to_s %>
@@ -163,13 +156,26 @@
               <% end %>
             <% end %>
           <% end %>
+
+          <% missing_languages = settings.languages.keys.map(&:to_s) - @page.language_versions.pluck(:lang) %>
+          <% if missing_languages.any? %>
+            <button
+              type="button"
+              class="button is-small is-info is-light"
+              data-page-translate-all-langs
+              data-source-page-id="<%= @page.id %>"
+              title="Создать переводы на все отсутствующие языки через Gemini"
+            >
+              ✨ перевести на все (<%= missing_languages.size %>)
+            </button>
+          <% end %>
         </div>
       </div>
 
-<div class="columns">
+<div class="columns my-0 is-gapless">
   <div class="column is-6">
 
-        <label class="label is-small">Родительская страница</label>
+        <label class="label is-small">parent page</label>
 
             <select name="page[parent_id]" class="input is-small">
               <option value="">Корневая страница</option>
@@ -182,14 +188,14 @@
             </select>
 
   </div>
-  <div class="column is-3">
+  <div class="column is-3  ml-1">
 
       <%= label(:page, :layout, "layout:", options = {class: 'label is-small'}) %>
       <% values = Dir.glob("**", base: "project/views/layout").delete_if{|file| file.starts_with?("_")}.unshift("") %>
       <%= select(:page, :layout, values, options = {class: 'select input is-success is-size-7', value: @page.layout}) %>
 
   </div>
-  <div class="column is-3">
+  <div class="column is-3 ml-1">
 
       <%= label(:page, :view, "view:", options = {class: 'label is-small'}) %>
       <% values = Dir.glob("**", base: "project/views").delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.unshift("") %>
@@ -198,13 +204,13 @@
   </div>
 </div>
 
-  <div class="columns">
+  <div class="columns my-2 is-gapless" >
 
     <div class="column is-1">
       <label class="label is-small">slug</label>
     </div>
 
-    <div class="column is-11">
+    <div class="column is-9">
       <input
           class="input is-small"
           type="text"
@@ -213,24 +219,20 @@
           <%= "required" if @page.non_root_master? %>
         >
     </div>
-  </div>
 
-  <div class="columns">
-
-    <div class="column is-1">
-      <label class="label is-small">edited_at</label>
-    </div>
-
-    <div class="column is-11">
+    <div class="column is-2">
       <input
-          class="input is-small"
+          class="input is-small ml-1"
           type="date"
           name="page[edited_at]"
           value="<%= @page.edited_at&.strftime('%Y-%m-%d') %>"
         >
-      <p class="help is-size-7">проставляется вручную при серьёзных изменениях — время добавится само при сохранении, используется как дата в .rss</p>
+
     </div>
+
+
   </div>
+
 
     <div class="field is-grouped mt-0 pt-0">
         <button type="submit" class="button is-danger is-small has-text-white">
@@ -679,10 +681,19 @@
 
     <%# Основной контент страницы %>
 
+    <%# я Claude (2026-08-11): кнопка "перевести и протолкнуть в переводы"
+        имеет смысл только у мастер-страницы, у которой уже есть хотя бы
+        один перевод — иначе некуда пропагировать. %>
+    <% show_translate_buttons = @page.master? && @page.translations.exists? %>
 
-    <div class="columns">
+    <div class="columns is-gapless my-2">
       <div class="column is-1">
         <label class="label is-small">title</label>
+        <% if show_translate_buttons %>
+          <button type="button" class="button is-small is-info is-light py-0 px-1"
+            data-page-translate-field data-field="title" data-source-page-id="<%= @page.id %>"
+            title="Перевести title и обновить во всех переводах">✨</button>
+        <% end %>
       </div>
       <div class="column is-11">
         <input
@@ -693,10 +704,15 @@
           >
       </div>
     </div>
-    
-    <div class="columns">
+
+    <div class="columns is-gapless my-2">
       <div class="column is-1">
         <label class="label is-small">h1</label>
+        <% if show_translate_buttons %>
+          <button type="button" class="button is-small is-info is-light py-0 px-1"
+            data-page-translate-field data-field="h1" data-source-page-id="<%= @page.id %>"
+            title="Перевести h1 и обновить во всех переводах">✨</button>
+        <% end %>
       </div>
       <div class="column is-11">
         <input
@@ -708,9 +724,14 @@
       </div>
     </div>
 
-    <div class="columns">
+    <div class="columns is-gapless my-2">
       <div class="column is-1">
         <label class="label is-small">subtitle</label>
+        <% if show_translate_buttons %>
+          <button type="button" class="button is-small is-info is-light py-0 px-1"
+            data-page-translate-field data-field="subtitle" data-source-page-id="<%= @page.id %>"
+            title="Перевести subtitle и обновить во всех переводах">✨</button>
+        <% end %>
       </div>
       <div class="column is-11">
         <input
@@ -722,9 +743,9 @@
       </div>
     </div>
 
-    <div class="columns">
+    <div class="columns is-gapless my-2">
       <div class="column is-1">
-        <label class="label is-small">anchors</label>
+        <label class="label is-small my-0">anchors</label>
       </div>
       <div class="column is-3">
         <input
@@ -736,7 +757,7 @@
       </div>
       <div class="column is-4">
         <input
-            class="input is-small"
+            class="input is-small ml-2"
             type="text"
             name="page[anchor_2]"
             value="<%= @page.anchor_2 %>"
@@ -744,7 +765,7 @@
       </div>
       <div class="column is-4">
         <input
-            class="input is-small"
+            class="input is-small ml-3"
             type="text"
             name="page[anchor_3]"
             value="<%= @page.anchor_3 %>"
@@ -754,25 +775,108 @@
 
     <div class="field">
       <label class="label is-small">meta_description</label>
+      <% if show_translate_buttons %>
+        <button type="button" class="button is-small is-info is-light py-0 px-1"
+          data-page-translate-field data-field="meta_description" data-source-page-id="<%= @page.id %>"
+          title="Перевести meta_description и обновить во всех переводах">✨</button>
+      <% end %>
       <div class="control">
         <textarea
-          class="textarea"
+          class="textarea autosize-textarea"
           name="page[meta_description]"
-          rows="4"
+          rows="1"
         ><%= @page.meta_description %></textarea>
       </div>
     </div>
 
     <div class="field">
       <label class="label is-small">body</label>
+      <% if show_translate_buttons %>
+        <button type="button" class="button is-small is-info is-light py-0 px-1"
+          data-page-translate-field data-field="body" data-source-page-id="<%= @page.id %>"
+          title="Перевести body и обновить во всех переводах">✨</button>
+      <% end %>
       <div class="control">
         <textarea
-          class="textarea"
+          class="textarea autosize-textarea"
           name="page[body]"
-          rows="16"
+          rows="1"
         ><%= @page.body %></textarea>
       </div>
     </div>
+
+
+    <div class="field">
+      <label class="label is-small">faq</label>
+      <div class="control">
+        <textarea
+          class="textarea autosize-textarea"
+          name="page[faq]"
+          rows="1"
+        ><%= @page.faq %></textarea>
+      </div>
+    </div>
+
+
+    <div class="field">
+      <label class="label is-small">schema</label>
+      <div class="control">
+        <textarea
+          class="textarea autosize-textarea"
+          name="page[schema]"
+          rows="1"
+        ><%= @page.schema %></textarea>
+      </div>
+    </div>
+
+    <% [:hero_1, :hero_2, :hero_3, 
+        :sidebar_1, :sidebar_2, :sidebar_3,
+        :footer_1, :footer_2, :footer_3,
+        :block_1, :block_2, :block_3, :block_4
+       ].each do |column| 
+    %>
+
+      <div class="field">
+        <label class="label is-small"><%= column %></label>
+        <div class="control">
+          <textarea
+            class="textarea autosize-textarea"
+            name="page[<%= column %>]"
+            rows="1"
+          ><%= @page.send(column) %></textarea>
+        </div>
+      </div>
+    <% end %>
+
+
+    <style>
+      #page-editor textarea.autosize-textarea {
+        min-height: 2em;
+        overflow-y: hidden;
+      }
+    </style>
+
+    <script>
+      (function () {
+        function autosize(el) {
+          el.style.height = 'auto';
+          el.style.height = el.scrollHeight + 'px';
+        }
+
+        $('#page-editor textarea.autosize-textarea').each(function () {
+          autosize(this);
+        });
+
+        // Форма перезагружается через AJAX при каждом открытии страницы —
+        // .off перед .on, чтобы не плодить одинаковые делегированные
+        // обработчики на document с каждой перезагрузкой партиала.
+        $(document)
+          .off('input.autosize-textarea')
+          .on('input.autosize-textarea', '#page-editor textarea.autosize-textarea', function () {
+            autosize(this);
+          });
+      })();
+    </script>
 
     <br>
 

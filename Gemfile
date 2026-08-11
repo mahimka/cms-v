@@ -55,8 +55,6 @@ gem 'puma'
 
 gem 'whenever', require: false
 
-gem 'deepl-rb'
-
 # for ajpes communications
 gem 'savon'
 gem 'dotenv'
