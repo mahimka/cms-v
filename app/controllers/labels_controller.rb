@@ -8,6 +8,9 @@ class LabelsController < App
       @labels_found = @q.result(distinct: true).size
       @labels       = @q.result(distinct: true).order(:ancestry, :position, :name).page(params[:page]).per(500)
 
+      # Один запрос на всю страницу вместо label.usage_count на каждую строку.
+      @detail_counts_by_label = Detail.group(:label_id).count
+
       erb :"/labels/index", layout: :"/layout/wide", views: settings.views_admin
 
     end

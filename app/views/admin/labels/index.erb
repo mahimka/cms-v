@@ -36,6 +36,7 @@
       <td title="запрещает менять name — на него ссылается List conditions">fixed 🔒</td>
       <td>name</td>
       <td>field_type</td>
+      <td title="сколько раз используется в details">details</td>
       <td></td>
     </tr>
 
@@ -49,6 +50,7 @@
       <td><%= checkbox_in_place(group, :fixed) %></td>
       <td class="has-text-weight-semibold"><%= group.name %></td>
       <td><%= group.field_type %></td>
+      <td><%= @detail_counts_by_label[group.id] || 0 %></td>
       <td>
         <form method="POST" action="/admin/labels/<%= group.id %>/sort_children" style="display:inline;">
           <input type="hidden" name="by" value="string">
@@ -69,6 +71,7 @@
         <td><%= checkbox_in_place(label, :fixed) %></td>
         <td class="pl-5"><%= label.name %></td>
         <td><%= label.field_type %></td>
+        <td><%= @detail_counts_by_label[label.id] || 0 %></td>
         <td>
           <a href="/admin/labels/<%= label.id %>" class="button is-small">show</a>
           <a href="/admin/labels/<%= label.id %>/edit" class="button is-small">edit</a>
