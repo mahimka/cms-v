@@ -121,7 +121,7 @@
     parent_id
   </div>
   <div class="column is-1">
-    <input type="checkbox" name="q[detail_records_id_present]" value='1' <%= @q.detail_records_id_present ? "checked" : "" %>>
+    <input type="checkbox" name="q[detail_records_id_not_null]" value='1' <%= @q.detail_records_id_not_null ? "checked" : "" %>>
     details
   </div>
   <div class="column is-1">
@@ -170,7 +170,7 @@
   </div>
 
   <div class="column is-1">
-    <input type="checkbox" name="q[detail_records_id_blank]" value='1' <%= @q.detail_records_id_blank ? "checked" : "" %>>
+    <input type="checkbox" name="q[detail_records_id_null]" value='1' <%= @q.detail_records_id_null ? "checked" : "" %>>
     details
   </div>
 
