@@ -76,9 +76,9 @@ namespace :gsc_stats do
     # Запрос аналитики (исправлено: query_searchanalytic без 's'!)
     request = Google::Apis::SearchconsoleV1::SearchAnalyticsQueryRequest.new(
       # start_date: (Date.today - 90).iso8601,
-      start_date: (Date.today - 4).iso8601,
+      start_date: (Date.today - 3).iso8601,
       # end_date:   Date.today.iso8601,
-      end_date:   (Date.today - 4).iso8601,
+      end_date:   (Date.today - 3).iso8601,
       dimensions: %w[page query date], #['query'], #  query page date   query, page, country, device, searchAppearance, date
       row_limit:  5000
     )
