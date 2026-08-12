@@ -17,11 +17,14 @@
     <% @item.detail_records.includes(:label).order("labels.position, labels.name").each do |detail| %>
       <div class="columns is-mobile mb-1">
 
+        <% row_options = effective_labels.to_h { |l| [l.id, l.name] } %>
+        <% row_options[detail.label_id] ||= detail.label&.name %>
+
         <form method="POST" action="/admin/details/<%= detail.id %>" class="column is-11 field has-addons mb-0">
           <input type="hidden" name="_method" value="PATCH">
           <input type="hidden" name="redirect_to" value="/admin/items/<%= @item.id %>/edit">
           <div class="control">
-            <%= select(:detail, :label_id, effective_labels.to_h { |l| [l.id, l.name] }, options = {class: 'select input is-small', value: detail.label_id}) %>
+            <%= select(:detail, :label_id, row_options, options = {class: 'select input is-small', value: detail.label_id}) %>
           </div>
           <div class="control is-expanded">
             <input type="text" class="input is-small" name="detail[value]" value="<%= fast_escape_html(detail.value) %>" placeholder="значение">
