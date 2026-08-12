@@ -46,13 +46,12 @@ class EventsController < App
 
     end
 
-    # update - step 2: остальные поля + details (hash параметр: значение) + tags
+    # update - step 2: остальные поля + tags (details теперь свои формы, см. DetailsController)
     patch '/events/:id' do
 
       @event = Event.find(params[:id])
 
       attributes = (params[:event] || {}).to_h.symbolize_keys
-      attributes[:details] = details_hash_from_params
 
       if @event.update(attributes)
         @event.tag_ids = Array(params[:tag_ids]).reject(&:blank?)
@@ -75,20 +74,5 @@ class EventsController < App
     end
   end
 
-  private
-
-  # Собирает hash деталей из параллельных массивов полей формы
-  # (details_keys[] / details_values[]) в { "key" => "value" }.
-  # Пустые ключи отбрасываются.
-  def details_hash_from_params
-    keys   = Array(params[:details_keys])
-    values = Array(params[:details_values])
-
-    keys.zip(values).each_with_object({}) do |(key, value), hash|
-      next if key.blank?
-
-      hash[key] = value
-    end
-  end
 
 end

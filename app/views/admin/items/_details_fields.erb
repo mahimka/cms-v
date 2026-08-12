@@ -11,66 +11,60 @@
 
   <div class="column is-9">
 
-    <% existing_details = @item.details || {} %>
-    <% schema_label_names = @item.effective_labels.pluck(:name) %>
+    <% effective_labels = @item.effective_labels.order(:position, :name) %>
+    <% used_label_ids = @item.detail_records.map(&:label_id) %>
 
-    <datalist id="details-labels-datalist">
-      <% schema_label_names.each do |name| %>
-        <option value="<%= fast_escape_html(name) %>">
-      <% end %>
-    </datalist>
+    <% @item.detail_records.includes(:label).order("labels.position, labels.name").each do |detail| %>
+      <div class="columns is-mobile mb-1">
 
-    <div id="details-rows">
-
-      <% existing_details.each do |key, value| %>
-        <div class="field has-addons details-row">
+        <form method="POST" action="/admin/details/<%= detail.id %>" class="column is-11 field has-addons mb-0">
+          <input type="hidden" name="_method" value="PATCH">
+          <input type="hidden" name="redirect_to" value="/admin/items/<%= @item.id %>/edit">
           <div class="control">
-            <input type="text" class="input is-small" name="details_keys[]" value="<%= fast_escape_html(key) %>" placeholder="параметр" list="details-labels-datalist">
+            <%= select(:detail, :label_id, effective_labels.to_h { |l| [l.id, l.name] }, options = {class: 'select input is-small', value: detail.label_id}) %>
           </div>
           <div class="control is-expanded">
-            <input type="text" class="input is-small" name="details_values[]" value="<%= fast_escape_html(value) %>" placeholder="значение">
+            <input type="text" class="input is-small" name="detail[value]" value="<%= fast_escape_html(detail.value) %>" placeholder="значение">
           </div>
           <div class="control">
-            <button type="button" class="button is-small is-danger remove-details-row">&times;</button>
+            <button type="submit" class="button is-small is-info">save</button>
           </div>
-        </div>
-      <% end %>
-    </div>
+        </form>
 
-    <template id="details-row-template">
-      <div class="field has-addons details-row">
+        <form method="POST" action="/admin/details/<%= detail.id %>" class="column is-1" onsubmit="return confirm('Delete this detail?')">
+          <input type="hidden" name="_method" value="DELETE">
+          <input type="hidden" name="redirect_to" value="/admin/items/<%= @item.id %>/edit">
+          <button type="submit" class="button is-small is-danger">&times;</button>
+        </form>
+
+      </div>
+    <% end %>
+
+    <hr class="my-2">
+
+    <% available_labels = effective_labels.reject { |l| used_label_ids.include?(l.id) } %>
+
+    <% if available_labels.any? %>
+      <form method="POST" action="/admin/details" class="field has-addons">
+        <input type="hidden" name="detail[detailable_type]" value="Item">
+        <input type="hidden" name="detail[detailable_id]" value="<%= @item.id %>">
+        <input type="hidden" name="redirect_to" value="/admin/items/<%= @item.id %>/edit">
         <div class="control">
-          <input type="text" class="input is-small" name="details_keys[]" placeholder="параметр" list="details-labels-datalist">
+          <%= select(:detail, :label_id, available_labels.to_h { |l| [l.id, l.name] }, options = {class: 'select input is-small'}) %>
         </div>
         <div class="control is-expanded">
-          <input type="text" class="input is-small" name="details_values[]" placeholder="значение">
+          <input type="text" class="input is-small" name="detail[value]" placeholder="значение">
         </div>
         <div class="control">
-          <button type="button" class="button is-small is-danger remove-details-row">&times;</button>
+          <button type="submit" class="button is-small is-success">+ add detail</button>
         </div>
-      </div>
-    </template>
+      </form>
+    <% else %>
+      <p class="help">все ключи из schema уже заполнены — новые можно завести в разделе <a href="/admin/labels">Labels</a></p>
+    <% end %>
 
-    <button type="button" id="add-details-row" class="button is-small is-info mt-2">+ add custom param</button>
-    <p class="help">параметр можно выбрать из ключей, привязанных к schema, или ввести свой</p>
+    <p class="help">параметр выбирается только из ключей, привязанных к schema — новый ключ сначала нужно завести в <a href="/admin/labels">Labels</a></p>
 
   </div>
 
 </div>
-
-<script>
-  (function() {
-    var rows = document.getElementById('details-rows');
-    var template = document.getElementById('details-row-template');
-
-    document.getElementById('add-details-row').addEventListener('click', function() {
-      rows.appendChild(template.content.cloneNode(true));
-    });
-
-    rows.addEventListener('click', function(event) {
-      if (event.target.classList.contains('remove-details-row')) {
-        event.target.closest('.details-row').remove();
-      }
-    });
-  })();
-</script>
