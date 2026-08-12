@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_08_07_100000) do
+ActiveRecord::Schema.define(version: 2026_08_12_110000) do
+
+  create_table "details", force: :cascade do |t|
+    t.string "detailable_type"
+    t.integer "detailable_id"
+    t.integer "label_id"
+    t.text "value"
+    t.float "numeric_value"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["detailable_type", "detailable_id", "label_id"], name: "index_details_on_detailable_and_label", unique: true
+    t.index ["detailable_type", "detailable_id"], name: "index_details_on_detailable_type_and_detailable_id"
+  end
 
   create_table "entities", force: :cascade do |t|
     t.boolean "active"
