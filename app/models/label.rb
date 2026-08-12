@@ -20,6 +20,8 @@ class Label < ActiveRecord::Base
   # деталях, нельзя удалить, пока эти детали не удалены.
   has_many :details, dependent: :restrict_with_error
 
+  before_destroy :prevent_destroy_unless_inactive_and_unfixed
+
   validates :name, presence: true
 
   # Перевод name на язык страницы. Переводы вносятся вручную в админке
@@ -47,5 +49,16 @@ class Label < ActiveRecord::Base
 
   def self.ransackable_associations(auth_object = nil)
     ["parent", "children"]
+  end
+
+  private
+
+  # Удалять можно только заведомо выведенный из оборота label — сперва
+  # сними active и fixed вручную, чтобы удаление не было случайным.
+  def prevent_destroy_unless_inactive_and_unfixed
+    return if !active? && !fixed?
+
+    errors.add(:base, "нельзя удалить — сначала снимите active и fixed")
+    throw :abort
   end
 end
