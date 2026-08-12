@@ -1,0 +1,71 @@
+<div class="content m-3">
+
+<form method="GET" action="/admin/details">
+
+  <div class="columns">
+    <div class="column is-2">
+      <tag class="tag is-size-7">detailable_type_eq</tag>
+      <% @detailable_types_for_select = {"": ""}.merge(DetailsController::DETAILABLE_TYPES.to_h { |type| [type, type] }) %>
+      <%= select(:q, :detailable_type_eq, @detailable_types_for_select, options = {class: 'select input is-small', value: @q.detailable_type_eq}) %>
+    </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">label_name_cont</tag>
+      <%= input(:q, :label_name_cont, options = {class: 'input is-small', value: @q.label_name_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">value_cont</tag>
+      <%= input(:q, :value_cont, options = {class: 'input is-small', value: @q.value_cont, placeholder: ""}) %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-1">
+      <input type="submit" value="Filter" class="button is-warning">
+    </div>
+    <div class="column is-11">
+      Found/Total: <%= @details_found %> / <%= Detail.all.size %>
+    </div>
+  </div>
+
+</form>
+
+<div class="content">
+
+  <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
+    <div class="column is-12">
+      <%= paginate @details unless @details.blank? %>
+    </div>
+  </div>
+
+  <table class="table is-narrow is-size-7">
+    <tr class="is-size-6 has-text-weight-semibold">
+      <td>detailable</td>
+      <td>label</td>
+      <td>value</td>
+      <td>numeric_value</td>
+    </tr>
+
+  <% @details.each do |detail| %>
+
+    <tr>
+      <td>
+        <% if detail.detailable %>
+          <a href="/admin/<%= detail.detailable.class.name.underscore.pluralize %>/<%= detail.detailable.id %>">
+            <%= detail.detailable_type %> #<%= detail.detailable_id %>
+          </a>
+        <% else %>
+          <%= detail.detailable_type %> #<%= detail.detailable_id %>
+        <% end %>
+      </td>
+      <td><%= detail.label&.name %></td>
+      <td><%= detail.value %></td>
+      <td><%= detail.numeric_value %></td>
+    </tr>
+
+  <% end %>
+
+  </table>
+
+</div>
+
+</div>

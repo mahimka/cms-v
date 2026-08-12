@@ -20,6 +20,7 @@ use TagsController
 use SchemasController
 use LabelsController
 use LinksController
+use DetailsController
 use PicturesController
 use ItemsController
 use EntitiesController

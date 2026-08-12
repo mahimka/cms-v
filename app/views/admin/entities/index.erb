@@ -121,7 +121,7 @@
     parent_id
   </div>
   <div class="column is-1">
-    <input type="checkbox" name="q[details_present]" value='1' <%= @q.details_present ? "checked" : "" %>>
+    <input type="checkbox" name="q[detail_records_id_present]" value='1' <%= @q.detail_records_id_present ? "checked" : "" %>>
     details
   </div>
   <div class="column is-1">
@@ -170,7 +170,7 @@
   </div>
 
   <div class="column is-1">
-    <input type="checkbox" name="q[details_blank]" value='1' <%= @q.details_blank ? "checked" : "" %>>
+    <input type="checkbox" name="q[detail_records_id_blank]" value='1' <%= @q.detail_records_id_blank ? "checked" : "" %>>
     details
   </div>
 
@@ -264,7 +264,7 @@
       <td width=250><%= input_in_place(entity, :address) %></td>
       <td><%= entity.parent_id %></td>
       <td><%= entity&.tags&.size %></td>
-      <td><%= entity&.details&.size %></td>
+      <td><%= entity&.detail_records&.size %></td>
       <td><%= entity&.pictures&.size %></td>
       <td><%= entity&.links&.size %></td>
       <td><%= entity&.profiles&.size %></td>

@@ -14,6 +14,12 @@ class Label < ActiveRecord::Base
 
   has_many :links, dependent: :nullify
 
+  # :nullify не подходит, как у links — Detail#label_id обязателен
+  # (не optional), поэтому осиротевшая запись сломает set_numeric_value,
+  # уникальность и Entity/Item/Event#details. Лейбл, используемый в
+  # деталях, нельзя удалить, пока эти детали не удалены.
+  has_many :details, dependent: :restrict_with_error
+
   validates :name, presence: true
 
   # Перевод name на язык страницы. Переводы вносятся вручную в админке
