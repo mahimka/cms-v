@@ -62,6 +62,14 @@
         </form>
         <a href="/admin/labels/<%= group.id %>" class="button is-small">show</a>
         <a href="/admin/labels/<%= group.id %>/edit" class="button is-small">edit</a>
+        <% if !group.active? && !group.fixed? %>
+          <form method="POST" action="/admin/labels/<%= group.id %>" style="display:inline;" onsubmit="return confirm('Delete this label?')">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="button is-small is-danger">delete</button>
+          </form>
+        <% else %>
+          <button type="button" class="button is-small" disabled title="удалить можно только неактивный (active=false) и не fixed label">delete</button>
+        <% end %>
       </td>
     </tr>
 
@@ -75,6 +83,14 @@
         <td>
           <a href="/admin/labels/<%= label.id %>" class="button is-small">show</a>
           <a href="/admin/labels/<%= label.id %>/edit" class="button is-small">edit</a>
+          <% if !label.active? && !label.fixed? %>
+            <form method="POST" action="/admin/labels/<%= label.id %>" style="display:inline;" onsubmit="return confirm('Delete this label?')">
+              <input type="hidden" name="_method" value="DELETE">
+              <button type="submit" class="button is-small is-danger">delete</button>
+            </form>
+          <% else %>
+            <button type="button" class="button is-small" disabled title="удалить можно только неактивный (active=false) и не fixed label">delete</button>
+          <% end %>
         </td>
       </tr>
     <% end %>
