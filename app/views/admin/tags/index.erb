@@ -79,7 +79,7 @@
     </div>
   </div>   
 
-  <table class="tableis-narrow is-size-7 ">
+  <table class="table is-narrow is-size-7 ">
     <tr class="is-size-6 has-text-weight-semibold">
       <td>active</td>
       <td title="запрещает менять name — на него ссылается List conditions (tags)">fixed 🔒</td>
@@ -93,7 +93,7 @@
   <% grouped_tags = @tags.group_by { |t| (t.parent_id.presence && t.parent_id != 0 && t.parent) ? t.parent : t } %>
   <% grouped_tags.sort_by { |group, _| [group.position || 0, group.name.to_s] }.each do |group, tags_in_group| %>
 
-    <tr class="has-background-light">
+    <tr class="has-background-light is-size-7">
       <td><%= checkbox_in_place(group, :active) %></td>
       <td><%= checkbox_in_place(group, :fixed) %></td>
       <td><%= group.position %></td>
@@ -117,7 +117,7 @@
       <tr>
         <td><%= checkbox_in_place(tag, :active) %></td>
         <td><%= checkbox_in_place(tag, :fixed) %></td>
-        <td><%= input_in_place(tag, :position) %></td>
+        <td width=15><%= input_in_place(tag, :position) %></td>
         <td class="pl-5"><%= tag.name %></td>
         <td><%= input_in_place(tag, :admin_notes) %></td>
         <td>
