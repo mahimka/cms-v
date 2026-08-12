@@ -117,9 +117,9 @@
       <tr>
         <td><%= checkbox_in_place(tag, :active) %></td>
         <td><%= checkbox_in_place(tag, :fixed) %></td>
-        <td><%= tag.position %></td>
+        <td><%= input_in_place (tag, :position) %></td>
         <td class="pl-5"><%= tag.name %></td>
-        <td><%= tag.admin_notes %></td>
+        <td><%= input_in_place (tag, :admin_notes) %></td>
         <td>
           <a href="/admin/tags/<%= tag.id %>" class="button is-small" target='_blank'>tag</a>
           <a href="/admin/tags/<%= tag.id %>/edit" class="button is-small" target='_blank'>edit</a>
