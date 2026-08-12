@@ -16,9 +16,14 @@
 <h2 class='title is-4 mt-4'>used by schemas</h2>
 <ul>
   <% @label.schemas.each do |schema| %>
-    <li><a href="/admin/schemas/<%= schema.id %>"><%= schema.name %></a>
+    <li>
+      <a href="/admin/schemas/<%= schema.id %>"><%= schema.name %></a>
+      <span class="tag is-info is-light"><%= @label.usage_count(schema: schema) %></span>
+    </li>
   <% end %>
 </ul>
+
+<p class="help mt-2">всего используется в details: <%= @label.usage_count %></p>
 
 <h2 class='title is-4 mt-4'>children</h2>
 <ul>
