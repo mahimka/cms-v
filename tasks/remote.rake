@@ -49,12 +49,12 @@ namespace :remote do
 
     task :all do
        @commands << "cd #{@app_name} && git pull"
-       @commands << "cd #{@app_name} && bundle install"
+       # @commands << "cd #{@app_name} && bundle install"
 
        run_ssh_commands @commands
        @commands = []
 
-      Rake::Task["upload:config"].invoke
+      # Rake::Task["upload:config"].invoke
       Rake::Task["upload:project"].invoke
       # Rake::Task["upload:public"].invoke
 
