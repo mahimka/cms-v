@@ -26,7 +26,7 @@ class Tag < ActiveRecord::Base
   has_many :schemas, through: :schema_tags
 
   validates_presence_of :name #, :position
-  # validates_uniqueness_of :name
+  validates :name, uniqueness: true
 
   # Перевод name на язык страницы. Переводы вносятся вручную в админке
   # (translations — hash locale => строка), при отсутствии — фолбэк на name.
