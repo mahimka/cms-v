@@ -34,6 +34,12 @@ class Tag < ActiveRecord::Base
     translations&.dig(lang.to_s).presence || name
   end
 
+  # Сколько объектов (любого taggable-типа — Item/Entity/Event/Page/
+  # Picture) помечено этим тегом.
+  def usage_count
+    taggings.count
+  end
+
   # # for forms:
   # def parenttag_and_tag
   #   "#{self.parent.name}" +  " :: " + "#{self.name}"
