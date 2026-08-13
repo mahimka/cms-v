@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_08_12_120000) do
+ActiveRecord::Schema.define(version: 2026_08_12_130000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -95,6 +95,7 @@ ActiveRecord::Schema.define(version: 2026_08_12_120000) do
     t.text "translations"
     t.boolean "fixed", default: false
     t.index ["ancestry"], name: "index_labels_on_ancestry"
+    t.index ["name"], name: "index_labels_on_name", unique: true
   end
 
   create_table "links", force: :cascade do |t|
