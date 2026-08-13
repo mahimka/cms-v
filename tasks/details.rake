@@ -39,4 +39,28 @@ namespace :details do
       puts "  #{key.inspect} (#{count}x)"
     end
   end
+
+  JUNK_VALUES = ["replace me", "edit me!", "", nil].freeze
+
+  desc "Удаляет details latitude/longitude (перенесены в entities.latitude/longitude) и details с мусорными/пустыми value"
+  task :cleanup_junk do
+    # delete_all не поддерживает joins — удаляем по подзапросу id.
+    lat_lon = Detail.where(id: Detail.joins(:label).where(labels: { name: %w[latitude longitude] }).select(:id))
+    lat_lon_count = lat_lon.count
+    lat_lon.delete_all
+
+    junk_values = Detail.where(value: JUNK_VALUES)
+    junk_values_count = junk_values.count
+    junk_values.delete_all
+
+    # На случай пробельных "пустых" значений, не пойманных точным списком выше.
+    blank_ish = Detail.select { |d| d.value.to_s.strip.empty? }
+    blank_ish_count = blank_ish.size
+    Detail.where(id: blank_ish.map(&:id)).delete_all if blank_ish_count.positive?
+
+    puts "Удалено latitude/longitude: #{lat_lon_count}"
+    puts "Удалено с мусорным value (#{JUNK_VALUES.map(&:inspect).join(', ')}): #{junk_values_count}"
+    puts "Удалено дополнительно blank-после-strip: #{blank_ish_count}"
+    puts "Осталось details: #{Detail.count}"
+  end
 end
