@@ -1,29 +1,30 @@
 <h1 class='title is-4'><%= @tag.parent_id %> : <%= @tag.name %></h1>
-<table class='table is-size-7'>
 
-	<tr>
-		<td>domain</td>
-		<td><%#= @tag.site&.domain %> <a href="<%#=  @tag.site&.url %>">site</a></td>
-	</tr>
+<p class="mb-4">
+  <a href="/admin/tags/<%= @tag.id %>/edit" class="button is-small">edit</a>
+  <span class="tag is-info is-light">всего используется: <%= @taggings.size %></span>
+</p>
 
-</table>
+<h2 class='title is-4 mt-4'>tagged objects</h2>
 
-
-<p></p>
-
-<%# @label.labels.each do |key, value| %>
-  <p>
-  	<strong><%#= key %></strong><br>
-  	<%# if value.is_a? String %>
-  	  <br>
-  	  <%#= value %>
-  	<%# elsif value.is_a? Array %>
-  	  <ul>
-  	  <%# value.each do |value| %>  
-  	    <li><%#= value %>
-  	  <%# end %>  
-  	  </ul>
-  	<%# end %>
-
-  </p>
-<%# end %>
+<% if @taggings.empty? %>
+  <p class="help">этим тегом ничего не помечено</p>
+<% else %>
+  <% @taggings.group_by(&:taggable_type).each do |type, taggings_of_type| %>
+    <h3 class="title is-5 mt-3"><%= type %> (<%= taggings_of_type.size %>)</h3>
+    <ul>
+      <% taggings_of_type.each do |tagging| %>
+        <% obj = tagging.taggable %>
+        <li>
+          <% if obj.nil? %>
+            <span class="has-text-grey">#<%= tagging.taggable_id %> (запись удалена)</span>
+          <% elsif type == "Page" %>
+            <a href="<%= obj.uri %>" target="_blank"><%= obj.uri %></a>
+          <% else %>
+            <a href="/admin/<%= type.underscore.pluralize %>/<%= obj.id %>"><%= obj.try(:name) || obj.try(:title) || obj.try(:alt).presence || obj.try(:file) || "##{obj.id}" %></a>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

@@ -7,7 +7,11 @@ class TagsController < App
       @q = Tag.ransack(params[:q])
       @tags_found = @q.result(distinct: true).size # for index.rb
       @tags       = @q.result(distinct: true).includes(:parent).order(:parent_id, :position, :name).page(params[:page]).per(500)
-      erb :"/tags/index", layout: :"/layout/wide", views: settings.views_admin   
+
+      # Один запрос на всю страницу вместо tag.usage_count на каждую строку.
+      @tagging_counts_by_tag = Tagging.group(:tag_id).count
+
+      erb :"/tags/index", layout: :"/layout/wide", views: settings.views_admin
 
     end  
 
@@ -22,13 +26,14 @@ class TagsController < App
       erb :"/tags/new", layout: :"/layout/wide", views: settings.views_admin
     end 
 
-    get '/tags/:id' do 
+    get '/tags/:id' do
 
       @tag = Tag.find(params[:id])
- 
-      erb :"/tags/show", layout: :"/layout/wide", views: settings.views_admin   
+      @taggings = @tag.taggings.includes(:taggable).order(:taggable_type)
 
-    end  
+      erb :"/tags/show", layout: :"/layout/wide", views: settings.views_admin
+
+    end
 
     # edit
     get '/tags/:id/edit' do 
