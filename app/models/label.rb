@@ -22,7 +22,7 @@ class Label < ActiveRecord::Base
 
   before_destroy :prevent_destroy_unless_inactive_and_unfixed
 
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: true
 
   # Перевод name на язык страницы. Переводы вносятся вручную в админке
   # (translations — hash locale => строка), при отсутствии — фолбэк на name.
