@@ -42,12 +42,17 @@ namespace :details do
 
   JUNK_VALUES = ["replace me", "edit me!", "", nil].freeze
 
-  desc "Удаляет details latitude/longitude (перенесены в entities.latitude/longitude) и details с мусорными/пустыми value"
+  # Лейблы, выведенные из оборота как ключи details — либо перенесены в
+  # обычные колонки (latitude/longitude -> entities.latitude/longitude),
+  # либо больше не актуальны (high_60/low_60).
+  OBSOLETE_LABELS = %w[latitude longitude high_60 low_60].freeze
+
+  desc "Удаляет details с устаревшими label (#{OBSOLETE_LABELS.join(', ')}) и details с мусорными/пустыми value"
   task :cleanup_junk do
     # delete_all не поддерживает joins — удаляем по подзапросу id.
-    lat_lon = Detail.where(id: Detail.joins(:label).where(labels: { name: %w[latitude longitude] }).select(:id))
-    lat_lon_count = lat_lon.count
-    lat_lon.delete_all
+    obsolete = Detail.where(id: Detail.joins(:label).where(labels: { name: OBSOLETE_LABELS }).select(:id))
+    obsolete_count = obsolete.count
+    obsolete.delete_all
 
     junk_values = Detail.where(value: JUNK_VALUES)
     junk_values_count = junk_values.count
@@ -58,7 +63,7 @@ namespace :details do
     blank_ish_count = blank_ish.size
     Detail.where(id: blank_ish.map(&:id)).delete_all if blank_ish_count.positive?
 
-    puts "Удалено latitude/longitude: #{lat_lon_count}"
+    puts "Удалено с устаревшим label (#{OBSOLETE_LABELS.join(', ')}): #{obsolete_count}"
     puts "Удалено с мусорным value (#{JUNK_VALUES.map(&:inspect).join(', ')}): #{junk_values_count}"
     puts "Удалено дополнительно blank-после-strip: #{blank_ish_count}"
     puts "Осталось details: #{Detail.count}"
