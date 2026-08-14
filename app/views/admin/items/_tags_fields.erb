@@ -17,12 +17,14 @@
         вне текущей schema (например после смены schema у item) — иначе
         такой тег невозможно снять: чекбокса для него просто нет в форме. %>
     <% attached_out_of_scope = @item.tags.where.not(id: schema_tags.map(&:id)) %>
+    <% out_of_scope_ids = attached_out_of_scope.map(&:id) %>
     <% grouped_tags   = (schema_tags + attached_out_of_scope).group_by { |tag| tag.parent } %>
 
     <% grouped_tags.each do |parent, children| %>
       <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
       <% children.each do |tag| %>
-        <label class="checkbox mr-3">
+        <% suspect = out_of_scope_ids.include?(tag.id) %>
+        <label class="checkbox mr-3<%= " has-background-danger-light px-1" if suspect %>" <% if suspect %>title="группа этого тега не привязана к текущей schema — вероятно, тег остался от другой schema"<% end %>>
           <input type="checkbox" name="tag_ids[]" value="<%= tag.id %>" <%= "checked" if selected_ids.include?(tag.id) %>>
           <%= tag.name %>
         </label>
