@@ -6,7 +6,6 @@ if ActiveRecord::Base.connection.migration_context.needs_migration?
   raise 'Migrations are pending. Run `rake db:migrate` to resolve the issue.'
 end
 
-
 #In order to send HTTP PATCH and DELETE requests, I need to add Sinatra middleware. 
 use Rack::MethodOverride 
 
@@ -31,11 +30,10 @@ use HistoriesController
 use RoutesFirst
 use Routes
 use RoutesLast
-
+use RoutesHistory
 
 # use GeonamesController
 # use AdsController
-
 
 # use ProfilesController
 # use TagsController
@@ -46,7 +44,6 @@ use RoutesLast
 # use SitemapRoutesController
 # use RoutesController
 # use DisplayController
-
 
 run App
 
