@@ -10,8 +10,6 @@
 
     <%= erb :'/entities/_form', views: settings.views_admin %>
 
-    <%= erb :'/entities/_details_fields', views: settings.views_admin %>
-
     <%= erb :'/entities/_tags_fields', views: settings.views_admin %>
 
     <div class="field is-grouped">
@@ -25,8 +23,13 @@
 
   </form>
 
-  <%# отдельно от формы Entity: у каждой ссылки/картинки свой ресурс/маршрут, %>
-  <%# вложенные <form> в HTML невалидны %>
+  <%# отдельно от формы Entity: у каждой детали/ссылки/картинки свой
+      ресурс/маршрут и своя <form> на строку — вложенные <form> в HTML
+      невалидны, браузер обрывает внешнюю форму на первой же вложенной
+      (тогда всё после неё, включая кнопку Update Entity, вылетает из
+      формы и submit вообще ничего не отправляет). %>
+  <%= erb :'/entities/_details_fields', views: settings.views_admin %>
+
   <%= erb :'/entities/_links_fields', views: settings.views_admin %>
 
   <%= erb :'/entities/_profiles_fields', views: settings.views_admin %>
