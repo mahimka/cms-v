@@ -1,0 +1,52 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:history, :old_uri, "old_uri", options = {class: 'label'}) %>
+    <p class="help">старый адрес, с которого редиректим (уникален)</p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:history, :old_uri, options = {class: 'input is-success', value: @history.old_uri, placeholder: "/old-page"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:history, :new_uri, "new_uri", options = {class: 'label'}) %>
+    <p class="help">новый адрес, куда редиректим</p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:history, :new_uri, options = {class: 'input is-success', value: @history.new_uri, placeholder: "/new-page"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:history, :redirect_code, "redirect_code", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= select(:history, :redirect_code, {"301 — permanent" => 301, "302 — found (temporary)" => 302, "307 — temporary redirect" => 307, "308 — permanent redirect" => 308}, options = {class: 'select input is-success', value: @history.redirect_code}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:history, :page_id, "page_id", options = {class: 'label'}) %>
+    <% if @history.page %>
+      <p class="help">сейчас: <%= @history.page.uri %></p>
+    <% end %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:history, :page_id, options = {class: 'input is-success', value: @history.page_id, placeholder: "id страницы (необязательно)"}) %>
+  </div>
+
+</div>

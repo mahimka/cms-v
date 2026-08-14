@@ -1,0 +1,17 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <form method="POST" action="/admin/histories">
+
+    <%= erb :'/histories/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Create History" class="button is-warning">
+      </div>
+    </div>
+
+  </form>
+
+</div>
