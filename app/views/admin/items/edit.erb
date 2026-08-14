@@ -10,8 +10,6 @@
 
     <%= erb :'/items/_form', views: settings.views_admin %>
 
-    <%= erb :'/items/_details_fields', views: settings.views_admin %>
-
     <%= erb :'/items/_tags_fields', views: settings.views_admin %>
 
     <div class="field is-grouped">
@@ -25,8 +23,13 @@
 
   </form>
 
-  <%# отдельно от формы Item: у каждой ссылки/картинки свой ресурс/маршрут, %>
-  <%# вложенные <form> в HTML невалидны %>
+  <%# отдельно от формы Item: у каждой детали/ссылки/картинки свой
+      ресурс/маршрут и своя <form> на строку — вложенные <form> в HTML
+      невалидны, браузер обрывает внешнюю форму на первой же вложенной
+      (тогда всё после неё, включая кнопку Update Item, вылетает из
+      формы и submit вообще ничего не отправляет). %>
+  <%= erb :'/items/_details_fields', views: settings.views_admin %>
+
   <%= erb :'/items/_links_fields', views: settings.views_admin %>
 
   <%= erb :'/items/_profiles_fields', views: settings.views_admin %>
