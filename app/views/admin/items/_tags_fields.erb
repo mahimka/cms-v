@@ -13,7 +13,11 @@
 
     <% schema_tags   = @item.effective_tags.to_a %>
     <% selected_ids   = @item.tag_ids %>
-    <% grouped_tags   = schema_tags.group_by { |tag| tag.parent } %>
+    <%# Уже прикреплённые теги всегда показываем чекбоксом, даже если они
+        вне текущей schema (например после смены schema у item) — иначе
+        такой тег невозможно снять: чекбокса для него просто нет в форме. %>
+    <% attached_out_of_scope = @item.tags.where.not(id: schema_tags.map(&:id)) %>
+    <% grouped_tags   = (schema_tags + attached_out_of_scope).group_by { |tag| tag.parent } %>
 
     <% grouped_tags.each do |parent, children| %>
       <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
