@@ -121,6 +121,9 @@ class PicturesController < App
     begin
       image = MiniMagick::Image.open(disk_path)
       raise "not a valid image file" unless image.valid?
+      format = image.type
+      width = image.width
+      height = image.height
     rescue StandardError => e
       File.delete(disk_path) if File.exist?(disk_path)
       return [picture_params, e.message]
@@ -130,9 +133,9 @@ class PicturesController < App
     picture_params.delete(:image)
     picture_params.delete(:folder)
     picture_params[:file] = "#{folder}/#{filename}"
-    picture_params[:content_type] = image.mime_type
-    picture_params[:width] = image.width
-    picture_params[:height] = image.height
+    picture_params[:content_type] = "image/#{format.downcase}"
+    picture_params[:width] = width
+    picture_params[:height] = height
     [picture_params, nil]
   end
 
