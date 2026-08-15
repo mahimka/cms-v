@@ -100,9 +100,9 @@ class PicturesController < App
 
       halt 422, { error: "alt is blank — enter alt text first" }.to_json if @picture.alt.blank?
 
-      translations = translate_missing_alt_languages(@picture)
+      translations, errors = translate_missing_alt_languages(@picture)
       @picture.update!(translations: translations)
-      translations.to_json
+      { translations: translations, errors: errors }.to_json
     end
 
     delete '/pictures/:id' do
@@ -189,15 +189,20 @@ class PicturesController < App
   def translate_missing_alt_languages(picture)
     gemini = GeminiClient.new(api_key: settings.gemini_api_key)
     translations = (picture.translations || {}).dup
+    errors = {}
     target_langs = settings.languages.keys.map(&:to_s) - [settings.home_language.to_s]
 
     target_langs.each do |lang|
       next if translations[lang].present?
 
-      translations[lang] = gemini.translate(picture.alt, from: settings.home_language, to: lang)
+      begin
+        translations[lang] = gemini.translate(picture.alt, from: settings.home_language, to: lang)
+      rescue StandardError => e
+        errors[lang] = e.message
+      end
     end
 
-    translations
+    [translations, errors]
   end
 
   def unique_upload_filename(folder, filename)

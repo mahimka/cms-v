@@ -18,11 +18,20 @@ $(document).on("click", "[data-picture-translate-alt]", function (event) {
     method: "POST",
     dataType: "json"
   })
-    .done(function (translations) {
-      $.each(translations, function (lang, value) {
+    .done(function (result) {
+      $.each(result.translations, function (lang, value) {
         $('input[name="picture[translations][' + lang + ']"]').val(value);
       });
-      $button.removeClass("is-loading").addClass("is-success").text("✓ translated");
+
+      var failedLangs = Object.keys(result.errors || {});
+      $button.prop("disabled", false).removeClass("is-loading");
+
+      if (failedLangs.length) {
+        $button.addClass("is-warning").text("⚠ " + failedLangs.length + " failed");
+        console.error("Ошибки перевода:", result.errors);
+      } else {
+        $button.addClass("is-success").text("✓ translated");
+      }
     })
     .fail(function (xhr) {
       var message = (xhr.responseJSON && xhr.responseJSON.error) || xhr.statusText;
