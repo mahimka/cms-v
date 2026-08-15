@@ -46,7 +46,7 @@ gem 'kramdown', require: 'kramdown'
 gem 'ferrum'
 gem "nokogiri"
 
-# gem 'mini_magick'
+gem 'mini_magick'
 
 gem 'sinatra-formhelpers-ng', require: 'sinatra/form_helpers'
 # gem 'acts-as-taggable-on', require: 'acts-as-taggable-on'

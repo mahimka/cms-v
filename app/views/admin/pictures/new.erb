@@ -2,7 +2,7 @@
 
 <div class="content m-3">
 
-  <form method="POST" action="/admin/pictures">
+  <form method="POST" action="/admin/pictures" enctype="multipart/form-data">
 
     <%= erb :'/pictures/_form', views: settings.views_admin %>
 

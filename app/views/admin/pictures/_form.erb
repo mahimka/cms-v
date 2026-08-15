@@ -33,7 +33,34 @@
 <div class="columns">
 
   <div class="column is-2">
+    <p class="label">image</p>
+    <p class="help">загрузить файл с компьютера — file/content_type/width/height заполнятся автоматически</p>
+  </div>
+
+  <div class="column is-9">
+    <% if @picture.file.present? %>
+      <p class="help mb-2">сейчас: <%= @picture.file %></p>
+    <% end %>
+    <div class="file has-name is-small mb-2">
+      <label class="file-label">
+        <input class="file-input" type="file" name="picture[image]" accept="image/*" onchange="this.closest('.file').querySelector('.file-name').textContent = this.files[0] ? this.files[0].name : 'no file selected'">
+        <span class="file-cta">
+          <span class="file-label">Choose a file…</span>
+        </span>
+        <span class="file-name">no file selected</span>
+      </label>
+    </div>
+    <input type="text" name="picture[folder]" class="input is-small is-success" value="" placeholder="/images (по умолчанию), /images/rooms, ...">
+    <p class="help">папка внутри public — необязательно, по умолчанию /images</p>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
     <%= label(:picture, :file, "file", options = {class: 'label'}) %>
+    <p class="help">путь заполнится сам при загрузке; менять вручную нужно только для картинок без реального файла-загрузки</p>
   </div>
 
   <div class="column is-9">

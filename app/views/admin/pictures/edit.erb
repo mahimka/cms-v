@@ -4,7 +4,7 @@
 
   <h1 class="title"><%= @picture.alt || @picture.file %></h1>
 
-  <form method="POST" action="/admin/pictures/<%= @picture.id %>">
+  <form method="POST" action="/admin/pictures/<%= @picture.id %>" enctype="multipart/form-data">
     <input type="hidden" name="_method" value="PATCH">
 
     <%= erb :'/pictures/_form', views: settings.views_admin %>
