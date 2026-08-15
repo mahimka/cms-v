@@ -16,14 +16,15 @@
       <div class="control">
         <a href="/admin/pictures/<%= @picture.id %>" class="button">Show</a>
       </div>
-      <div class="control">
-        <form action="/admin/pictures/<%= @picture.id %>" method="post" onsubmit="return confirm('Are you sure?')">
-          <input type="hidden" name="_method" value="delete">
-          <input type="submit" value="Delete" class="button is-danger">
-        </form>
-      </div>
     </div>
 
+  </form>
+
+  <!-- отдельная форма вне основной — вложенный <form> внутри <form> невалиден,
+       браузер бы схлопнул их в одну форму с двумя полями _method (см. коммит-сообщение) -->
+  <form action="/admin/pictures/<%= @picture.id %>" method="post" onsubmit="return confirm('Are you sure?')">
+    <input type="hidden" name="_method" value="delete">
+    <input type="submit" value="Delete" class="button is-danger">
   </form>
 
 </div>
