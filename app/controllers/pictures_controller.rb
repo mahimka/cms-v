@@ -108,9 +108,13 @@ class PicturesController < App
   # Возвращает [params, error_message] — error_message нужен только на неудаче.
   def process_picture_upload(picture_params)
     upload = picture_params && picture_params[:image]
+    requested_folder = picture_params && picture_params[:folder]
+    picture_params = picture_params ? picture_params.dup : {}
+    picture_params.delete(:image)
+    picture_params.delete(:folder)
     return [picture_params, nil] unless upload.is_a?(Hash) && upload[:tempfile]
 
-    folder = '/' + picture_params[:folder].to_s.sub(%r{\A/}, '').sub(%r{/\z}, '')
+    folder = '/' + requested_folder.to_s.sub(%r{\A/}, '').sub(%r{/\z}, '')
     folder = '/images' if folder == '/'
 
     filename = unique_upload_filename(folder, sanitize_upload_filename(upload[:filename]))
@@ -129,9 +133,6 @@ class PicturesController < App
       return [picture_params, e.message]
     end
 
-    picture_params = picture_params.dup
-    picture_params.delete(:image)
-    picture_params.delete(:folder)
     picture_params[:file] = "#{folder}/#{filename}"
     picture_params[:content_type] = "image/#{format.downcase}"
     picture_params[:width] = width
