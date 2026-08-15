@@ -4,6 +4,33 @@ class PicturesController < App
 
   IMAGEABLE_TYPES = %w[Entity Item Event].freeze
 
+  # Ключ — класс для figure (см. project/views/profile_painting.erb),
+  # значение — подпись в select. Полный список ratio-модификаторов Bulma
+  # 1.0 (image element), другого источника этих классов в приложении нет.
+  RATIOS = {
+    "" => "— none —",
+    "is-square" => "square (1:1)",
+    "is-1by1" => "1:1",
+    "is-5by4" => "5:4",
+    "is-4by3" => "4:3",
+    "is-3by2" => "3:2",
+    "is-5by3" => "5:3",
+    "is-16by9" => "16:9 (widescreen)",
+    "is-2by1" => "2:1",
+    "is-3by1" => "3:1",
+    "is-4by5" => "4:5",
+    "is-3by4" => "3:4",
+    "is-2by3" => "2:3",
+    "is-3by5" => "3:5",
+    "is-9by16" => "9:16 (vertical widescreen)",
+    "is-1by2" => "1:2",
+    "is-1by3" => "1:3",
+  }.freeze
+
+  # Единственная схема, объединяющая группы тегов, которыми имеет смысл
+  # помечать картинки (независимо от типа imageable) — см. Schema#effective_tags.
+  TAGGABLE_SCHEMA_NAME = "Picture".freeze
+
   namespace '/admin' do
 
     get '/pictures' do
@@ -65,6 +92,17 @@ class PicturesController < App
         flash.now[:errors] = @picture.errors.full_messages
         erb :"/pictures/edit", layout: :"/layout/wide", views: settings.views_admin
       end
+    end
+
+    post '/pictures/:id/translate_alt' do
+      @picture = Picture.find(params[:id])
+      content_type :json
+
+      halt 422, { error: "alt is blank — enter alt text first" }.to_json if @picture.alt.blank?
+
+      translations = translate_missing_alt_languages(@picture)
+      @picture.update!(translations: translations)
+      translations.to_json
     end
 
     delete '/pictures/:id' do
@@ -143,6 +181,23 @@ class PicturesController < App
   def sanitize_upload_filename(filename)
     base = File.basename(filename.to_s).gsub(/[^\w.\-]+/, '-')
     base.presence || "upload-#{Time.now.to_i}"
+  end
+
+  # Как TaggableTranslationsBackfiller (app/models/taggable_translations_backfiller.rb),
+  # но для одной записи и по кнопке: заполняет только пустые языки,
+  # никогда не перезаписывает то, что уже введено вручную.
+  def translate_missing_alt_languages(picture)
+    gemini = GeminiClient.new(api_key: settings.gemini_api_key)
+    translations = (picture.translations || {}).dup
+    target_langs = settings.languages.keys.map(&:to_s) - [settings.home_language.to_s]
+
+    target_langs.each do |lang|
+      next if translations[lang].present?
+
+      translations[lang] = gemini.translate(picture.alt, from: settings.home_language, to: lang)
+    end
+
+    translations
   end
 
   def unique_upload_filename(folder, filename)

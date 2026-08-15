@@ -87,6 +87,10 @@
   <div class="column is-2">
     <p class="label">translations</p>
     <p class="help">alt-текст на каждый язык (используется в видах вместо alt)</p>
+    <% if @picture.persisted? %>
+      <button type="button" class="button is-small is-link is-light mt-1" data-picture-translate-alt data-picture-id="<%= @picture.id %>">🌐 translate to all</button>
+      <p class="help">заполняет только пустые языки — введённое вручную не трогает</p>
+    <% end %>
   </div>
 
   <div class="column is-9">
@@ -143,11 +147,11 @@
 
   <div class="column is-2">
     <%= label(:picture, :ratio, "ratio", options = {class: 'label'}) %>
-    <p class="help">например 16:9, 4:3, 1:1 — используется для CSS-класса вида is-16by9</p>
+    <p class="help">CSS-класс Bulma для figure.image (project/views/profile_*.erb)</p>
   </div>
 
   <div class="column is-9">
-    <%= input(:picture, :ratio, options = {class: 'input is-success', value: @picture.ratio, placeholder: "16:9"}) %>
+    <%= select(:picture, :ratio, PicturesController::RATIOS, options = {class: 'select input is-success', value: @picture.ratio}) %>
   </div>
 
 </div>
@@ -198,9 +202,13 @@
   </div>
 
   <div class="column is-9">
-    <% Tag.active.order(:parent_id, :position, :name).group_by(&:parent).each do |parent, children| %>
+    <% picture_schema = Schema.find_by(name: PicturesController::TAGGABLE_SCHEMA_NAME) %>
+    <% schema_tags = picture_schema ? picture_schema.effective_tags : Tag.none %>
+    <% attached_out_of_scope = @picture.persisted? ? @picture.tags.where.not(id: schema_tags.select(:id)) : Tag.none %>
+    <% grouped_tags = (schema_tags.to_a + attached_out_of_scope.to_a).uniq.group_by(&:parent) %>
+    <% grouped_tags.sort_by { |parent, _| parent&.position || 0 }.each do |parent, children| %>
       <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
-      <% children.each do |tag| %>
+      <% children.sort_by { |t| [t.position || 0, t.name] }.each do |tag| %>
         <label class="checkbox mr-3">
           <input type="checkbox" name="tag_ids[]" value="<%= tag.id %>" <%= "checked" if @picture.tag_ids.include?(tag.id) %>>
           <%= tag.name %>
