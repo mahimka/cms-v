@@ -72,11 +72,20 @@ class App < Sinatra::Base
       halt 401, "Not authorized\n"
     end  
     
-    def authorized? 
+    def authorized?
       @auth ||=  Rack::Auth::Basic::Request.new(request.env)
       @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == [settings.cms['login'].to_s, settings.cms['password'].to_s]
     end
-  end  
+
+    # Залогиненный посетитель сайта (не путать с админом — это отдельная,
+    # обычная HTTP Basic Auth, см. protected!/authorized? выше). nil, если
+    # гость или сессии нет.
+    def current_user
+      return @current_user if defined?(@current_user)
+
+      @current_user = session[:user_id] && User.find_by(id: session[:user_id])
+    end
+  end
 
   # === start of view rendering helpers (project/views -> app/views с фолбэком) ===
 
@@ -214,9 +223,11 @@ class App < Sinatra::Base
   helpers Sinatra::FormHelpers  #https://stackoverflow.com/questions/12207161/good-forms-helpers-for-sinatra
 
   #https://github.com/nakajima/rack-flash
-  enable :sessions  
-  use Rack::Flash, :sweep => true  
-  #set :session_secret, "secret"  # нужен секрет али нет?? где читать ?
+  # session_secret — постоянный, из config/secret.yml (settings.session_secret,
+  # config_file уже вызвал set за нас) — без него Sinatra генерит случайный
+  # секрет на каждую перезагрузку, и залогиненные слетают при каждом рестарте.
+  enable :sessions
+  use Rack::Flash, :sweep => true
 
   configure :development do |c|
     register Sinatra::Reloader

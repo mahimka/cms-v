@@ -1,0 +1,25 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @user.name %></h1>
+
+  <form method="POST" action="/admin/users/<%= @user.id %>">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <%= erb :'/users/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Update User" class="button is-link is-warning">
+      </div>
+    </div>
+
+  </form>
+
+  <form action="/admin/users/<%= @user.id %>" method="post" onsubmit="return confirm('Are you sure?')">
+    <input type="hidden" name="_method" value="delete">
+    <input type="submit" value="Delete" class="button is-danger">
+  </form>
+
+</div>

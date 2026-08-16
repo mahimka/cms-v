@@ -7,15 +7,16 @@ class Picture < ActiveRecord::Base
   scope :published, -> { where(published: true) }
 
   belongs_to :imageable, polymorphic: true
+  belongs_to :user, optional: true
 
   validates :file, presence: true
 
   def self.ransackable_attributes(auth_object = nil)
-    ["active", "id", "imageable_type", "imageable_id", "file", "alt", "content_type", "width", "height", "ratio", "published", "position", "created_at", "updated_at"]
+    ["active", "id", "imageable_type", "imageable_id", "file", "alt", "content_type", "width", "height", "ratio", "published", "position", "user_id", "latitude", "longitude", "taken_at", "created_at", "updated_at"]
   end
 
   def self.ransackable_associations(auth_object = nil)
-    ["imageable", "tags"]
+    ["imageable", "tags", "user"]
   end
 
   # Alt-текст на язык страницы. Переводится вручную в админке

@@ -1,0 +1,38 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:user, :name, "name", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:user, :name, options = {class: 'input is-success', value: @user.name, placeholder: "Имя"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:user, :email, "email", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:user, :email, options = {class: 'input is-success', value: @user.email, placeholder: "user@example.com"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:user, :password, "password", options = {class: 'label'}) %>
+    <% if @user.persisted? %>
+      <p class="help">оставьте пустым, чтобы не менять</p>
+    <% end %>
+  </div>
+
+  <div class="column is-9">
+    <input type="password" name="user[password]" class="input is-success" placeholder="<%= @user.persisted? ? "" : "минимум 8 символов" %>" autocomplete="new-password">
+  </div>
+
+</div>
