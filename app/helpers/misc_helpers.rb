@@ -59,22 +59,118 @@ module MiscHelpers
       erb partial_sym, layout: false, views: "/", locals: options
     end
 
-    # Тег в HTML, если он есть в page_tags (по умолчанию — @page_tags
-    # текущей страницы), иначе пустая строка. page_tags — произвольный
-    # hash { tag_name => переведённое_значение }, поэтому подходит и для
-    # тегов текущей @page, и для тегов сущности из цикла (см. _card_room.erb).
+    # Выводит переведённые названия тегов группы group_name, которыми
+    # затегирован объект, привязанный к странице (page.pageable). По
+    # умолчанию — только первый найденный тег группы, но можно вывести
+    # несколько через limit. Каждый — в своей обёртке (как у tag_by_lang),
+    # так что html_after так же работает построчным разделителем ("<br>").
+    #
+    # options:
+    #   limit:      сколько тегов группы вывести максимум, по умолчанию 1
+    #   css_class:  класс на обёртке, по умолчанию "tag is-light"
+    #   html_tag:   тег обёртки, по умолчанию "span"
+    #   html_after: что добавить после каждого тега
+    #   page:       чья страница — по умолчанию текущая @page
+    def tags_by_group(group_name, options = {})
+      limit      = options[:limit]      || 1
+      css_class  = options[:css_class]  || "tag is-light"
+      html_tag   = options[:html_tag]   || "span"
+      html_after = options[:html_after] || ""
+      page       = options[:page]       || @page
+
+      return "" unless page&.pageable
+
+      group = Tag.find_by(name: group_name)
+      return "" unless group
+
+      matching_tags = page.pageable.tags.select { |t| t.parent_id == group.id }.first(limit)
+
+      matching_tags.map do |tag|
+        "<#{html_tag} class='#{css_class}'>#{tag.translation(page.lang)}</#{html_tag}>#{html_after}"
+      end.join
+    end
+
+
+
+    # Выводит переведённое название тега tag_name, если объекту, привязанному
+    # к странице (page.pageable), он присвоен. Иначе — "".
+    #
+    # options:
+    #   css_class:  класс на обёртке, по умолчанию "tag is-light"
+    #   html_tag:   тег обёртки, по умолчанию "span"
+    #   html_after: что добавить после закрывающего тега
+    #   page:       чья страница — по умолчанию текущая @page; передавать
+    #               явно при рендере списка/карточек, где для каждой строки
+    #               нужна её собственная page
     def tag_by_lang(tag_name, options = {})
       css_class  = options[:css_class]  || "tag is-light"
       html_tag   = options[:html_tag]   || "span"
       html_after = options[:html_after] || ""
-      page_tags  = options[:page_tags]  || @page_tags || {}
+      page       = options[:page]       || @page
 
-      translated = page_tags[tag_name]
+      return "" unless page&.pageable
 
-      return "" unless translated
+      tag = page.pageable.tags.find { |t| t.name == tag_name }
+      return "" unless tag
+
+      translated = tag.translation(page.lang)
 
       "<#{html_tag} class='#{css_class}'>#{translated}</#{html_tag}>#{html_after}"
     end
+
+
+    # Выводит переведённое название label и значение детали label_name у
+    # объекта, привязанного к странице (page.pageable). Если такой детали
+    # нет (или значение пустое) — "".
+    #
+    # options:
+    #   separator:  чем разделить название и значение, по умолчанию ": "
+    #   css_class:  класс на обёртке, по умолчанию "tag is-light"
+    #   html_tag:   тег обёртки, по умолчанию "span"
+    #   html_after: что добавить после закрывающего тега
+    #   page:       чья страница — по умолчанию текущая @page
+    def detail_by_label(label_name, options = {})
+      separator  = options[:separator]  || ": "
+      css_class  = options[:css_class]  || "tag is-light"
+      html_tag   = options[:html_tag]   || "span"
+      html_after = options[:html_after] || ""
+      page       = options[:page]       || @page
+      only_value = options[:only_value] || false
+
+      return "" unless page&.pageable
+
+      value = page.pageable.details[label_name]
+      return "" if value.blank?
+
+      label = Label.find_by(name: label_name)
+      translated_label = label ? label.translation(page.lang) : label_name
+
+      if only_value
+        "#{value}"
+      else
+        "<#{html_tag} class='#{css_class}'>#{translated_label}#{separator}#{value}</#{html_tag}>#{html_after}"
+      end
+    end
+
+
+
+
+    # # Тег в HTML, если он есть в page_tags (по умолчанию — @page_tags
+    # # текущей страницы), иначе пустая строка. page_tags — произвольный
+    # # hash { tag_name => переведённое_значение }, поэтому подходит и для
+    # # тегов текущей @page, и для тегов сущности из цикла (см. _card_room.erb).
+    # def tag_by_lang(tag_name, options = {})
+    #   css_class  = options[:css_class]  || "tag is-light"
+    #   html_tag   = options[:html_tag]   || "span"
+    #   html_after = options[:html_after] || ""
+    #   page_tags  = options[:page_tags]  || @page_tags || {}
+
+    #   translated = page_tags[tag_name]
+
+    #   return "" unless translated
+
+    #   "<#{html_tag} class='#{css_class}'>#{translated}</#{html_tag}>#{html_after}"
+    # end
 
     # UI-строка по ключу label_name (например '_faq', 'season_low') на
     # язык lang. Label#translation сам фолбэчит на label.name, если для
