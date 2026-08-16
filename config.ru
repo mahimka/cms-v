@@ -26,6 +26,9 @@ use EntitiesController
 use EventsController
 use PagesController
 use HistoriesController
+use SessionsController
+use UsersController
+use PublicPhotosController
 
 use RoutesFirst
 use Routes
