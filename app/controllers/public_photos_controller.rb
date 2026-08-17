@@ -10,18 +10,23 @@ class PublicPhotosController < App
   post '/photos' do
     content_type :json
 
-    picture_params, upload_error = process_picture_upload(params[:picture], max_bytes: MAX_UPLOAD_BYTES)
-    halt 422, { error: upload_error }.to_json if upload_error
-
     imageable_type = params[:picture][:imageable_type]
     imageable_id   = params[:picture][:imageable_id]
-    valid_imageable = PicturesController::IMAGEABLE_TYPES.include?(imageable_type) &&
-                       imageable_type.safe_constantize&.exists?(id: imageable_id)
+    imageable = PicturesController::IMAGEABLE_TYPES.include?(imageable_type) &&
+                imageable_type.safe_constantize&.find_by(id: imageable_id)
+
+    # Имя файла — из названия объекта, к которому привязывается фото (а не
+    # случайное "photo.jpg" от клиента); совпадение имени сам разрулит
+    # unique_upload_filename в PictureUploadHelpers, добавив -1, -2...
+    picture_params, upload_error = process_picture_upload(
+      params[:picture], max_bytes: MAX_UPLOAD_BYTES, preferred_filename: imageable&.name
+    )
+    halt 422, { error: upload_error }.to_json if upload_error
 
     picture = Picture.new(
       picture_params.merge(
-        imageable_type: valid_imageable ? imageable_type : nil,
-        imageable_id: valid_imageable ? imageable_id : nil,
+        imageable_type: imageable ? imageable_type : nil,
+        imageable_id: imageable ? imageable_id : nil,
         published: false,
         user_id: current_user&.id,
         latitude: params[:picture][:latitude].presence,
