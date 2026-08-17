@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_08_12_130000) do
+ActiveRecord::Schema.define(version: 2026_08_16_150000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -190,7 +190,12 @@ ActiveRecord::Schema.define(version: 2026_08_12_130000) do
     t.integer "position"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "user_id"
+    t.float "latitude"
+    t.float "longitude"
+    t.datetime "taken_at"
     t.index ["imageable_type", "imageable_id"], name: "index_pictures_on_imageable_type_and_imageable_id"
+    t.index ["user_id"], name: "index_pictures_on_user_id"
   end
 
   create_table "profile_markers", force: :cascade do |t|
@@ -304,6 +309,15 @@ ActiveRecord::Schema.define(version: 2026_08_12_130000) do
     t.boolean "fixed", default: false
     t.index ["name"], name: "index_tags_on_name", unique: true
     t.index ["parent_id"], name: "index_tags_on_parent_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.string "password_digest"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   add_foreign_key "entities", "schemas"
