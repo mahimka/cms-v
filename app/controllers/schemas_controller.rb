@@ -69,6 +69,15 @@ class SchemasController < App
       status 200
     end
 
+    # Выгружает все схемы (все колонки) одним файлом в public/schemas.json.
+    post '/schemas/export' do
+      data = Schema.all.map(&:attributes)
+      File.write(File.join(settings.public_folder, 'schemas.json'), JSON.pretty_generate(data))
+
+      flash[:notice] = "Exported #{data.size} schemas to /schemas.json"
+      redirect '/admin/schemas'
+    end
+
     delete '/schemas/:id' do
       @schema = Schema.find(params[:id])
       if @schema.destroy

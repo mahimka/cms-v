@@ -84,6 +84,18 @@ class TagsController < App
       redirect back
     end
 
+    # Выгружает группу тегов (все колонки самой группы + все колонки
+    # каждого вложенного тега в children) в public/<имя группы>.json.
+    post '/tags/:id/export' do
+      group = Tag.find(params[:id])
+      data = group.attributes.merge('children' => group.children.map(&:attributes))
+      filename = "#{group.name.parameterize}.json"
+      File.write(File.join(settings.public_folder, filename), JSON.pretty_generate(data))
+
+      flash[:notice] = "Exported '#{group.name}' (#{group.children.size} tags) to /#{filename}"
+      redirect back
+    end
+
     # delete
     delete '/tags/:id' do
       set_tag
