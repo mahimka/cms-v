@@ -2,39 +2,91 @@
   <input type="hidden" name="redirect_to" value="<%= params[:redirect_to] %>">
 <% end %>
 
-<div class="columns">
+<div class="columns my-1 is-gapless">
 
   <div class="column is-2">
-    <%= label(:picture, :imageable_type, "imageable_type", options = {class: 'label'}) %>
   </div>
 
-  <div class="column is-9">
-    <% @imageable_types_for_select = {"": ""}.merge(PicturesController::IMAGEABLE_TYPES.to_h { |type| [type, type] }) %>
-    <%= select(:picture, :imageable_type, @imageable_types_for_select, options = {class: 'select input is-success', value: @picture.imageable_type}) %>
+  <div class="column is-2">
+    <input type="hidden" name="picture[active]" value="0">
+    <input type="checkbox" name="picture[active]" value="1" <%= @picture.active ? "checked" : "" %>>
+    <span class='is-size-7'>active</span>
+  </div>
+
+  <div class="column is-2">
+    <input type="hidden" name="picture[published]" value="0">
+    <input type="checkbox" name="picture[published]" value="1" <%= @picture.published ? "checked" : "" %>>
+    <span class='is-size-7'>published</span>
+  </div>
+
+  <div class="column is-1">
+    <span class='is-size-7'>position</span>
+  </div>
+
+  <div class="column is-1">
+    <%= input(:picture, :position, options = {class: 'input is-success is-size-7', value: @picture.position, placeholder: "enter position"}) %>
   </div>
 
 </div>
 
-<div class="columns">
+<div class="columns my-1 is-gapless">
 
   <div class="column is-2">
-    <%= label(:picture, :imageable_id, "imageable_id", options = {class: 'label'}) %>
+    <%= label(:picture, :content_type, "content_type", options = {class: 'label is-size-7'}) %>
+  </div>
+
+  <div class="column is-2 mr-2">
+    <%= input(:picture, :content_type, options = {class: 'input is-success is-size-7', value: @picture.content_type, placeholder: "image/jpeg"}) %>
+  </div>
+
+  <div class="column is-2 mr-2">
+    <div class="field has-addons">
+      <div class="control">
+        <%= input(:picture, :width, options = {class: 'input is-success is-size-7', value: @picture.width, placeholder: "1920"}) %>
+      </div>
+      <div class="control">
+        <span class="button is-static is-small">x</span>
+      </div>
+      <div class="control">
+        <%= input(:picture, :height, options = {class: 'input is-success is-size-7', value: @picture.height, placeholder: "1080"}) %>
+      </div>
+    </div>
+  </div>
+  <div class="column is-3 mr-2">
+    <%= select(:picture, :ratio, PicturesController::RATIOS, options = {class: 'select input is-success is-size-7', value: @picture.ratio}) %>
+  </div>
+
+</div>
+
+
+<div class="columns my-1 is-gapless">
+
+  <div class="column is-2">
+    <%= label(:picture, :imageable_type, "imageable_type", options = {class: 'label is-size-7'}) %>
+  </div>
+
+  <div class="column is-1 mr-2">
+    <% @imageable_types_for_select = {"": ""}.merge(PicturesController::IMAGEABLE_TYPES.to_h { |type| [type, type] }) %>
+    <%= select(:picture, :imageable_type, @imageable_types_for_select, options = {class: 'select input is-success is-size-7', value: @picture.imageable_type}) %>
+  </div>
+
+  <div class="column is-1 mr-2">
+    <%= input(:picture, :imageable_id, options = {class: 'input is-success is-size-7', value: @picture.imageable_id, placeholder: "id записи (Entity/Item)"}) %>
+  </div>
+
+  <div class="column is-6 ml-3">
+    <%#= label(:picture, :imageable_id, "imageable_id", options = {class: 'label is-size-7'}) %>
     <% if @picture.imageable %>
-      <p class="help">сейчас: <%= @picture.imageable.name %></p>
+      <p class="is-size-6"><a href="/admin/<%= @picture.imageable.class.name.downcase.pluralize %>/<%= @picture.imageable.id %>/edit"><%= @picture.imageable.name %></a></p>
     <% end %>
   </div>
-
-  <div class="column is-9">
-    <%= input(:picture, :imageable_id, options = {class: 'input is-success', value: @picture.imageable_id, placeholder: "id записи (Entity/Item)"}) %>
-  </div>
-
 </div>
 
-<div class="columns">
+<div class="columns my-1 is-gapless">
 
   <div class="column is-2">
-    <p class="label">image</p>
-    <p class="help">загрузить файл с компьютера — file/content_type/width/height заполнятся автоматически</p>
+    <p class="label is-size-7">image</p>
+    <!--<p class="help">загрузить файл с компьютера — file/content_type/width/height заполнятся автоматически</p>-->
   </div>
 
   <div class="column is-9">
@@ -51,42 +103,69 @@
       </label>
     </div>
     <input type="text" name="picture[folder]" class="input is-small is-success" value="" placeholder="/images (по умолчанию), /images/rooms, ...">
-    <p class="help">папка внутри public — необязательно, по умолчанию /images</p>
+    <!--<p class="help">папка внутри public — необязательно, по умолчанию /images</p>-->
   </div>
 
 </div>
 
-<div class="columns">
+<div class="columns my-1 is-gapless">
 
   <div class="column is-2">
-    <%= label(:picture, :file, "file", options = {class: 'label'}) %>
-    <p class="help">путь заполнится сам при загрузке; менять вручную нужно только для картинок без реального файла-загрузки</p>
+    <%= label(:picture, :file, "file", options = {class: 'label is-size-7'}) %>
+    <!--<p class="help">путь заполнится сам при загрузке; менять вручную нужно только для картинок без реального файла-загрузки</p>-->
   </div>
 
   <div class="column is-9">
-    <%= input(:picture, :file, options = {class: 'input is-success', value: @picture.file, placeholder: "/uploads/beach-izola-01.jpg"}) %>
+    <%= input(:picture, :file, options = {class: 'input is-success is-size-7', value: @picture.file, placeholder: "/uploads/beach-izola-01.jpg"}) %>
   </div>
 
 </div>
 
-<div class="columns">
+<div class="columns my-1 is-gapless">
 
   <div class="column is-2">
-    <%= label(:picture, :alt, "alt", options = {class: 'label'}) %>
-    <p class="help">базовый alt-текст (фолбэк, если перевода для языка нет)</p>
+    <%= label(:picture, :alt, "alt", options = {class: 'label is-size-7'}) %>
+    <!--<p class="help">базовый alt-текст (фолбэк, если перевода для языка нет)</p>-->
   </div>
 
   <div class="column is-9">
-    <%= input(:picture, :alt, options = {class: 'input is-success', value: @picture.alt, placeholder: "enter alt text"}) %>
+    <%= input(:picture, :alt, options = {class: 'input is-success is-size-7', value: @picture.alt, placeholder: "enter alt text"}) %>
   </div>
 
 </div>
 
-<div class="columns">
+<div class="columns my-1 is-gapless">
 
   <div class="column is-2">
-    <p class="label">translations</p>
-    <p class="help">alt-текст на каждый язык (используется в видах вместо alt)</p>
+    <%= label(:picture, :user_id, "author", options = {class: 'label is-size-7'}) %>
+  </div>
+
+  <div class="column is-4">
+    <% users_for_select = {"" => "— none —"}.merge(User.order(:name).to_h { |u| [u.id, u.name] }) %>
+    <%= select(:picture, :user_id, users_for_select, options = {class: 'select input is-success is-size-7', value: @picture.user_id}) %>
+  </div>
+
+  <div class="column is-6">
+    <% if @picture.latitude.present? %>
+      <p class="is-size-7">
+        <%= @picture.latitude %>, <%= @picture.longitude %>
+        — <a href="https://www.google.com/maps?q=<%= @picture.latitude %>,<%= @picture.longitude %>" target="_blank">открыть на карте</a>
+        <% if @picture.taken_at %> · снято <%= @picture.taken_at.strftime("%d.%m.%Y %H:%M") %><% end %>
+      </p>
+    <% else %>
+      <p class="is-size-7 has-text-grey">нет EXIF-координат</p>
+    <% end %>
+  </div>
+
+</div>
+
+<hr>
+
+<div class="columns my-1 is-gapless">
+
+  <div class="column is-2">
+    <p class="label is-size-7">translations</p>
+    <!--<p class="help">alt-текст на каждый язык (используется в видах вместо alt)</p>-->
     <% if @picture.persisted? %>
       <button type="button" class="button is-small is-link is-light mt-1" data-picture-translate-alt data-picture-id="<%= @picture.id %>">🌐 translate to all</button>
       <p class="help">заполняет только пустые языки — введённое вручную не трогает</p>
@@ -101,7 +180,7 @@
           <span class="button is-small is-static"><%= lang_info[:icon] %> <%= lang_code.upcase %></span>
         </div>
         <div class="control is-expanded">
-          <input type="text" class="input is-small" name="picture[translations][<%= lang_code %>]" value="<%= fast_escape_html(@picture.translations&.dig(lang_code)) %>" placeholder="<%= fast_escape_html(@picture.alt) %>">
+          <input type="text" class="input is-small is-size-7" name="picture[translations][<%= lang_code %>]" value="<%= fast_escape_html(@picture.translations&.dig(lang_code)) %>" placeholder="<%= fast_escape_html(@picture.alt) %>">
         </div>
       </div>
     <% end %>
@@ -109,96 +188,15 @@
 
 </div>
 
-<div class="columns">
+
+<hr>
+
+
+<div class="columns my-1 is-gapless">
 
   <div class="column is-2">
-    <%= label(:picture, :content_type, "content_type", options = {class: 'label'}) %>
-  </div>
-
-  <div class="column is-9">
-    <%= input(:picture, :content_type, options = {class: 'input is-success', value: @picture.content_type, placeholder: "image/jpeg"}) %>
-  </div>
-
-</div>
-
-<div class="columns">
-
-  <div class="column is-2">
-    <%= label(:picture, :width, "width x height", options = {class: 'label'}) %>
-  </div>
-
-  <div class="column is-9">
-    <div class="field has-addons">
-      <div class="control">
-        <%= input(:picture, :width, options = {class: 'input is-success', value: @picture.width, placeholder: "1920"}) %>
-      </div>
-      <div class="control">
-        <span class="button is-static is-small">x</span>
-      </div>
-      <div class="control">
-        <%= input(:picture, :height, options = {class: 'input is-success', value: @picture.height, placeholder: "1080"}) %>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<div class="columns">
-
-  <div class="column is-2">
-    <%= label(:picture, :ratio, "ratio", options = {class: 'label'}) %>
-    <p class="help">CSS-класс Bulma для figure.image (project/views/profile_*.erb)</p>
-  </div>
-
-  <div class="column is-9">
-    <%= select(:picture, :ratio, PicturesController::RATIOS, options = {class: 'select input is-success', value: @picture.ratio}) %>
-  </div>
-
-</div>
-
-<div class="columns">
-
-  <div class="column is-2">
-    <%= label(:picture, :position, "position", options = {class: 'label'}) %>
-  </div>
-
-  <div class="column is-9">
-    <%= input(:picture, :position, options = {class: 'input is-success', value: @picture.position, placeholder: "enter position"}) %>
-  </div>
-
-</div>
-
-<div class="columns">
-
-  <div class="column is-2">
-    <%= label(:picture, :published, "published", options = {class: 'label'}) %>
-  </div>
-
-  <div class="column is-9">
-    <input type="hidden" name="picture[published]" value="0">
-    <input type="checkbox" name="picture[published]" value="1" <%= @picture.published ? "checked" : "" %>>
-  </div>
-
-</div>
-
-<div class="columns">
-
-  <div class="column is-2">
-    <%= label(:picture, :active, "active", options = {class: 'label'}) %>
-  </div>
-
-  <div class="column is-9">
-    <input type="hidden" name="picture[active]" value="0">
-    <input type="checkbox" name="picture[active]" value="1" <%= @picture.active ? "checked" : "" %>>
-  </div>
-
-</div>
-
-<div class="columns">
-
-  <div class="column is-2">
-    <p class="label">tags</p>
-    <p class="help">чтобы можно было выбирать картинки по набору тегов (например izola + beach)</p>
+    <p class="label is-size-7">tags</p>
+    <!--<p class="help">чтобы можно было выбирать картинки по набору тегов (например izola + beach)</p>-->
   </div>
 
   <div class="column is-9">
@@ -209,8 +207,8 @@
     <% grouped_tags.sort_by { |parent, _| parent&.position || 0 }.each do |parent, children| %>
       <p class="has-text-weight-semibold is-size-7 mt-2"><%= parent&.name || "—" %></p>
       <% children.sort_by { |t| [t.position || 0, t.name] }.each do |tag| %>
-        <label class="checkbox mr-3">
-          <input type="checkbox" name="tag_ids[]" value="<%= tag.id %>" <%= "checked" if @picture.tag_ids.include?(tag.id) %>>
+        <label class="button checkbox mr-1 mb-2 is-size-7 pl-2">
+          <input type="checkbox" name="tag_ids[]" value="<%= tag.id %>" <%= "checked" if @picture.tag_ids.include?(tag.id) %> >
           <%= tag.name %>
         </label>
       <% end %>
