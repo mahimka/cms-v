@@ -4,7 +4,13 @@
   <script src="/javascripts/checkbox-ajax.js"></script>
 <% end %>
 
-<p><a class="button is-warning" href="/admin/tags/new">Add Tag</a></p>
+<p>
+  <a class="button is-warning" href="/admin/tags/new">Add Tag</a>
+  <form method="POST" action="/admin/tags/import" enctype="multipart/form-data" style="display:inline;">
+    <input type="file" name="import_file" accept="application/json" required>
+    <button type="submit" class="button is-link" title="файл, выгруженный кнопкой export у группы — ищет по name, существующие обновляет, новые создаёт">Import group</button>
+  </form>
+</p>
 
 <div class="content m-3">
 

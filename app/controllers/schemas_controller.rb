@@ -1,5 +1,10 @@
 class SchemasController < App
 
+  # Импортируемые поля — без id, created_at, updated_at (см. /schemas/import).
+  # ancestry сюда не входит — иерархия пересчитывается программно через
+  # parent=, id из файла мог не совпасть с id в текущей базе.
+  SCHEMA_IMPORT_FIELDS = %w[schema_org_url json_ld_template position active fixed].freeze
+
   namespace '/admin' do
 
     get '/schemas' do
@@ -75,6 +80,41 @@ class SchemasController < App
       File.write(File.join(settings.public_folder, 'schemas.json'), JSON.pretty_generate(data))
 
       flash[:notice] = "Exported #{data.size} schemas to /schemas.json"
+      redirect '/admin/schemas'
+    end
+
+    # Импорт из файла, выгруженного /schemas/export. id/created_at/updated_at
+    # не переносятся; поиск — по name (уникален), так что повторный импорт
+    # того же файла обновляет существующие записи, а не дублирует их.
+    # Иерархия (ancestry) восстанавливается через parent= по имени родителя,
+    # а не по старому id — обрабатываем родителей раньше детей (сортировка
+    # по фактической глубине ancestry в файле).
+    post '/schemas/import' do
+      upload = params[:import_file]
+      halt 422, "Файл не выбран" unless upload.is_a?(Hash) && upload[:tempfile]
+
+      records = JSON.parse(upload[:tempfile].read)
+      records = records.sort_by { |r| r['ancestry'].to_s.split('/').reject(&:blank?).size }
+
+      old_id_to_new = {}
+
+      records.each do |r|
+        old_parent_id = r['ancestry'].to_s.split('/').reject(&:blank?).last&.to_i
+        new_parent = old_parent_id ? old_id_to_new[old_parent_id] : nil
+
+        schema = Schema.find_or_initialize_by(name: r.fetch('name'))
+        schema.parent = new_parent
+        schema.assign_attributes(r.slice(*SCHEMA_IMPORT_FIELDS))
+        schema.save!
+
+        old_id_to_new[r['id']] = schema
+      end
+
+      flash[:notice] = "Imported #{records.size} schemas"
+      redirect '/admin/schemas'
+    rescue StandardError => e
+      flash[:error_title] = "Import failed:"
+      flash[:errors] = [e.message]
       redirect '/admin/schemas'
     end
 
