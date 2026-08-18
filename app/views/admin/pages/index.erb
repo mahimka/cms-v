@@ -350,7 +350,7 @@
       <td><%= page.lang %></td>
       <td><%= page.master_id %></td>
 
-      <td><%= checkbox_in_place page, :ready %></td> 
+  <!--    <td><%= checkbox_in_place page, :ready %></td> 
       <td><%= checkbox_in_place page, :published %></td> 
 
       <td><%#= page.pictures.length %></td>
@@ -358,9 +358,13 @@
       <td><a href="/admin/pages/<%= page.id %>/edit-in-place" class='button is-small'>edit</a></td>
       <td><a href="/admin/pages/new?source_page_id=<%= page.id %>&sub=true" class='button is-small is-warning'>sub</a></td>
       <td><a href="/admin/pages/new?source_page_id=<%= page.id %>&copy=true" class='button is-small is-warning'>copy</a></td>
-  
+  -->
       <td><a href='<%= page.uri %>'><%= page.uri %></a></td>
       <td width=370><%= input_in_place page, :title %></td>
+      <td width=370><%= input_in_place page, :h1 %></td>
+      <td width=370><%= input_in_place page, :subtitle %></td>
+      <td width=370><%= input_in_place page, :anchor_1 %></td>
+      <td width=370><%= input_in_place page, :anchor_2 %></td>
 
       <% values = Dir.glob("**", base: "project/views").delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.unshift("") %>
       <td width=170><%= select_in_place(page, :view, values, class: 'input is-success is-small mt-1') %></td>
