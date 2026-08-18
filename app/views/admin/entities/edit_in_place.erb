@@ -1,0 +1,86 @@
+<%= erb :'/layout/_flash', views: settings.views %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @entity.name %></h1>
+  <p class="subtitle is-6">
+    Всё сохраняется сразу по месту, без кнопки Update.
+    <a href="/admin/entities/<%= @entity.id %>/edit">обычная форма</a> ·
+    <a href="/admin/entities">все entities</a>
+  </p>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:entity, :name, "name", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@entity, :name) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:entity, :schema_id, "schema", options = {class: 'label'}) %></div>
+    <div class="column is-9">
+      <% schemas_for_select = Schema.active.order(:ancestry, :position, :name).to_h { |s| [s.id, ("— " * s.depth) + s.name] } %>
+      <%= select_in_place(@entity, :schema_id, schemas_for_select) %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:entity, :parent_id, "parent_id", options = {class: 'label'}) %></div>
+    <div class="column is-9">
+      <% entities_for_select = Entity.where.not(id: @entity.id).order(:name).to_h { |e| [e.id, e.name] } %>
+      <%= select_in_place(@entity, :parent_id, entities_for_select) %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:entity, :address, "address", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@entity, :address) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:entity, :latitude, "latitude", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@entity, :latitude) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:entity, :longitude, "longitude", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@entity, :longitude) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:entity, :active, "active", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@entity, :active) %></div>
+  </div>
+
+  <hr>
+
+  <div id="entity-details-fields">
+    <%= erb :'/entities/_details_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <div id="entity-links-fields">
+    <%= erb :'/entities/_links_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <div id="entity-profiles-fields">
+    <%= erb :'/entities/_profiles_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <div id="entity-tags-fields">
+    <%= erb :'/entities/_tags_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <%= erb :'/entities/_pictures_fields', views: settings.views_admin %>
+
+</div>
+
+<script src="/javascripts/entity-edit-in-place.js"></script>
+<script>
+  initEntityEditInPlace(<%= @entity.id %>);
+</script>

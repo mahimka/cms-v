@@ -32,9 +32,11 @@ class LinksController < App
     post '/links' do
       @link = Link.new(params[:link])
       if @link.save
+        halt 200, "ok" if request.xhr?
         flash[:notice] = "Link created!"
         redirect redirect_target_or(back_to_linkable_or('/admin/links'))
       else
+        halt 422, @link.errors.full_messages.join(", ") if request.xhr?
         flash.now[:error_title] = "Cannot create a new link:"
         flash.now[:errors] = @link.errors.full_messages
         erb :"/links/new", layout: :"/layout/wide", views: settings.views_admin
@@ -44,9 +46,11 @@ class LinksController < App
     patch '/links/:id' do
       @link = Link.find(params[:id])
       if @link.update(params[:link])
+        halt 200, "ok" if request.xhr?
         flash[:notice] = "Link updated!"
         redirect redirect_target_or("/admin/links/#{@link.id}/edit")
       else
+        halt 422, @link.errors.full_messages.join(", ") if request.xhr?
         flash.now[:error_title] = "Cannot update the link:"
         flash.now[:errors] = @link.errors.full_messages
         erb :"/links/edit", layout: :"/layout/wide", views: settings.views_admin
@@ -57,9 +61,11 @@ class LinksController < App
       @link = Link.find(params[:id])
       linkable = @link.linkable
       if @link.destroy
+        halt 200, "ok" if request.xhr?
         flash[:notice] = "Link destroyed!"
         redirect redirect_target_or(linkable ? "/admin/#{linkable.class.name.underscore.pluralize}/#{linkable.id}" : '/admin/links')
       else
+        halt 422, @link.errors.full_messages.join(", ") if request.xhr?
         flash[:error_title] = "Cannot destroy the link:"
         flash[:errors] = @link.errors.full_messages
         redirect redirect_target_or('/admin/links')

@@ -3,7 +3,10 @@
 <div class="content m-3">
 
   <h1 class="title"><%= @entity.name %></h1>
-  <p class="subtitle is-6">Step 2: остальные поля, details, tags, links и pictures.</p>
+  <p class="subtitle is-6">
+    Step 2: остальные поля, details, tags, links и pictures.
+    <a href="/admin/entities/<%= @entity.id %>/edit_in_place">edit in place</a>
+  </p>
 
   <form method="POST" action="/admin/entities/<%= @entity.id %>">
     <input type="hidden" name="_method" value="PATCH">

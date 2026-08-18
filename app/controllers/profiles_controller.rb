@@ -33,9 +33,11 @@ class ProfilesController < App
     post '/profiles' do
       @profile = Profile.new(params[:profile])
       if @profile.save
+        halt 200, "ok" if request.xhr?
         flash[:notice] = "Profile created!"
         redirect redirect_target_or(back_to_profileable_or('/admin/profiles'))
       else
+        halt 422, @profile.errors.full_messages.join(", ") if request.xhr?
         flash.now[:error_title] = "Cannot create a new profile:"
         flash.now[:errors] = @profile.errors.full_messages
         erb :"/profiles/new", layout: :"/layout/wide", views: settings.views_admin
@@ -45,9 +47,11 @@ class ProfilesController < App
     patch '/profiles/:id' do
       @profile = Profile.find(params[:id])
       if @profile.update(params[:profile])
+        halt 200, "ok" if request.xhr?
         flash[:notice] = "Profile updated!"
         redirect redirect_target_or("/admin/profiles/#{@profile.id}/edit")
       else
+        halt 422, @profile.errors.full_messages.join(", ") if request.xhr?
         flash.now[:error_title] = "Cannot update the profile:"
         flash.now[:errors] = @profile.errors.full_messages
         erb :"/profiles/edit", layout: :"/layout/wide", views: settings.views_admin
@@ -58,9 +62,11 @@ class ProfilesController < App
       @profile = Profile.find(params[:id])
       profileable = @profile.profileable
       if @profile.destroy
+        halt 200, "ok" if request.xhr?
         flash[:notice] = "Profile destroyed!"
         redirect redirect_target_or(profileable ? "/admin/#{profileable.class.name.underscore.pluralize}/#{profileable.id}" : '/admin/profiles')
       else
+        halt 422, @profile.errors.full_messages.join(", ") if request.xhr?
         flash[:error_title] = "Cannot destroy the profile:"
         flash[:errors] = @profile.errors.full_messages
         redirect redirect_target_or('/admin/profiles')
