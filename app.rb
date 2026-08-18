@@ -112,7 +112,7 @@ class App < Sinatra::Base
   helpers TranslationHelpers
   helpers MiscHelpers
   helpers FeedAndSitemapHelpers
-  helpers ProjectHelpers if defined?(ProjectHelpers)
+  helpers ProjectHelpers if defined?(App::ProjectHelpers)
 
   helpers Sinatra::ContentFor
   helpers Sinatra::FormHelpers  #https://stackoverflow.com/questions/12207161/good-forms-helpers-for-sinatra
