@@ -8,6 +8,14 @@ APP_ENV = ENV['RACK_ENV'] || "development"
 
 Bundler.require :default, APP_ENV.to_sym
 
+# путь до public/ вне Sinatra-контекста (например из моделей, где settings
+# недоступен) — Picture#sync_exif_metadata им пользуется.
+PUBLIC_FOLDER = File.expand_path('public', __dir__)
+
+# mini_exiftool по умолчанию ищет exiftool в PATH (нужен apt-get на сервере) -
+# exiftool_vendored тащит сам бинарник внутри гема, просто указываем на него.
+MiniExiftool.command = ExiftoolVendored.path_to_exiftool
+
 
 # файлы с именем, начинающимся на "_", не подключаются автоматически -
 # используй такой префикс, чтобы просто хранить код в проекте, не запуская его

@@ -48,6 +48,12 @@ gem "nokogiri"
 
 gem 'mini_magick'
 
+# запись author/title/GPS/даты из Picture обратно в EXIF файла (Picture#sync_exif_metadata) -
+# exiftool_vendored тащит сам бинарник exiftool внутри гема (не нужен apt-get на сервере),
+# mini_exiftool даёт удобный Ruby-API для записи поверх него (см. environment.rb)
+gem 'exiftool_vendored'
+gem 'mini_exiftool'
+
 gem 'sinatra-formhelpers-ng', require: 'sinatra/form_helpers'
 # gem 'acts-as-taggable-on', require: 'acts-as-taggable-on'
 
