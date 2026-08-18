@@ -1,8 +1,10 @@
 <%= erb :'/layout/_flash', views: settings.views %>
 
+<img src='<%= @picture.file %>' >
+
 <div class="content m-3">
 
-  <h1 class="title"><%= @picture.alt || @picture.file %></h1>
+  <h1 class="title is-5"><%= "alt: #{@picture.alt}" || "file: #{@picture.file}"  %></h1>
 
   <form method="POST" action="/admin/pictures/<%= @picture.id %>" enctype="multipart/form-data">
     <input type="hidden" name="_method" value="PATCH">
@@ -11,10 +13,10 @@
 
     <div class="field is-grouped">
       <div class="control">
-        <input type="submit" value="Update Picture" class="button is-link is-warning">
+        <input type="submit" value="Update Picture" class="button is-link is-warning is-size-7">
       </div>
       <div class="control">
-        <a href="/admin/pictures/<%= @picture.id %>" class="button">Show</a>
+        <a href="/admin/pictures/<%= @picture.id %>" class="button is-size-7">Show</a>
       </div>
     </div>
 
@@ -22,9 +24,12 @@
 
   <!-- отдельная форма вне основной — вложенный <form> внутри <form> невалиден,
        браузер бы схлопнул их в одну форму с двумя полями _method (см. коммит-сообщение) -->
+
+
+  <p></p>
   <form action="/admin/pictures/<%= @picture.id %>" method="post" onsubmit="return confirm('Are you sure?')">
     <input type="hidden" name="_method" value="delete">
-    <input type="submit" value="Delete" class="button is-danger">
+    <input type="submit" value="Delete" class="button is-danger is-size-7">
   </form>
 
 </div>

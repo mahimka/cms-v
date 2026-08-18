@@ -683,8 +683,8 @@
 
     <div class="columns is-gapless my-2">
       <div class="column is-1">
-        <label class="label is-small">title</label>
-        <%= translate_field_button(@page, "title") %>
+        <label class="label is-small">title
+        <%= translate_field_button(@page, "title") %></label>
       </div>
       <div class="column is-11">
         <input
@@ -698,8 +698,8 @@
 
     <div class="columns is-gapless my-2">
       <div class="column is-1">
-        <label class="label is-small">h1</label>
-        <%= translate_field_button(@page, "h1") %>
+        <label class="label is-small">h1
+        <%= translate_field_button(@page, "h1") %></label>
       </div>
       <div class="column is-11">
         <input
@@ -712,9 +712,9 @@
     </div>
 
     <div class="columns is-gapless my-2">
-      <div class="column is-1">
-        <label class="label is-small">subtitle</label>
-        <%= translate_field_button(@page, "subtitle") %>
+      <div class="column is-2">
+        <label class="label is-small">subtitle
+        <%= translate_field_button(@page, "subtitle") %></label>
       </div>
       <div class="column is-11">
         <input
@@ -731,22 +731,23 @@
         <label class="label is-small my-0">anchors</label>
       </div>
       <div class="column is-3">
-        <%= translate_field_button(@page, "anchor_1") %>
+        
         <input
             class="input is-small"
             type="text"
             name="page[anchor_1]"
             value="<%= @page.anchor_1 %>"
-          >
+          ><%= translate_field_button(@page, "anchor_1") %>
       </div>
       <div class="column is-4">
-        <%= translate_field_button(@page, "anchor_2") %>
+        
         <input
             class="input is-small ml-2"
             type="text"
             name="page[anchor_2]"
             value="<%= @page.anchor_2 %>"
           >
+          <%= translate_field_button(@page, "anchor_2") %>
       </div>
       <div class="column is-4">
         <%= translate_field_button(@page, "anchor_3") %>
@@ -756,12 +757,13 @@
             name="page[anchor_3]"
             value="<%= @page.anchor_3 %>"
           >
+
       </div>
     </div>
 
     <div class="field">
-      <label class="label is-small">meta_description</label>
-      <%= translate_field_button(@page, "meta_description") %>
+      <label class="label is-small">meta_description
+      <%= translate_field_button(@page, "meta_description") %></label>
       <div class="control">
         <textarea
           class="textarea autosize-textarea"
@@ -772,8 +774,8 @@
     </div>
 
     <div class="field">
-      <label class="label is-small">body</label>
-      <%= translate_field_button(@page, "body") %>
+      <label class="label is-small">body
+      <%= translate_field_button(@page, "body") %></label>
       <div class="control">
         <textarea
           class="textarea autosize-textarea"

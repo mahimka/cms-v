@@ -40,10 +40,41 @@
 <a href="/admin/pictures/new?imageable_type=Entity&imageable_id=<%= @entity.id %>" class="button is-small is-info">+ add picture</a>
 <div class="columns is-multiline mt-1">
   <% @entity.pictures.each do |picture| %>
-    <div class="column is-2">
-      <figure class="image is-4by3">
-        <a href="/admin/pictures/<%= picture.id %>/edit"><img src="<%= picture.file %>" alt="<%= picture.alt %>"></a>
-      </figure>
+    <div class="column is-4">
+
+      <div class="card 
+         <% if picture.published %>
+             has-background-primary-light
+         <% elsif !picture.published && picture.active %>
+             has-background-warning-light
+         <% else %>
+            has-background-grey-lighter
+         <% end %>
+      ">
+
+        <figure class="image <%= picture.ratio %>">
+          <a href="/admin/pictures/<%= picture.id %>/edit"><img src="<%= picture.file %>" alt="<%= picture.alt %>"></a>
+        </figure>
+
+      <div class="card-content">
+
+        <%= picture.ratio.blank? ? "<span class='tag is-warning'>?</span>" : "<span class='tag'>#{picture.ratio}</span>"  %>
+
+        <span class="tag"><%= picture.width %></span> x <span class="tag"><%= picture.height %></span>
+        <br>
+        <span class="is-size-7"><%= picture.file.sub('/images/', '') %></span>
+        <br>
+        <% unless picture.alt.blank? %>
+          <span class="is-size-7"><%= picture.alt %></span>
+        <% else %>
+          <span class="tag is-warning">no alt!!</span>
+        <% end %>
+        <br>
+        <span class="is-size-7">user: <%= picture.user&.name %></span> <span class="is-size-7"><%= picture.taken_at&.strftime('%b %d, %Y') %></span>
+
+      </div>
+
+      </div>
     </div>
   <% end %>
 </div>
