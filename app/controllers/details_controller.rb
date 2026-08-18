@@ -17,9 +17,11 @@ class DetailsController < App
     post '/details' do
       @detail = Detail.new(params[:detail])
       if @detail.save
+        halt 200, "ok" if request.xhr?
         flash[:notice] = "Deталь создана!"
         redirect redirect_target_or(back_to_detailable_or('/admin/details'))
       else
+        halt 422, @detail.errors.full_messages.join(", ") if request.xhr?
         flash[:error_title] = "Не удалось создать деталь:"
         flash[:errors] = @detail.errors.full_messages
         redirect redirect_target_or(back_to_detailable_or('/admin/details'))
@@ -29,9 +31,11 @@ class DetailsController < App
     patch '/details/:id' do
       @detail = Detail.find(params[:id])
       if @detail.update(params[:detail])
+        halt 200, "ok" if request.xhr?
         flash[:notice] = "Деталь обновлена!"
         redirect redirect_target_or(back_to_detailable_or('/admin/details'))
       else
+        halt 422, @detail.errors.full_messages.join(", ") if request.xhr?
         flash[:error_title] = "Не удалось обновить деталь:"
         flash[:errors] = @detail.errors.full_messages
         redirect redirect_target_or(back_to_detailable_or('/admin/details'))
@@ -42,9 +46,11 @@ class DetailsController < App
       @detail = Detail.find(params[:id])
       detailable = @detail.detailable
       if @detail.destroy
+        halt 200, "ok" if request.xhr?
         flash[:notice] = "Деталь удалена!"
         redirect redirect_target_or(detailable ? "/admin/#{detailable.class.name.underscore.pluralize}/#{detailable.id}" : '/admin/details')
       else
+        halt 422, @detail.errors.full_messages.join(", ") if request.xhr?
         flash[:error_title] = "Не удалось удалить деталь:"
         flash[:errors] = @detail.errors.full_messages
         redirect redirect_target_or('/admin/details')
