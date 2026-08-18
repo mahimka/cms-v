@@ -112,6 +112,9 @@
         </form>
         <a href="/admin/tags/<%= group.id %>" class="button is-small" target='_blank'>tag</a>
         <a href="/admin/tags/<%= group.id %>/edit" class="button is-small" target='_blank'>edit</a>
+        <form method="POST" action="/admin/tags/<%= group.id %>/export" style="display:inline;">
+          <button type="submit" class="button is-small is-info" title="группа + дети, все колонки, в /<%= group.name.parameterize %>.json">export</button>
+        </form>
       </td>
     </tr>
 
