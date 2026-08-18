@@ -25,7 +25,9 @@ def require_all_except_underscored(dir)
 end
 
 require_all './app/helpers'
-require_relative './project/helpers/project_helpers'
+# require_relative './project/helpers/project_helpers'
+helpers_path = File.expand_path('./project/helpers/project_helpers', __dir__)
+require helpers_path if File.exist?("#{helpers_path}.rb")
 require_relative './app'
 
 # project/routes.rb грузится РАНЬШЕ app/controllers/routes_controller.rb -
