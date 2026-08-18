@@ -134,6 +134,31 @@
 
 </div>
 
+<div class="columns my-1 is-gapless">
+
+  <div class="column is-2">
+    <%= label(:picture, :user_id, "author", options = {class: 'label is-size-7'}) %>
+  </div>
+
+  <div class="column is-4">
+    <% users_for_select = {"" => "— none —"}.merge(User.order(:name).to_h { |u| [u.id, u.name] }) %>
+    <%= select(:picture, :user_id, users_for_select, options = {class: 'select input is-success is-size-7', value: @picture.user_id}) %>
+  </div>
+
+  <div class="column is-6">
+    <% if @picture.latitude.present? %>
+      <p class="is-size-7">
+        <%= @picture.latitude %>, <%= @picture.longitude %>
+        — <a href="https://www.google.com/maps?q=<%= @picture.latitude %>,<%= @picture.longitude %>" target="_blank">открыть на карте</a>
+        <% if @picture.taken_at %> · снято <%= @picture.taken_at.strftime("%d.%m.%Y %H:%M") %><% end %>
+      </p>
+    <% else %>
+      <p class="is-size-7 has-text-grey">нет EXIF-координат</p>
+    <% end %>
+  </div>
+
+</div>
+
 <hr>
 
 <div class="columns my-1 is-gapless">
