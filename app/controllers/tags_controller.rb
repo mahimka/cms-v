@@ -1,6 +1,11 @@
 class TagsController < App
 
-  namespace '/admin' do 
+  # Импортируемые поля тега/группы — без id, created_at, updated_at,
+  # translations (см. /tags/import) и без parent_id (он всегда
+  # пересчитывается программно, не берётся из файла).
+  TAG_IMPORT_FIELDS = %w[active short short_2 admin_notes fixed position].freeze
+
+  namespace '/admin' do
 
     get '/tags' do 
 
@@ -94,6 +99,39 @@ class TagsController < App
 
       flash[:notice] = "Exported '#{group.name}' (#{group.children.size} tags) to /#{filename}"
       redirect back
+    end
+
+    # Импорт группы + детей из файла, выгруженного /tags/:id/export.
+    # id/created_at/updated_at/translations сознательно не переносятся —
+    # только TAG_IMPORT_FIELDS; поиск группы/тега — по name (уникален),
+    # так что повторный импорт того же файла обновляет, а не дублирует.
+    # parent_id детей всегда пересчитывается на актуальный id найденной/
+    # созданной группы, а не на id из файла (он может уже не существовать).
+    post '/tags/import' do
+      upload = params[:import_file]
+      halt 422, "Файл не выбран" unless upload.is_a?(Hash) && upload[:tempfile]
+
+      data = JSON.parse(upload[:tempfile].read)
+
+      group = Tag.find_or_initialize_by(name: data.fetch('name'))
+      group.parent_id = nil
+      group.assign_attributes(data.slice(*TAG_IMPORT_FIELDS))
+      group.save!
+
+      imported = Array(data['children']).map do |child_data|
+        child = Tag.find_or_initialize_by(name: child_data.fetch('name'))
+        child.parent_id = group.id
+        child.assign_attributes(child_data.slice(*TAG_IMPORT_FIELDS))
+        child.save!
+        child
+      end
+
+      flash[:notice] = "Imported '#{group.name}' + #{imported.size} tags"
+      redirect '/admin/tags'
+    rescue StandardError => e
+      flash[:error_title] = "Import failed:"
+      flash[:errors] = [e.message]
+      redirect '/admin/tags'
     end
 
     # delete

@@ -3,6 +3,10 @@
   <form method="POST" action="/admin/schemas/export" style="display:inline;">
     <button type="submit" class="button is-info" title="все схемы, все колонки, в /schemas.json">Export</button>
   </form>
+  <form method="POST" action="/admin/schemas/import" enctype="multipart/form-data" style="display:inline;">
+    <input type="file" name="import_file" accept="application/json" required>
+    <button type="submit" class="button is-link" title="ищет по name — существующие обновляет, новые создаёт">Import</button>
+  </form>
 </p>
 
 <div class="content m-3">
