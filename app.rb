@@ -87,6 +87,22 @@ class App < Sinatra::Base
     end
   end
 
+  helpers do
+    def asset_path(path)
+      # Находим путь к файлу в папке public
+      file_path = File.join(settings.public_folder, path)
+      
+      if File.exist?(file_path)
+        # Получаем метку времени редактирования файла в формате Unix Timestamp
+        mtime = File.mtime(file_path).to_i
+        "#{path}?v=#{mtime}"
+      else
+        path
+      end
+    end
+  end
+
+
 
 
   # before ['/admin/ads*', '/admin/items*', '/admin/tags*', '/admin/import*'] do
