@@ -28,7 +28,6 @@ tmp/*
 
 
 public/*
-public/zts-eturizem.txt
 
 public/images/*
 !public/images/.gitkeep 
