@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="<%= @page.lang %>"  class="has-navbar-fixed-top">
+<html lang="<%= @page.lang %>" class="has-navbar-fixed-top">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -15,87 +15,141 @@
   <meta name="description" content="<%= yield_content :meta_description %>"/>
   <%- end -%>
 
+  <link rel="canonical" href="https://<%= settings.domain -%><%= @page.uri -%>" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="<%= @page.title || yield_content(:title) %>">
+  <meta property="og:description" content="<%= @page.meta_description || yield_content(:meta_description) %>">
+  <meta property="og:url" content="https://<%= settings.domain -%><%= @page.uri -%>">
+  <meta property="og:type" content="website">
+
+  <!-- Alternate & RSS & Sitemap -->
   <%- @page.source_page.translations.each do |page| -%>
     <link rel="alternate" hreflang="<%= page.lang -%>" href="https://<%= settings.domain -%><%= page.uri -%>" />
   <%- end -%>
-
   <meta name="copyright" content="&copy; 2019-2026 <%= settings.site_name %>" /> 
   <%- if @page.effective_conditions.present? -%>
-  <link rel="alternate" type="application/rss+xml" title="Diversorio Updates" href="https://diversorio.com<%= @page.uri %>.rss" />
+  <link rel="alternate" type="application/rss+xml" title="<%= settings.site_name -%> Updates" href="https://<%= settings.domain -%><%= @page.uri %>.rss" />
   <%- else -%>
-  <link rel="alternate" type="application/rss+xml" title="Diversorio Updates" href="https://diversorio.com/<%= @page.lang == 'sl' ? '' : "#{@page.lang}/" %>updates.rss" />
+  <link rel="alternate" type="application/rss+xml" title="<%= settings.site_name -%> Updates" href="https://<%= settings.domain -%>/<%= @page.lang == 'sl' ? '' : "#{@page.lang}/" %>updates.rss" />
   <%- end -%>
-  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://diversorio.com/<%= @page.lang == 'sl' ? '' : "#{@page.lang}/" %>sitemap.xml" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://<%= settings.domain -%>/<%= @page.lang == 'sl' ? '' : "#{@page.lang}/" %>sitemap.xml" />
 
-    <script src="https://kit.fontawesome.com/eaa64c5f2f.js" crossorigin="anonymous"></script>
+  <!-- Favicon.io-->
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/site.webmanifest">
+  
+  <link rel="stylesheet" href="/stylesheets/bulma.min.css">
+  <link rel="stylesheet" href="/stylesheets/splide.min.css">
+  <link rel="stylesheet" href="/stylesheets/photoswipe.css">
+  <link rel="stylesheet" href="/stylesheets/cookieconsent.css" media="print" onload="this.media='all'">
 
-  <script
-        src="https://code.jquery.com/jquery-3.6.0.min.js"
-        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-        crossorigin="anonymous"></script>
-    
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    
+  <script defer src="/javascripts/cookieconsent.js"></script>
+  <script defer src="/javascripts/cookieconsent-init.js"></script>
+  <script defer src="/javascripts/splide.min.js"></script>
+  
+  <%= yield_content :head_extra -%>
+   
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [ 
+
+  <% if !@page.schema.blank? %>
+    <%= @page.schema %>
+    ,
+  <% elsif !yield_content(:schema_main_entity).blank? -%>
+    <%= yield_content :schema_main_entity -%>
+    ,
+  <% end %>
+
+  <% unless yield_content(:schema_webpage).blank? -%>
+    <%= yield_content(:schema_webpage) -%>
+  <% else %>
+    <%= partial '_schema_webpage' %>
+  <% end %>
+  <%= partial '_schema_breadcrumb' %>
+  <% unless yield_content(:schema_faq).blank? -%>
+    ,
+    <%= yield_content(:schema_faq) -%>
+  <% else %>
+    <%= partial '_schema_faq' %>
+  <% end %>
+    ]
+  }
+  </script>  
+
 </head>
 
-<body>
+<body onorientationchange="hideUrlBar();">
 
   <section class="section header-color mb-0 pb-0 mt-0 pt-5">
     <div class="container">
-      <%#= erb :'/layout/_header' %>
-      <%#= erb :'/layout/_header_level' %>
-      <%= erb :'/layout/_header_navbar' %>
-      <%#= erb :'/layout/_navigation' %>
+      <%= partial '_header_navbar' %>
     </div>
   </section>
 
   <%= yield_content :hero %>
 
-  <section class="section mt-6 pt-3 pb-3">
+  <section class="section pt-3 pb-3">
     <div class="container">
-      <%= erb :'/layout/_header_breadcrumbs' %>
+     <%= partial '_header_breadcrumbs' %>
     </div>
   </section>
+  
+  <main>
 
+    <% unless yield_content(:sidebar).blank? %>
 
-  <% unless yield_content(:sidebar).blank? %>
+      <section class="section borded-top-bottom-section pl-2 pr-2">
+       <div class="container mt-4 pt-0 content pr-4">
 
-    <section class="section borded-top-bottom-section pl-2 pr-2">
-     <div class="container mt-4 pt-0 content pr-4">
+          <div class="columns">
 
-        <div class="columns">
+            <div class="column is-two-thirds ">  
+              <%= yield %>
+            </div>
 
-          <div class="column is-two-thirds ">  
-            <%= yield %>
+            <div class="column is-one-third ">  
+              <aside>
+                <%= yield_content :sidebar %>
+              </aside>
+            </div>
+
           </div>
+        </div> 
+      </section>
 
-          <div class="column is-one-third ">  
-            <aside>
-              <%= yield_content :sidebar %>
-            </aside>
-          </div>
+    <% else %>
 
-        </div>
-      </div> 
-    </section>
+      <section class="section borded-top-bottom-section">
+        <div class="container">
+          <%= yield %>
+        </div>    
+      </section>
 
-  <% else %>
+    <% end %>
+    
+  </main>
 
-    <section class="section borded-top-bottom-section">
-      <div class="container">
-        <%= yield %>
-      </div>    
-    </section>
+  <%= partial '_footer' %>
 
-  <% end %>
+  <style>
+    #backToTop {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+  </style>
 
-  <%= erb :'/layout/_footer' %>
-
-  <button id="backToTop" class="button is-primary is-rounded is-hidden" title="Наверх">
-    <span class="icon">
-      <i class="fas fa-arrow-up"></i>Up
-    </span>
+  <button id="backToTop" class="button is-primary is-rounded is-hidden" title="Up">
+      <!-- https://lucide.dev/icons/?search=up -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-corner-left-up-icon lucide-corner-left-up"><path d="M14 9 9 4 4 9"/><path d="M20 20h-7a4 4 0 0 1-4-4V4"/></svg>
+      Up
   </button>
 
   <script>

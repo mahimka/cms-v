@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="<%= @page.lang %>"  class="has-navbar-fixed-top">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <%- if @page.title -%>
+  <title><%= @page.title -%></title>
+  <%- else -%>
+  <title><%= yield_content :title %></title>
+  <%- end -%>
+  <%- if @page.meta_description -%>
+  <meta name="description" content="<%= @page.meta_description -%>"/>
+  <%- else -%>
+  <meta name="description" content="<%= yield_content :meta_description %>"/>
+  <%- end -%>
+
+  <%- @page.source_page.translations.each do |page| -%>
+    <link rel="alternate" hreflang="<%= page.lang -%>" href="https://<%= settings.domain -%><%= page.uri -%>" />
+  <%- end -%>
+
+  <meta name="copyright" content="&copy; 2019-2026 <%= settings.site_name %>" /> 
+  <%- if @page.effective_conditions.present? -%>
+  <link rel="alternate" type="application/rss+xml" title="Diversorio Updates" href="https://diversorio.com<%= @page.uri %>.rss" />
+  <%- else -%>
+  <link rel="alternate" type="application/rss+xml" title="Diversorio Updates" href="https://diversorio.com/<%= @page.lang == 'sl' ? '' : "#{@page.lang}/" %>updates.rss" />
+  <%- end -%>
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://diversorio.com/<%= @page.lang == 'sl' ? '' : "#{@page.lang}/" %>sitemap.xml" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+
+    <script src="https://kit.fontawesome.com/eaa64c5f2f.js" crossorigin="anonymous"></script>
+
+  <script
+        src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+    
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    
+</head>
+
+<body>
+
+  <section class="section header-color mb-0 pb-0 mt-0 pt-5">
+    <div class="container">
+      <%#= erb :'/layout/_header' %>
+      <%#= erb :'/layout/_header_level' %>
+      <%= erb :'/layout/_header_navbar' %>
+      <%#= erb :'/layout/_navigation' %>
+    </div>
+  </section>
+
+  <%= yield_content :hero %>
+
+  <section class="section mt-6 pt-3 pb-3">
+    <div class="container">
+      <%= erb :'/layout/_header_breadcrumbs' %>
+    </div>
+  </section>
+
+
+  <% unless yield_content(:sidebar).blank? %>
+
+    <section class="section borded-top-bottom-section pl-2 pr-2">
+     <div class="container mt-4 pt-0 content pr-4">
+
+        <div class="columns">
+
+          <div class="column is-two-thirds ">  
+            <%= yield %>
+          </div>
+
+          <div class="column is-one-third ">  
+            <aside>
+              <%= yield_content :sidebar %>
+            </aside>
+          </div>
+
+        </div>
+      </div> 
+    </section>
+
+  <% else %>
+
+    <section class="section borded-top-bottom-section">
+      <div class="container">
+        <%= yield %>
+      </div>    
+    </section>
+
+  <% end %>
+
+  <%= erb :'/layout/_footer' %>
+
+  <button id="backToTop" class="button is-primary is-rounded is-hidden" title="Наверх">
+    <span class="icon">
+      <i class="fas fa-arrow-up"></i>Up
+    </span>
+  </button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const backToTopBtn = document.getElementById('backToTop');
+
+      // Показываем или скрываем кнопку при прокрутке
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+          backToTopBtn.classList.remove('is-hidden');
+        } else {
+          backToTopBtn.classList.add('is-hidden');
+        }
+      });
+
+      // Плавный скролл наверх при клике
+      backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+    });
+  </script>
+
+</body>

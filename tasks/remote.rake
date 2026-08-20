@@ -83,6 +83,14 @@ namespace :remote do
       run_ssh_commands @commands
     end  
 
+    task :restart do
+      
+      @commands << "passenger-config restart-app #{@deploy_to}" if @server == 'passenger'
+      @commands << "cd #{@app_name} && bundle exec pumactl -P #{@deploy_to}/tmp/puma.pid restart" if @server == 'puma'
+
+      run_ssh_commands @commands
+    end
+
     task :config do
       Rake::Task["upload:config"].invoke
       

@@ -226,7 +226,7 @@ module MiscHelpers
           anchor = anchor_text 
         end
 
-        "<a href='#{page.uri}' class='#{css_class}' title='#{title}'>#{anchor}</a>"
+        "<a href='#{page.uri}' class='#{css_class} is-underlined' title='#{title}'>#{anchor}</a>"
 
       else
         "<!--page is not found-->"
