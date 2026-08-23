@@ -207,8 +207,8 @@ class App < Sinatra::Base
 
     data     = JSON.parse(request.body.read) rescue {}
     button   = data['button']   || 'unknown'
-    page_url = data['page_url'].gsub("https://#{settings.domain}", '') || 'unknown'
-    # country  = request.env['HTTP_CF_IPCOUNTRY'] || request.ip || 'Unknown'
+    page_url = (data['page_url'] || 'unknown').gsub("https://#{settings.domain}", '')
+    country  = request.env['HTTP_CF_IPCOUNTRY'] || request.ip || 'Unknown'
     time     = Time.now.utc.strftime('%Y-%m-%d %H:%M:%S UTC')
 
     # Форматируем CSV-строку
