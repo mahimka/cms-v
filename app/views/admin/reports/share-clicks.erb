@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Отчет по кликам Share</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body class="has-background-light" style="min-height: 100vh; padding: 2rem 0;">
+  <div class="container">
+    
+    <div class="level">
+      <div class="level-left">
+        <h1 class="title">📊 Отчет: Клики по кнопкам «Поделиться»</h1>
+      </div>
+      <div class="level-right">
+        <span class="tag is-info is-medium">Всего кликов: <%= @clicks.size %></span>
+      </div>
+    </div>
+
+    <!-- Карточки суммарной статистики -->
+    <div class="columns mb-5">
+      <div class="column">
+        <div class="box">
+          <h2 class="subtitle is-6 font-weight-bold">По платформам</h2>
+          <ul>
+            <% @stats_by_button.each do |button, count| %>
+              <li><b><%= button %>:</b> <%= count %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="box">
+          <h2 class="subtitle is-6 font-weight-bold">Топ стран / IP</h2>
+          <ul>
+            <% @stats_by_country.each do |country, count| %>
+              <li><b><%= country %>:</b> <%= count %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Таблица последних кликов -->
+    <div class="box">
+      <h2 class="subtitle is-5">История кликов (последние сверху)</h2>
+      <table class="table is-striped is-fullwidth is-hoverable">
+        <thead>
+          <tr>
+            <th>Дата и время</th>
+            <th>Кнопка</th>
+            <th>Страница</th>
+            <th>Страна / IP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @clicks.empty? %>
+            <tr>
+              <td colspan="4" class="has-text-centered has-text-grey">Записей пока нет</td>
+            </tr>
+          <% else %>
+            <% @clicks.each do |click| %>
+              <tr>
+                <td><small><%= click[:time] %></small></td>
+                <td><span class="tag is-light"><%= click[:button] %></span></td>
+                <td><a href="<%= click[:url] %>" target="_blank"><%= click[:url] %></a></td>
+                <td><code><%= click[:country] %></code></td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</body>
+</html>

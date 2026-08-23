@@ -186,4 +186,91 @@ class App < Sinatra::Base
   end
 
 
+
+
+  # запись кликов на кнопки ШАРЫ
+  # require 'sinatra'
+  # require 'json'
+  # require 'time'
+  # require 'fileutils'
+
+  # Конфигурация пути к лог-файлу вне public/
+  LOG_DIR  = File.join(settings.root, 'log')
+  LOG_FILE = File.join(LOG_DIR, 'share-clicks.txt')
+
+  # Автоматически создаем папку log/, если ее еще нет
+  FileUtils.mkdir_p(LOG_DIR) unless File.directory?(LOG_DIR)
+
+  # POST-обработчик кликов
+  post '/api/log-share' do
+    content_type :json
+
+    data     = JSON.parse(request.body.read) rescue {}
+    button   = data['button']   || 'unknown'
+    page_url = data['page_url'].gsub("https://#{settings.domain}", '') || 'unknown'
+    # country  = request.env['HTTP_CF_IPCOUNTRY'] || request.ip || 'Unknown'
+    time     = Time.now.utc.strftime('%Y-%m-%d %H:%M:%S UTC')
+
+    # Форматируем CSV-строку
+    log_line = "#{time}, #{button}, #{page_url}, #{country}\n"
+
+    # Потокобезопасная запись в приватный файл
+    File.open(LOG_FILE, 'a') do |f|
+      f.flock(File::LOCK_EX)
+      f.write(log_line)
+    end
+
+    { status: 'ok' }.to_json
+  end
+
+  # Защищенный маршрут для просмотра лога (только по секретному ключу)
+  get '/admin/share-stats' do
+    # Простейшая защита по токену в URL: /admin/share-stats?key=my_secret_key_123
+    secret_key = "my_secret_key_123" 
+
+    halt 403, "Access Denied" unless params[:key] == secret_key
+
+    if File.exist?(LOG_FILE)
+      content_type 'text/plain; charset=utf-8'
+      File.read(LOG_FILE)
+    else
+      "Лог пока пуст."
+    end
+  end
+
+
+  # Страница отчета
+  get '/admin/reports/share-clicks' do
+    @clicks = []
+    @stats_by_button  = Hash.new(0)
+    @stats_by_country = Hash.new(0)
+
+    if File.exist?(LOG_FILE)
+      File.readlines(LOG_FILE).reverse_each do |line|
+        next if line.strip.empty?
+
+        parts = line.strip.split(', ')
+        next if parts.size < 4
+
+        timestamp, button, page_url, country = parts
+
+        @clicks << {
+          time: timestamp,
+          button: button,
+          url: page_url,
+          country: country
+        }
+
+        @stats_by_button[button] += 1
+        @stats_by_country[country] += 1
+      end
+    end
+
+    # Рендерим файл views/share-clicks.erb
+    # erb :'share-clicks'
+    erb :"/reports/share-clicks", layout: :"/layout/wide", views: settings.views_admin
+
+  end
+
+
 end
