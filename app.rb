@@ -51,6 +51,14 @@ class App < Sinatra::Base
   # В остальных окружениях show_exceptions остаётся false (дефолт), чтобы
   # сработал error 500 do...end и посетитель не увидел внутренности сервера.
   error 500 do
+    if (err = env['sinatra.error'])
+      File.open(File.join(settings.root, 'log', 'app_errors.log'), 'a') do |f|
+        f.flock(File::LOCK_EX)
+        f.puts "[#{Time.now.utc}] #{request.request_method} #{request.path} :: #{err.class}: #{err.message}"
+        f.puts err.backtrace.first(15).join("\n")
+        f.puts '---'
+      end
+    end
     erb :"errors/500", layout: false
   end
 
