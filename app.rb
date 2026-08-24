@@ -281,4 +281,45 @@ class App < Sinatra::Base
   end
 
 
+  # Приём HTML со страниц профилей от Chrome-расширения (?parse_profile=true
+  # в URL включает отправку на стороне расширения). Пока только сохраняем
+  # сырой HTML на диск — парсинг (parse_michelin/parse_google/parse_thefork)
+  # будет добавлен отдельным шагом, когда определимся с форматом разбора.
+  PARSED_PROFILES_DIR = File.join(settings.root, 'tmp', 'parsed_profiles')
+  FileUtils.mkdir_p(PARSED_PROFILES_DIR) unless File.directory?(PARSED_PROFILES_DIR)
+
+  post '/api/parse' do
+    content_type :json
+
+    api_key = request.env['HTTP_X_API_KEY']
+    unless api_key.to_s.strip == settings.api_key_for_parser.to_s.strip
+      halt 401, { success: false, error: 'Unauthorized: Invalid or missing API Key' }.to_json
+    end
+
+    data = JSON.parse(request.body.read) rescue {}
+    restaurant_id = data['restaurant_id']
+    url           = data['url']
+    html          = data['html']
+
+    halt 400, { success: false, error: 'html is required' }.to_json if html.to_s.empty?
+
+    puts "=========================================="
+    puts "ПОЛУЧЕН ЗАПРОС ДЛЯ RESTAURANT ID: #{restaurant_id}"
+    puts "URL: #{url}"
+    puts "Размер HTML: #{html.length} символов"
+    puts "=========================================="
+
+    filename = "#{Time.now.utc.strftime('%Y%m%d%H%M%S')}_#{restaurant_id || 'noid'}.json"
+    File.write(File.join(PARSED_PROFILES_DIR, filename), JSON.pretty_generate({
+      restaurant_id: restaurant_id,
+      url: url,
+      html: html,
+      received_at: Time.now.utc.iso8601
+    }))
+
+    { status: 'ok', saved_as: filename }.to_json
+  end
+
+
+
 end
