@@ -282,12 +282,10 @@ class App < Sinatra::Base
 
 
   # Приём HTML со страниц профилей от Chrome-расширения (?parse_profile=true
-  # в URL включает отправку на стороне расширения). Пока только сохраняем
-  # сырой HTML на диск — парсинг (parse_michelin/parse_google/parse_thefork)
-  # будет добавлен отдельным шагом, когда определимся с форматом разбора.
-  PARSED_PROFILES_DIR = File.join(settings.root, 'tmp', 'parsed_profiles')
-  FileUtils.mkdir_p(PARSED_PROFILES_DIR) unless File.directory?(PARSED_PROFILES_DIR)
-
+  # в URL включает отправку на стороне расширения). title/h1 достаём сразу —
+  # они универсальны для любого сайта. Разбор labels (site-specific) сюда не
+  # входит — планируется через AI по cleaned html_content, а не парсерами
+  # под каждый сайт вручную.
   post '/api/parse' do
     content_type :json
 
@@ -302,22 +300,38 @@ class App < Sinatra::Base
 
     halt 400, { success: false, error: 'html is required' }.to_json if html.to_s.empty?
 
+    doc = Nokogiri::HTML(html)
+
+    title = doc.at_css('title')&.text&.strip
+    h1    = doc.at_css('h1')&.text&.strip
+
+    # script/style/svg/comments — основной вес страницы (реклама, трекеры,
+    # иконки), но не несут ни текста, ни структуры, нужной для будущего
+    # разбора. Классы и теги вокруг реального контента остаются нетронутыми.
+    doc.css('script, style, noscript, svg, link, meta, iframe').remove
+    doc.xpath('//comment()').remove
+    cleaned_html = doc.to_html
+
+    profile = Profile.find_by(url: url)
+
+    snap_shot = SnapShot.create!(
+      profile_id: profile&.id,
+      html_content: cleaned_html,
+      param_1: title,
+      param_2: h1,
+      parsed: false
+    )
+
     puts "=========================================="
     puts "ПОЛУЧЕН ЗАПРОС ДЛЯ ПРОФИЛЯ"
     puts "URL: #{url}"
-    puts "Размер HTML: #{html.length} символов"
+    puts "Profile: #{profile ? profile.id : 'не найден по url'}"
+    puts "title: #{title}"
+    puts "h1: #{h1}"
+    puts "Размер HTML: было #{html.length}, стало #{cleaned_html.length} символов"
     puts "=========================================="
 
-    # Profile.find_by(url: url) свяжет файл с нужным Entity/Item/Event на
-    # этапе парсинга — отдельный id со стороны расширения не нужен.
-    filename = "#{Time.now.utc.strftime('%Y%m%d%H%M%S')}_#{Digest::MD5.hexdigest(url.to_s)[0, 8]}.json"
-    File.write(File.join(PARSED_PROFILES_DIR, filename), JSON.pretty_generate({
-      url: url,
-      html: html,
-      received_at: Time.now.utc.iso8601
-    }))
-
-    { status: 'ok', saved_as: filename }.to_json
+    { status: 'ok', snap_shot_id: snap_shot.id, profile_id: profile&.id }.to_json
   end
 
 
