@@ -297,21 +297,21 @@ class App < Sinatra::Base
     end
 
     data = JSON.parse(request.body.read) rescue {}
-    restaurant_id = data['restaurant_id']
-    url           = data['url']
-    html          = data['html']
+    url  = data['url']
+    html = data['html']
 
     halt 400, { success: false, error: 'html is required' }.to_json if html.to_s.empty?
 
     puts "=========================================="
-    puts "ПОЛУЧЕН ЗАПРОС ДЛЯ RESTAURANT ID: #{restaurant_id}"
+    puts "ПОЛУЧЕН ЗАПРОС ДЛЯ ПРОФИЛЯ"
     puts "URL: #{url}"
     puts "Размер HTML: #{html.length} символов"
     puts "=========================================="
 
-    filename = "#{Time.now.utc.strftime('%Y%m%d%H%M%S')}_#{restaurant_id || 'noid'}.json"
+    # Profile.find_by(url: url) свяжет файл с нужным Entity/Item/Event на
+    # этапе парсинга — отдельный id со стороны расширения не нужен.
+    filename = "#{Time.now.utc.strftime('%Y%m%d%H%M%S')}_#{Digest::MD5.hexdigest(url.to_s)[0, 8]}.json"
     File.write(File.join(PARSED_PROFILES_DIR, filename), JSON.pretty_generate({
-      restaurant_id: restaurant_id,
       url: url,
       html: html,
       received_at: Time.now.utc.iso8601
