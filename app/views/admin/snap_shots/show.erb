@@ -48,19 +48,19 @@
 
 <p></p>
 
-<% @snap_shot.labels.each do |key, value| %>
+<%# @snap_shot.markers.each do |key, value| %>
   <p>
-  	<strong><%= key %></strong><br>
-  	<% if value.is_a? String %>
+  	<strong><%#= key %></strong><br>
+  	<%# if value.is_a? String %>
   	  <br>
-  	  <%= value %>
-  	<% elsif value.is_a? Array %>
+  	  <%#= value %>
+  	<%# elsif value.is_a? Array %>
   	  <ul>
-  	  <% value.each do |value| %>
-  	    <li><%= value %>
-  	  <% end %>
+  	  <%# value.each do |value| %>
+  	    <li><%#= value %>
+  	  <%# end %>
   	  </ul>
-  	<% end %>
+  	<%# end %>
 
   </p>
-<% end %>
+<%# end %>

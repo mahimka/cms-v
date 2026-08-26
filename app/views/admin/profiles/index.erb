@@ -240,9 +240,9 @@
       <td><%= profile.profileable_id %></td>
       <td><%= profile.status %></td>
       <td><%= profile.scraped_at %></td>
-      <td><%= input_in_place profile, :title %></td>
-      <td><%= input_in_place profile, :h1 %></td>
-      <td><%= input_in_place profile, :meta_description %></td>
+      <td><%#= input_in_place profile, :title %><%= profile.title %></td>
+      <td><%#= input_in_place profile, :h1 %><%= profile.h1 %></td>
+      <td><%#= input_in_place profile, :meta_description %><%= profile.meta_description&.length %></td>
 
       <td><a href="/admin/profiles/<%= profile.id %>/edit" class='button is-small'>edit</a></td>
 

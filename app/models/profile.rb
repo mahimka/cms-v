@@ -12,6 +12,11 @@ class Profile < ActiveRecord::Base
   has_many :profile_markers, dependent: :destroy
   has_many :markers, :through => :profile_markers
 
+  # ключ -> значение или ключ -> массив значений (адрес, рейтинг, кол-во
+  # отзывов и т.п.) — то, что не укладывается в markers/tags. Заполняется
+  # из lib/profile_data_extractor.rb по результату разбора SnapShot через AI.
+  serialize :details, JSON
+
   validates :site_id, :url, presence: true
   # validates :name, uniqueness: true
 
