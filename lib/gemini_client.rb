@@ -49,7 +49,77 @@ class GeminiClient
     translate_batch({ "value" => text }, from: from, to: to)["value"]
   end
 
+  # instructions — сайт/тип-специфичный текст (см. project/prompts/*.txt),
+  # что именно извлекать. Формат ответа (markers/details) — общий для всех
+  # промптов, задаётся здесь, чтобы вызывающий код не зависел от того, как
+  # именно каждый промпт сформулирован.
+  #
+  # Схема — списки пар {group, values}/{key, value}, а не объект с
+  # динамическими ключами: Gemini structured output трактует OBJECT без
+  # перечисленных properties как "разрешённых полей нет" и возвращает {}
+  # (проверено вживую), а имя группы/ключа как ЗНАЧЕНИЕ строки — это как раз
+  # то место, где схема может быть открытой.
+  #
+  # Возвращает { "markers" => { "группа" => [...] }, "details" => { "ключ" => "значение" } }
+  # (в hash уже здесь, вызывающему коду не нужно знать про промежуточный
+  # список пар).
+  def extract_profile_data(html, instructions:)
+    schema = {
+      type: "OBJECT",
+      properties: {
+        markers: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              group: { type: "STRING" },
+              values: { type: "ARRAY", items: { type: "STRING" } }
+            },
+            required: %w[group values]
+          }
+        },
+        details: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              key: { type: "STRING" },
+              value: { type: "STRING" }
+            },
+            required: %w[key value]
+          }
+        }
+      },
+      required: %w[markers details]
+    }
+
+    raw = JSON.parse(generate(build_extract_prompt(instructions, html), response_schema: schema))
+
+    {
+      "markers" => raw["markers"].to_a.to_h { |m| [m["group"], m["values"]] },
+      "details" => raw["details"].to_a.to_h { |d| [d["key"], d["value"]] }
+    }
+  end
+
   private
+
+  def build_extract_prompt(instructions, html)
+    <<~PROMPT
+      #{instructions}
+
+      Верни JSON строго такой структуры:
+      {
+        "markers": [ { "group": "группа", "values": ["значение1", "значение2"] } ],
+        "details": [ { "key": "ключ", "value": "значение" } ]
+      }
+
+      Никаких пояснений, markdown-обёртки или комментариев — только сам JSON.
+      Если извлекать нечего — верни пустые списки [] для markers и/или details, не null.
+
+      HTML страницы:
+      #{html}
+    PROMPT
+  end
 
   # я Claude (2026-08-11): промпт черновой — проговорено с автором, что
   # формулировку ещё будут уточнять (особенно про anchor_text). Ключевое,
@@ -96,6 +166,10 @@ class GeminiClient
     response = Retryable.retryable(tries: RETRY_TRIES, on: RateLimitedError, sleep: ->(n) { 2**n }) do
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
+      http.open_timeout = 15
+      # extract_profile_data гонит целую (пусть и почищенную) HTML-страницу
+      # в промпте — дефолтных 60s read_timeout на это не хватает.
+      http.read_timeout = 180
 
       request = Net::HTTP::Post.new(uri)
       request['content-type'] = 'application/json'

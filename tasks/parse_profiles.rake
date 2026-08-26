@@ -126,3 +126,28 @@ namespace :profiles do
     puts "Scraping finished!"
   end
 end
+
+namespace :snap_shots do
+  desc "Разобрать необработанные SnapShot через DeepSeek: markers + profile.details (rake snap_shots:parse [id=4] [limit=10])"
+  task :parse do
+    client = DeepseekClient.new(api_key: App.settings.api_deepSeek_v3_1)
+    parser = SnapShotParser.new(client: client)
+
+    scope = if ENV['id']
+              SnapShot.where(id: ENV['id'])
+            else
+              SnapShot.where(parsed: [false, nil]).limit((ENV['limit'] || 10).to_i)
+            end
+
+    puts "Найдено #{scope.count} snap_shot(ов) для разбора"
+
+    scope.find_each do |snap_shot|
+      result = parser.parse!(snap_shot)
+      if result[:success]
+        puts "##{snap_shot.id}: OK (#{result[:prompt]}) markers=#{result[:markers].keys.join(',')} details=#{result[:details].keys.join(',')}"
+      else
+        puts "##{snap_shot.id}: FAIL — #{result[:error]}"
+      end
+    end
+  end
+end
