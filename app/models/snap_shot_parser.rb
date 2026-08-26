@@ -68,7 +68,34 @@ class SnapShotParser
     return if details.blank?
 
     profile.details = (profile.details || {}).merge(details)
+
+    # rating/review_count дублируются из details в типизированные колонки —
+    # они на горячем пути отображения (ссылки на профили с др. сайтов в
+    # обзоре объекта), сортировать/форматировать из сериализованного JSON
+    # неудобно. details остаётся полным сырым слепком того, что извлёк AI.
+    rating = parse_rating(details['rating'])
+    profile.rating = rating if rating
+
+    review_count = parse_review_count(details['review_count'])
+    profile.review_count = review_count if review_count
+
     profile.save!
+  end
+
+  # "4.5", "4,5", "4.5 out of 5", "4.5/5" -> 4.5. nil, если чисел вообще нет.
+  def parse_rating(value)
+    return nil if value.blank?
+
+    match = value.to_s.match(/(\d+[.,]?\d*)/)
+    match ? match[1].tr(',', '.').to_f : nil
+  end
+
+  # "230", "1,234", "1234 reviews" -> integer. nil, если цифр вообще нет.
+  def parse_review_count(value)
+    return nil if value.blank?
+
+    digits = value.to_s.gsub(/[^\d]/, '')
+    digits.empty? ? nil : digits.to_i
   end
 
 end

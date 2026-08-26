@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_08_26_150000) do
+ActiveRecord::Schema.define(version: 2026_08_26_170000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -225,6 +225,8 @@ ActiveRecord::Schema.define(version: 2026_08_26_150000) do
     t.string "h1"
     t.text "meta_description"
     t.text "details"
+    t.float "rating"
+    t.integer "review_count"
     t.index ["profileable_type", "profileable_id"], name: "index_profiles_on_profileable_type_and_profileable_id"
     t.index ["site_id"], name: "index_profiles_on_site_id"
   end
