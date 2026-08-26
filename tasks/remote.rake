@@ -38,9 +38,9 @@ namespace :remote do
 
   # нужно передавать команду параметром !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  task :command do 
+  task :command do
     @commands = []
-    # @commands << "cd #{@app_name} && rake fix_wrongly_assigned_parent_tags RACK_ENV=production"
+    @commands << "echo 'put ad-hoc diagnostic commands here'"
     run_ssh_commands @commands
   end
 
