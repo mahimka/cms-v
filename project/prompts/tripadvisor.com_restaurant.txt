@@ -1,0 +1,73 @@
+Это HTML-страница отзыва ресторана с TripAdvisor.
+
+Извлеки следующие markers. Для каждой группы ниже дан реальный список
+значений с фильтров TripAdvisor — старайся использовать формулировки
+именно из этого списка (чтобы одинаковые по смыслу теги не расходились по
+написанию). Списки cuisines/dishes/features не полные (там ещё больше
+вариантов, чем поместилось сюда) — если на странице явно указано что-то
+релевантное, чего в списке нет, всё равно включи это значение как есть, а
+не пропускай.
+
+- markers.establishment_type — тип заведения:
+  Restaurants, Dessert, Coffee & Tea, Bars & Pubs
+
+- markers.meal_types — какие приёмы пищи предлагаются:
+  Breakfast, Brunch, Lunch, Dinner
+
+- markers.price_range — ценовая категория (не диапазон в валюте — это
+  отдельно, ниже в details):
+  Cheap Eats, Mid-range, Fine Dining
+
+- markers.cuisines — типы кухни:
+  European, Slovenian, Mediterranean, Seafood, Italian, Cafe, Pizza, Grill,
+  Pub, Bar, Central European, International, Barbecue, Wine Bar, Georgian,
+  Fast Food, American, Steakhouse, German, Sushi, Asian, Fusion, Diner,
+  Healthy, Australian, Russian, Soups, Neapolitan, Campania,
+  Southern-Italian, Chinese
+
+- markers.dishes — конкретные блюда, если явно упомянуты (меню, отзывы):
+  Fish, Calamari, Pasta, Pesto, Mixed Seafood, Fresh Pasta, Salad, Cecina,
+  Soup, Norway Lobsters, Antipasti, Scampi, Shrimp Scampi, Desserts,
+  Moules-frites, Sweets, Sea Bass, Potato Wedges, Octopus, Italian Desserts,
+  Cake, Truffle, Polenta, Shrimp, Risotto, Clams, Fish Soup, Tartufo,
+  Milanese risotto, Breads and Pastries, Jumbo Shrimp, Fried, Ice Cream,
+  Prosciutto, Tagliatelle, Steak Frites, Tuna, Beef, Gnocchi alla
+  sorrentina, Cakes, Chicken dishes, Fresh Fish, Fish Fillet, Truffade,
+  Burger, Lasagne, Lobster, Steak Tartare, Crawfish, Mussels, Gelato,
+  Scallops, Cod, Salmon, Foie gras, Cuttlefish, Bass, Torte, Chocolate
+  mousse, Gilt-head bream, Lamb, Fritto misto, Neapolitan pizza, Vitello
+  tonnato, Offal, Burger and Fries, Tartare, Pate, Pasta Primavera,
+  Homemade Pasta, Carpaccio, Veal, Tarte, Torta, Beef Carpaccio, Tarts,
+  Tasting Menu
+
+- markers.features — удобства и условия заведения:
+  Seating, Reservations, Wheelchair Accessible, Table Service, Serves
+  Alcohol, Outdoor Seating, Free Wifi, Highchairs Available, Accepts Credit
+  Cards, Wine and Beer, Takeout, Mastercard, Visa, Parking Available, Full
+  Bar, Dog Friendly, Television, Delivery, Street Parking, Free
+  off-street parking, Digital Payments, Family style, American Express,
+  Cash Only, Buffet, Validated Parking, Discover, Live Music, Beach,
+  Private Dining, Jazz Bar, Drive Thru, Playgrounds, Non-smoking
+  restaurants, Gift Cards Available
+
+- markers.dietary_restrictions:
+  Vegetarian friendly, Vegan options, Gluten free options
+
+- markers.great_for:
+  Families with children, Kids, Local cuisine, Romantic, Special occasions,
+  Large groups, Scenic view, Business meetings, Bar scene, Hidden Gems,
+  Hot New Restaurants
+
+- markers.michelin_guide — включай группу, только если на странице явно
+  упоминается MICHELIN Guide, значение: "MICHELIN Guide"
+
+Извлеки также details:
+- details.address — полный адрес
+- details.rating — рейтинг (например "4.5")
+- details.review_count — количество отзывов
+- details.phone — телефон, если есть
+- details.price_range_text — диапазон цен как есть в тексте (например
+  "€10–20"), если на странице указан именно так, а не категорией
+
+Если какого-то поля нет на странице — не включай его вообще (не пиши null
+или пустую строку).
