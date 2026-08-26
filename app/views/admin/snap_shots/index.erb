@@ -31,6 +31,7 @@
       <%= input(:q, :profile_profileable_type_cont, options = {class: 'input is-small', value: @q.profile_profileable_type_cont, placeholder: ""}) %>
     </div>
 
+    <!--
     <div class="column is-2">
       <label class="label is-size-7">param_1_cont</label>
       <%= input(:q, :param_1_cont, options = {class: 'input is-small', value: @q.param_1_cont, placeholder: ""}) %>
@@ -50,6 +51,20 @@
     <div class="column is-2">
       <label class="label is-size-7">param_5_cont</label>
       <%= input(:q, :param_5_cont, options = {class: 'input is-small', value: @q.param_5_cont, placeholder: ""}) %>
+    </div>
+    -->
+
+    <div class="column is-2">
+      <label class="label is-size-7">title_cont</label>
+      <%= input(:q, :title_cont, options = {class: 'input is-small', value: @q.title_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <label class="label is-size-7">h1_cont</label>
+      <%= input(:q, :h1_cont, options = {class: 'input is-small', value: @q.h1_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <label class="label is-size-7">meta_description_cont</label>
+      <%= input(:q, :meta_description_cont, options = {class: 'input is-small', value: @q.meta_description_cont, placeholder: ""}) %>
     </div>
 
 </div>
@@ -73,6 +88,7 @@
 
 </div>
 
+<!--
 <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
 
     <div class="column is-1">
@@ -102,6 +118,49 @@
     <div class="column is-1">
       <input type="checkbox" name="q[html_content_blank]" value='1'  <%= @q.html_content_blank  ? "checked" : "" %>>
       html_content
+    </div>
+
+</div>
+-->
+
+<div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+    <div class="column is-1">
+      <b>blank: </b>
+    </div>
+
+    <div class="column is-1">
+      <input type="checkbox" name="q[title_blank]" value='1'  <%= @q.title_blank  ? "checked" : "" %>>
+      title
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[h1_blank]" value='1'  <%= @q.h1_blank  ? "checked" : "" %>>
+      h1
+    </div>
+    <div class="column is-2">
+      <input type="checkbox" name="q[meta_description_blank]" value='1'  <%= @q.meta_description_blank  ? "checked" : "" %>>
+      meta_description
+    </div>
+
+</div>
+
+<div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+
+    <div class="column is-1">
+      <b>not_blank: </b>
+    </div>
+
+    <div class="column is-1">
+      <input type="checkbox" name="q[title_present]" value='1'  <%= @q.title_present  ? "checked" : "" %>>
+      title
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[h1_present]" value='1'  <%= @q.h1_present  ? "checked" : "" %>>
+      h1
+    </div>
+    <div class="column is-2">
+      <input type="checkbox" name="q[meta_description_present]" value='1'  <%= @q.meta_description_present  ? "checked" : "" %>>
+      meta_description
     </div>
 
 </div>
@@ -138,12 +197,15 @@
   <table class="tableis-narrow is-size-7 ">
     <tr class="is-size-6 has-text-weight-semibold">
       <td>param_1</td>
-      <td>volume</td>
+      <!-- <td>volume</td>
       <td>capacity</td>
       <td>param_2</td>
       <td>param_5</td>
       <td>param_3</td>
-      <td>param_4</td>
+      <td>param_4</td> -->
+      <td>title</td>
+      <td>h1</td>
+      <td>meta_description</td>
       <td></td>
       <td></td>
       <td></td>
@@ -160,12 +222,15 @@
       <%#= checkbox_in_place snap_shot, :ready %>
       <%#= checkbox_in_place snap_shot, :published %>
       <td width='500'><%= input_in_place snap_shot, :param_1 %><%#= snap_shot&.labels['Description'] if snap_shot&.labels %></td>
-      <td><%= snap_shot&.labels['vol'] if snap_shot&.labels %></td>
+      <!-- <td><%= snap_shot&.labels['vol'] if snap_shot&.labels %></td>
       <td><%= snap_shot&.labels['capacity'] if snap_shot&.labels %></td>
       <td width='30'><%= input_in_place snap_shot, :param_2 %></td>
       <td><%= input_in_place snap_shot, :param_5 %></td>
       <td><%= input_in_place snap_shot, :param_3 %></td>
-      <td><%= input_in_place snap_shot, :param_4 %></td>
+      <td><%= input_in_place snap_shot, :param_4 %></td> -->
+      <td><%= input_in_place snap_shot, :title %></td>
+      <td><%= input_in_place snap_shot, :h1 %></td>
+      <td><%= input_in_place snap_shot, :meta_description %></td>
       <td><%#= input_in_place snap_shot, :param_6 %></td>
 
       <td><a href="/admin/snap_shots/<%= snap_shot.id %>" class="button is-small" target='_blank'>shot</a></td>

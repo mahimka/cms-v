@@ -302,12 +302,14 @@ class App < Sinatra::Base
 
     doc = Nokogiri::HTML(html)
 
-    title = doc.at_css('title')&.text&.strip
-    h1    = doc.at_css('h1')&.text&.strip
+    title           = doc.at_css('title')&.text&.strip
+    h1              = doc.at_css('h1')&.text&.strip
+    meta_description = doc.at_css('meta[name="description"]')&.[]('content')&.strip
 
     # script/style/svg/comments — основной вес страницы (реклама, трекеры,
     # иконки), но не несут ни текста, ни структуры, нужной для будущего
     # разбора. Классы и теги вокруг реального контента остаются нетронутыми.
+    # meta убираем только теперь — meta_description уже извлечён выше.
     doc.css('script, style, noscript, svg, link, meta, iframe').remove
     doc.xpath('//comment()').remove
     cleaned_html = doc.to_html
@@ -317,8 +319,9 @@ class App < Sinatra::Base
     snap_shot = SnapShot.create!(
       profile_id: profile&.id,
       html_content: cleaned_html,
-      param_1: title,
-      param_2: h1,
+      title: title,
+      h1: h1,
+      meta_description: meta_description,
       parsed: false
     )
 

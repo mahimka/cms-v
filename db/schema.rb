@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_08_16_150000) do
+ActiveRecord::Schema.define(version: 2026_08_24_210000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -281,6 +281,9 @@ ActiveRecord::Schema.define(version: 2026_08_16_150000) do
     t.string "param_3"
     t.string "param_4"
     t.string "param_5"
+    t.string "title"
+    t.string "h1"
+    t.text "meta_description"
     t.index "\"site_id\"", name: "index_shots_on_site_id"
   end
 
