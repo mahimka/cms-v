@@ -30,7 +30,10 @@ class Profile < ActiveRecord::Base
       "redirected",
       "redirected_to",
       "status",
-      "scraped_at"
+      "scraped_at",
+      "title",
+      "h1",
+      "meta_description"
     ]
   end
 
