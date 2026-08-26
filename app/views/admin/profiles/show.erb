@@ -16,6 +16,23 @@
   <p><strong>status:</strong> <%= @profile.status %></p>
   <p><strong>notes:</strong> <%= @profile.notes %></p>
   <p><strong>scraped_at:</strong> <%= @profile.scraped_at %></p>
+  <p><strong>title:</strong> <%= @profile.title %></p>
+  <p><strong>h1:</strong> <%= @profile.h1 %></p>
+  <p><strong>meta_description:</strong> <%= @profile.meta_description %></p>
+
+  <p><strong>markers:</strong></p>
+  <ul>
+    <% @profile.markers.each do |marker| %>
+      <li><%= marker.group %>: <%= marker.name %></li>
+    <% end %>
+  </ul>
+
+  <p><strong>details:</strong></p>
+  <ul>
+    <% (@profile.details || {}).each do |key, value| %>
+      <li><strong><%= key %>:</strong> <%= value %></li>
+    <% end %>
+  </ul>
 
   <a href="/admin/profiles/<%= @profile.id %>/edit" class="button is-small">Edit</a>
   <a href="/admin/profiles" class="button is-small">Back</a>
