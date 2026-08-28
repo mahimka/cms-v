@@ -30,9 +30,9 @@ class TagsController < App
       halt 200, [].to_json if query.length < 2
 
       escaped = query.gsub(/[%_]/) { |c| "\\#{c}" }
-      tags = Tag.where("name LIKE ? ESCAPE '\\'", "%#{escaped}%").order(:name).limit(20)
+      tags = Tag.includes(:parent).where("name LIKE ? ESCAPE '\\'", "%#{escaped}%").order(:name).limit(20)
 
-      tags.map { |t| { id: t.id, name: t.name } }.to_json
+      tags.map { |t| { id: t.id, name: t.name, parent: t.parent&.name } }.to_json
     end
 
     get '/tags/new' do
