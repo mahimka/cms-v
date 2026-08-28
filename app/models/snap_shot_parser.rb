@@ -37,7 +37,7 @@ class SnapShotParser
     data = @client.extract_profile_data(snap_shot.html_content, instructions: instructions)
 
     apply_markers(profile, data['markers'])
-    apply_details(profile, data['details'])
+    sync_profile_from_snap_shot(profile, snap_shot, data['details'])
 
     snap_shot.update!(parsed: true, parsed_at: Time.now)
 
@@ -82,20 +82,28 @@ class SnapShotParser
     end
   end
 
-  def apply_details(profile, details)
-    return if details.blank?
+  # title/h1/meta_description/scraped_at — то же, что делает
+  # rake profiles:sync_from_snap_shots, но сразу при каждом разборе, а не
+  # отдельным ручным шагом, чтобы profile не отставал от последнего snap_shot.
+  def sync_profile_from_snap_shot(profile, snap_shot, details)
+    profile.title = snap_shot.title
+    profile.h1 = snap_shot.h1
+    profile.meta_description = snap_shot.meta_description
+    profile.scraped_at = snap_shot.created_at
 
-    profile.details = (profile.details || {}).merge(details)
+    if details.present?
+      profile.details = (profile.details || {}).merge(details)
 
-    # rating/review_count дублируются из details в типизированные колонки —
-    # они на горячем пути отображения (ссылки на профили с др. сайтов в
-    # обзоре объекта), сортировать/форматировать из сериализованного JSON
-    # неудобно. details остаётся полным сырым слепком того, что извлёк AI.
-    rating = self.class.parse_rating(details['rating'])
-    profile.rating = rating if rating
+      # rating/review_count дублируются из details в типизированные колонки —
+      # они на горячем пути отображения (ссылки на профили с др. сайтов в
+      # обзоре объекта), сортировать/форматировать из сериализованного JSON
+      # неудобно. details остаётся полным сырым слепком того, что извлёк AI.
+      rating = self.class.parse_rating(details['rating'])
+      profile.rating = rating if rating
 
-    review_count = self.class.parse_review_count(details['review_count'])
-    profile.review_count = review_count if review_count
+      review_count = self.class.parse_review_count(details['review_count'])
+      profile.review_count = review_count if review_count
+    end
 
     profile.save!
   end
