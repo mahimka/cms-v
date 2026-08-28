@@ -1,3 +1,14 @@
+<style>
+  .marker-tag-picker { position: relative; display: inline-block; }
+  .marker-tag-results {
+    position: absolute; top: 100%; left: 0; z-index: 20;
+    background: white; border: 1px solid #dbdbdb; min-width: 180px;
+    max-height: 200px; overflow-y: auto;
+  }
+  .marker-tag-result-item { padding: 4px 8px; cursor: pointer; }
+  .marker-tag-result-item:hover { background: #f5f5f5; }
+</style>
+
 <div class="content m-3">
 
 <form method="GET" action="/admin/markers">
@@ -109,7 +120,19 @@
       <td><%= marker.site&.domain %></td>
       <td><%= marker.group %></td>
       <td><%= marker.name %></td>
-      <td><a href="/admin/tags/<%= marker.tag&.id %>/edit"><%= marker.tag&.name %></a></td>
+      <td>
+        <% if marker.tag %>
+          <a href="/admin/tags/<%= marker.tag.id %>">
+            <%= marker.tag.parent ? "#{marker.tag.parent.name}:#{marker.tag.name}" : marker.tag.name %>
+          </a>
+        <% else %>
+          <div class="marker-tag-picker" data-marker-id="<%= marker.id %>">
+            <input type="text" class="input is-small marker-tag-search" placeholder="найти тег..." autocomplete="off">
+            <div class="marker-tag-results" style="display:none;"></div>
+          </div>
+          <a href="/admin/tags/new?name=<%= URI.encode_www_form_component(marker.name.to_s) %>" class="button is-small" target="_blank">Создать тег</a>
+        <% end %>
+      </td>
       <td><%= marker.details %></td>
       <td><%= marker.admin_notes %></td>
       <td><a href="/admin/markers/<%= marker.id %>" class="button is-small" target='_blank'>marker</a></td>
@@ -122,3 +145,5 @@
 </div>
 
 </div>
+
+<script src="/javascripts/marker-tag-search.js"></script>

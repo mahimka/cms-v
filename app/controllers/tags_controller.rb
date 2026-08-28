@@ -20,7 +20,22 @@ class TagsController < App
 
     end  
 
-    get '/tags/new' do 
+    # Поиск тегов по имени для JS-автокомплита (см. markers/index.erb —
+    # привязка Marker к Tag). До /tags/:id, иначе "search" перехватится
+    # как :id.
+    get '/tags/search' do
+      content_type :json
+
+      query = params[:q].to_s.strip
+      halt 200, [].to_json if query.length < 2
+
+      escaped = query.gsub(/[%_]/) { |c| "\\#{c}" }
+      tags = Tag.where("name LIKE ? ESCAPE '\\'", "%#{escaped}%").order(:name).limit(20)
+
+      tags.map { |t| { id: t.id, name: t.name } }.to_json
+    end
+
+    get '/tags/new' do
       if params[:name]
         @tag = Tag.new(name: params[:name], short: params[:short], parent_id: params[:parent_id])
       elsif params[:parent_id]  
