@@ -256,10 +256,10 @@ module MiscHelpers
       fill_percent = ((rating - (i - 1)).clamp(0, 1) * 100).round(1)
 
       <<~HTML
-        <span style="position:relative; display:inline-block; width:#{size}px; height:#{size}px; vertical-align:middle;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}" viewBox="0 0 24 24" fill="none" stroke="#{empty_color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; top:0; left:0;"><path d="#{STAR_RATING_SVG_PATH}"/></svg>
-          <span style="position:absolute; top:0; left:0; width:#{fill_percent}%; height:100%; overflow:hidden; white-space:nowrap;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}" viewBox="0 0 24 24" fill="#{color}" stroke="#{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="#{STAR_RATING_SVG_PATH}"/></svg>
+        <span style="position:relative; display:inline-flex; width:#{size}px; height:#{size}px; vertical-align:middle;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}" viewBox="0 0 24 24" fill="none" stroke="#{empty_color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; top:0; left:0; display:block;"><path d="#{STAR_RATING_SVG_PATH}"/></svg>
+          <span style="position:absolute; top:0; left:0; width:#{fill_percent}%; height:#{size}px; overflow:hidden; white-space:nowrap;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}" viewBox="0 0 24 24" fill="#{color}" stroke="#{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><path d="#{STAR_RATING_SVG_PATH}"/></svg>
           </span>
         </span>
       HTML
