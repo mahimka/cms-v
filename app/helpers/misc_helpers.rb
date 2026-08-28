@@ -233,11 +233,39 @@ module MiscHelpers
       end
 
     rescue => e
-      
+
       return '!! some error in link_to !!'
 
     end
 
+  end
+
+  # Рейтинг звёздочками через SVG-иконку Lucide (у Bulma нет своего
+  # star-rating компонента — только CSS, без иконок). Заливка — не
+  # целая/половинчатая, а точный процент на каждую звезду (через overlay
+  # с clip по ширине), поэтому 3.7 честно покажет почти-заполненную
+  # четвёртую звезду, а не округление до половины.
+  STAR_RATING_SVG_PATH = 'M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z'.freeze
+
+  def star_rating(rating, max: 5, size: 16, color: '#f5a623', empty_color: '#dbdbdb')
+    return '' if rating.nil?
+
+    rating = rating.to_f.clamp(0, max)
+
+    stars = (1..max).map do |i|
+      fill_percent = ((rating - (i - 1)).clamp(0, 1) * 100).round(1)
+
+      <<~HTML
+        <span style="position:relative; display:inline-block; width:#{size}px; height:#{size}px; vertical-align:middle;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}" viewBox="0 0 24 24" fill="none" stroke="#{empty_color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; top:0; left:0;"><path d="#{STAR_RATING_SVG_PATH}"/></svg>
+          <span style="position:absolute; top:0; left:0; width:#{fill_percent}%; height:100%; overflow:hidden; white-space:nowrap;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="#{size}" height="#{size}" viewBox="0 0 24 24" fill="#{color}" stroke="#{color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="#{STAR_RATING_SVG_PATH}"/></svg>
+          </span>
+        </span>
+      HTML
+    end.join
+
+    "<span class=\"star-rating\" title=\"#{rating}/#{max}\">#{stars}</span>"
   end
 
 end
