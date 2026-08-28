@@ -125,6 +125,7 @@
           <a href="/admin/tags/<%= marker.tag.id %>">
             <%= marker.tag.parent ? "#{marker.tag.parent.name}:#{marker.tag.name}" : marker.tag.name %>
           </a>
+          <a href="#" class="marker-tag-unlink" data-marker-id="<%= marker.id %>" title="Отвязать тег">✕</a>
         <% else %>
           <div class="marker-tag-picker" data-marker-id="<%= marker.id %>">
             <input type="text" class="input is-small marker-tag-search" placeholder="найти тег..." autocomplete="off">
