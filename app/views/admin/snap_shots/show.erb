@@ -10,7 +10,7 @@
 	</tr>
 	<tr>
 		<td>profileable_type</td>
-		<td><%= @snap_shot.profile.profileable_type %> - <%= @snap_shot.profile.profileable_id ? "<a href=''>SHOW</a>" : 'NO PRODCT' %></td>
+		<td><%= @snap_shot.profile.profileable_type %> - <%= @snap_shot.profile.profileable_id ? "<a href='/admin/#{@snap_shot.profile.profileable_type.parameterize.pluralize}/#{@snap_shot.profile.profileable_id}'>SHOW</a>" : 'NO PRODCT' %></td>
 	</tr>
 	<tr>
 		<td>redirected_to</td>
@@ -20,6 +20,28 @@
 
 <h1 class='title is-4'>SnapShot</h1>
 <table class='table is-size-7'>
+
+
+	<tr>
+		<td>title</td>
+		<td><%= @snap_shot.title %></td>
+	</tr>
+	<tr>
+		<td>h1</td>
+		<td><%= @snap_shot.h1 %></td>
+	</tr>
+	<tr>
+		<td>meta_description</td>
+		<td><%= @snap_shot.meta_description %></td>
+	</tr>
+	<tr>
+		<td>labels</td>
+		<td><%= @snap_shot.labels %></td>
+	</tr>
+	<tr>
+		<td>html_content</td>
+		<td><%= @snap_shot.html_content.length %></td>
+	</tr>
 	<tr>
 		<td>param_1</td>
 		<td><%= @snap_shot.param_1 %></td>
@@ -46,7 +68,9 @@
 	</tr>
 </table>
 
-<p></p>
+
+
+
 
 <%# @snap_shot.markers.each do |key, value| %>
   <p>

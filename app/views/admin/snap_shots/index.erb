@@ -196,7 +196,6 @@
 
   <table class="tableis-narrow is-size-7 ">
     <tr class="is-size-6 has-text-weight-semibold">
-      <td>param_1</td>
       <!-- <td>volume</td>
       <td>capacity</td>
       <td>param_2</td>
@@ -205,8 +204,14 @@
       <td>param_4</td> -->
       <td>title</td>
       <td>h1</td>
-      <td>meta_description</td>
-      <td></td>
+      <td>m_d</td>
+      <td>labels</td>
+      <td>name</td>
+      <td>p_1</td>
+      <td>p_2</td>
+      <td>p_3</td>
+      <td>p_4</td>
+      <td>p_5</td>
       <td></td>
       <td></td>
       <td>html</td>
@@ -217,27 +222,38 @@
   <% @snap_shots.each do |snap_shot| %>
 
     <tr>
+
+
+      <td><%= snap_shot.title.length %> | <span class='tag' title= '<%= snap_shot.title %>'><%= snap_shot.title[0..20] %>..</span></td>
+      <td><%= snap_shot.h1 %></td>
+      <td><span class='tag' title= '<%= snap_shot.meta_description %>'><%= snap_shot.meta_description.length %></span></td>
+      <td><%= snap_shot.labels&.length %></td>
+      <td><%= snap_shot.name %></td>
+      <td><%= snap_shot.param_1 %></td>
+      <td><%= snap_shot.param_2 %></td>
+      <td><%= snap_shot.param_3 %></td>
+      <td><%= snap_shot.param_4 %></td>
+      <td><%= snap_shot.param_5 %></td>
     <!-- <tr <%#= "class='has-background-success-light'" if !snap_shot.listing_id.blank? %>> -->
 
-      <%#= checkbox_in_place snap_shot, :ready %>
+      <!-- <%#= checkbox_in_place snap_shot, :ready %>
       <%#= checkbox_in_place snap_shot, :published %>
-      <td width='500'><%= input_in_place snap_shot, :param_1 %><%#= snap_shot&.labels['Description'] if snap_shot&.labels %></td>
-      <!-- <td><%= snap_shot&.labels['vol'] if snap_shot&.labels %></td>
+      <td width='500'><%#= input_in_place snap_shot, :param_1 %><%#= snap_shot&.labels['Description'] if snap_shot&.labels %></td>
+      <td><%= snap_shot&.labels['vol'] if snap_shot&.labels %></td>
       <td><%= snap_shot&.labels['capacity'] if snap_shot&.labels %></td>
       <td width='30'><%= input_in_place snap_shot, :param_2 %></td>
       <td><%= input_in_place snap_shot, :param_5 %></td>
       <td><%= input_in_place snap_shot, :param_3 %></td>
-      <td><%= input_in_place snap_shot, :param_4 %></td> -->
-      <td><%= input_in_place snap_shot, :title %></td>
-      <td><%= input_in_place snap_shot, :h1 %></td>
-      <td><%= input_in_place snap_shot, :meta_description %></td>
-      <td><%#= input_in_place snap_shot, :param_6 %></td>
+      <td><%= input_in_place snap_shot, :param_4 %></td> 
+      <td><%#= input_in_place snap_shot, :title %></td>
+      <td><%#= input_in_place snap_shot, :h1 %></td>
+      <td><%#= input_in_place snap_shot, :meta_description %></td>
+      <td><%#= input_in_place snap_shot, :param_6 %></td>-->
 
       <td><a href="/admin/snap_shots/<%= snap_shot.id %>" class="button is-small" target='_blank'>shot</a></td>
       <td><a href="/admin/profiles/<%= snap_shot.profile_id %>" target='_blank'>profile</a></td>
       <td><a href="<%= snap_shot.profile.url %>" target='_blank'>sourcr</a></td>
       <td><%= snap_shot.html_content.length %></td>
-      <td><%= snap_shot.labels&.length %></td>
 
 
 

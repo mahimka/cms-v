@@ -97,23 +97,25 @@
 <% @entity.profiles.each do |profile| %>
   <p><%= profile.site.domain %> - <%= profile.url %>
   <ul>
-  	<li><%= profile.snap_shots.first.param_1  %>
-  	<li><%= profile.snap_shots.first.param_2  %>
-  	<li><%= profile.snap_shots.first.param_3  %>
-  	<li><%= profile.snap_shots.first.param_4  %>
+  	<li><%= profile.snap_shots&.first&.param_1  %>
+  	<li><%= profile.snap_shots&.first&.param_2  %>
+  	<li><%= profile.snap_shots&.first&.param_3  %>
+  	<li><%= profile.snap_shots&.first&.param_4  %>
   </ul>
 
 
   <h2 class='title is-4 mt-4'>snap_shot.first</h2>
   <p class="mt-4">
-  <% profile.snap_shots.first.labels.each do |key, value| %>
 
-    <h3 class="title is-size-6 mt-4"><%= key %></h3>
-    <p>
-    	<%= value  if value.is_a? String %>
-    	<%= value.map{|node| "<li>" + node }.join if value.is_a? Array %>
+  <% if profile.snap_shots.first&.labels %>
+    <% profile.snap_shots.first.labels.each do |key, value| %>
 
-
+      <h3 class="title is-size-6 mt-4"><%= key %></h3>
+      <p>
+      	<%= value  if value.is_a? String %>
+      	<%= value.map{|node| "<li>" + node }.join if value.is_a? Array %>
+      </p>
+    <% end %>
   <% end %>
 
 <% end %>

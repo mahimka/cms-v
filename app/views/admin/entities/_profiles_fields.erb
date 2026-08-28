@@ -10,12 +10,12 @@
     <% sites_for_select = {"": ""}.merge(Site.order(:name).to_h { |s| [s.id, s.name.presence || s.domain] }) %>
 
     <% @entity.profiles.each do |profile| %>
-      <div class="columns is-mobile mb-1">
+      <div class="columns is-mobile my-0 py-0 is-gapless">
 
-        <form method="POST" action="/admin/profiles/<%= profile.id %>" class="column is-11 field has-addons mb-0">
+        <form method="POST" action="/admin/profiles/<%= profile.id %>" class="column is-11 field has-addons my-0 py-0">
           <input type="hidden" name="_method" value="PATCH">
           <input type="hidden" name="redirect_to" value="/admin/entities/<%= @entity.id %>/edit">
-          <div class="control">
+          <div class="control column is-2 my-0 py-0">
             <%= select(:profile, :site_id, sites_for_select, options = {class: 'select input is-small', value: profile.site_id}) %>
           </div>
           <div class="control is-expanded">
@@ -24,15 +24,27 @@
           <div class="control">
             <button type="submit" class="button is-small is-info">save</button>
           </div>
+          <div class="control">
+            <a href='<%= profile.url %>#profile' class='button is-small' target='_blank'>chrome</a>
+          </div>
+   
         </form>
-
-        <form method="POST" action="/admin/profiles/<%= profile.id %>" class="column is-1" onsubmit="return confirm('Delete this profile?')">
+     
+        <form method="POST" action="/admin/profiles/<%= profile.id %>" class="column is-1 my-0 py-0" onsubmit="return confirm('Delete this profile?')">
           <input type="hidden" name="_method" value="DELETE">
           <input type="hidden" name="redirect_to" value="/admin/entities/<%= @entity.id %>/edit">
           <button type="submit" class="button is-small is-danger">&times;</button>
         </form>
 
+
       </div>
+      <div class="columns is-mobile my-1 py-0">
+        <div class="column is-2 my-0 py-0">
+        </div>
+        <div class="column is-1 my-0 py-0 is-size-7">
+           <%= profile.scraped_at %>
+        </div>
+       </div>
     <% end %>
 
     <hr class="my-2">
