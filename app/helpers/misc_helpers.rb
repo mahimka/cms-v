@@ -268,4 +268,22 @@ module MiscHelpers
     "<span class=\"star-rating\" title=\"#{rating}/#{max}\">#{stars}</span>"
   end
 
+  # Мелкие контактные иконки (адрес/сайт/телефон/email — см.
+  # _sidebar_address.erb, _sidebar_links.erb) тем же путём, что и
+  # star_rating: сырые SVG-пути Lucide, без внешней зависимости на сам
+  # пакет иконок.
+  SVG_ICON_PATHS = {
+    'map-pin' => '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+    'globe'   => '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+    'phone'   => '<path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.288 1.208 13.5 13.5 0 0 0 6.388 6.41"/>',
+    'mail'    => '<path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/>'
+  }.freeze
+
+  def svg_icon(name, size: 16, color: 'currentColor')
+    inner = SVG_ICON_PATHS[name]
+    return '' unless inner
+
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"#{size}\" height=\"#{size}\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#{color}\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:inline-block; vertical-align:middle;\">#{inner}</svg>"
+  end
+
 end
