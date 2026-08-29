@@ -87,6 +87,7 @@
 
   <table class="table is-narrow is-size-7 ">
     <tr class="is-size-6 has-text-weight-semibold">
+      <td></td>
       <td>active</td>
       <td title="запрещает менять name — на него ссылается List conditions (tags)">fixed 🔒</td>
       <td>position</td>
@@ -101,6 +102,9 @@
   <% grouped_tags.sort_by { |group, _| [group.position || 0, group.name.to_s] }.each do |group, tags_in_group| %>
 
     <tr class="has-background-light is-size-7">
+      <td>
+        <button type="button" class="button is-small tag-group-toggle" data-group-id="<%= group.id %>" data-expanded="false">▶</button>
+      </td>
       <td><%= checkbox_in_place(group, :active) %></td>
       <td><%= checkbox_in_place(group, :fixed) %></td>
       <td><%= group.position %></td>
@@ -125,7 +129,8 @@
     </tr>
 
     <% (tags_in_group - [group]).sort_by { |t| [t.position || 0, t.name.to_s] }.each do |tag| %>
-      <tr>
+      <tr class="tag-group-child" data-group-id="<%= group.id %>" style="display:none;">
+        <td></td>
         <td><%= checkbox_in_place(tag, :active) %></td>
         <td><%= checkbox_in_place(tag, :fixed) %></td>
         <td width=15><%= input_in_place(tag, :position) %></td>
@@ -146,4 +151,6 @@
 </div>
 
 </div>
+
+<script src="/javascripts/tag-group-toggle.js"></script>
 
