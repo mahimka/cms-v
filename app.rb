@@ -308,10 +308,19 @@ class App < Sinatra::Base
 
     # script/style/svg/comments — основной вес страницы (реклама, трекеры,
     # иконки), но не несут ни текста, ни структуры, нужной для будущего
-    # разбора. Классы и теги вокруг реального контента остаются нетронутыми.
-    # meta убираем только теперь — meta_description уже извлечён выше.
-    doc.css('script, style, noscript, svg, link, meta, iframe').remove
+    # разбора. meta убираем только теперь — meta_description уже извлечён выше.
+    doc.css('script, style, noscript, svg, link, meta, iframe, img').remove
     doc.xpath('//comment()').remove
+
+    # Атрибуты вроде class/style/data-automation/aria-*/id/tabindex — это
+    # хэши CSS-сборки и служебная разметка (проверено на реальной странице
+    # TripAdvisor: ~55% веса страницы), не несут содержимого. href оставляем
+    # (ссылки на сайт заведения, соцсети и т.п. — единственный атрибут с
+    # содержательной информацией, остальное всё в тексте узлов).
+    doc.css('*').each do |el|
+      el.attributes.each_key { |name| el.remove_attribute(name) unless name == 'href' }
+    end
+
     cleaned_html = doc.to_html
 
     profile = Profile.find_by(url: url)
