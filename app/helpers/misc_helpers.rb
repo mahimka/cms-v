@@ -286,4 +286,13 @@ module MiscHelpers
     "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"#{size}\" height=\"#{size}\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#{color}\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:inline-block; vertical-align:middle;\">#{inner}</svg>"
   end
 
+  # Безопасная вставка строки ВНУТРЬ уже написанных вручную JSON-LD литералов
+  # ("key": "<%= json_escape(text) %>") — экранирует кавычки/бэкслэши/
+  # переносы строк и т.п. Без этого перенос строки в @page.meta_description
+  # (например) ломает весь JSON-LD блок целиком. .to_json на строке уже даёт
+  # корректно экранированное содержимое в кавычках — снимаем только их.
+  def json_escape(text)
+    text.to_s.to_json[1..-2]
+  end
+
 end
