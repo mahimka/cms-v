@@ -6,4 +6,45 @@
 		<td><%= @marker.site&.domain %> <a href="<%=  @marker.site&.url %>">site</a></td>
 	</tr>
 
+	<tr>
+		<td>tags</td>
+		<td>
+			<% if @marker.tag %>
+				<a href="/admin/tags/<%= @marker.tag.id %>"><%= @marker.tag.name %></a>
+			<% else %>
+				<span class="has-text-grey">не привязан</span>
+			<% end %>
+		</td>
+	</tr>
+
+</table>
+
+<h2 class="title is-5">Профили (<%= @marker.profiles.count %>)</h2>
+
+<table class="table is-narrow is-size-7">
+	<tr class="is-size-6 has-text-weight-semibold">
+		<td>entity</td>
+		<td>profile url</td>
+		<td></td>
+	</tr>
+
+	<% @marker.profiles.includes(:profileable).each do |profile| %>
+		<% profileable = profile.profileable %>
+		<tr>
+			<td>
+				<% if profileable %>
+					<%= profileable.class.name %>: <%= profileable.name %>
+				<% else %>
+					<span class="has-text-grey">без entity</span>
+				<% end %>
+			</td>
+			<td><a href="<%= profile.url %>" target="_blank"><%= profile.url %></a></td>
+			<td>
+				<% if profileable %>
+					<% edit_path = profileable.is_a?(Entity) ? "/admin/entities/#{profileable.id}/edit_in_place" : "/admin/#{profileable.class.name.underscore.pluralize}/#{profileable.id}/edit" %>
+					<a href="<%= edit_path %>" class="button is-small" target="_blank">edit</a>
+				<% end %>
+			</td>
+		</tr>
+	<% end %>
 </table>
