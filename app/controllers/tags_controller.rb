@@ -32,7 +32,7 @@ class TagsController < App
       escaped = query.gsub(/[%_]/) { |c| "\\#{c}" }
       tags = Tag.includes(:parent).where("name LIKE ? ESCAPE '\\'", "%#{escaped}%").order(:name).limit(20)
 
-      tags.map { |t| { id: t.id, name: t.name, parent: t.parent&.name } }.to_json
+      tags.map { |t| { id: t.id, name: t.name, parent: t.parent&.name, usage_count: t.usage_count } }.to_json
     end
 
     get '/tags/new' do
@@ -102,6 +102,50 @@ class TagsController < App
       sorted.each_with_index { |tag, index| tag.update_column(:position, index) }
 
       redirect back
+    end
+
+    # Слить source в target: все taggings/markers/schema_tags source
+    # переезжают на target (дубли, если объект уже помечен обоими —
+    # схлопываются, не плодятся — на taggings/schema_tags есть unique index
+    # на комбинацию), затем source удаляется. fixed source нельзя — на него
+    # могут ссылаться List#conditions по имени (см. FixedName). Тег с
+    # детьми нельзя — PreventDestroyWithChildren всё равно не даст
+    # destroy, а тут даём понятную ошибку заранее, а не после переноса тегов.
+    post '/tags/:id/merge' do
+      content_type :json
+
+      source = Tag.find(params[:id])
+      target = Tag.find(params[:target_tag_id])
+
+      halt 422, { success: false, error: 'Нельзя сливать fixed тег' }.to_json if source.fixed?
+      halt 422, { success: false, error: 'Нельзя слить тег сам с собой' }.to_json if source.id == target.id
+      halt 422, { success: false, error: "У тега есть дочерние теги (#{source.children.pluck(:name).join(', ')}) — сначала перепривяжите их" }.to_json if source.children.any?
+
+      ActiveRecord::Base.transaction do
+        source.taggings.find_each do |tagging|
+          if Tagging.exists?(tag_id: target.id, taggable_type: tagging.taggable_type, taggable_id: tagging.taggable_id)
+            tagging.destroy
+          else
+            tagging.update!(tag_id: target.id)
+          end
+        end
+
+        source.markers.update_all(tag_id: target.id)
+
+        source.schema_tags.find_each do |schema_tag|
+          if SchemaTag.exists?(tag_id: target.id, schema_id: schema_tag.schema_id)
+            schema_tag.destroy
+          else
+            schema_tag.update!(tag_id: target.id)
+          end
+        end
+
+        source.destroy!
+      end
+
+      { success: true, target_tag_id: target.id }.to_json
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotDestroyed => e
+      halt 422, { success: false, error: e.message }.to_json
     end
 
     # Выгружает группу тегов (все колонки самой группы + все колонки

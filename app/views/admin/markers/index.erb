@@ -123,7 +123,7 @@
       <td>
         <% if marker.tag %>
           <a href="/admin/tags/<%= marker.tag.id %>">
-            <%= marker.tag.parent ? "#{marker.tag.parent.name}:#{marker.tag.name}" : marker.tag.name %>
+            <% if marker.tag.parent %><%= marker.tag.parent.name %>: <strong><%= marker.tag.name %></strong><% else %><strong><%= marker.tag.name %></strong><% end %>
           </a>
           <a href="#" class="marker-tag-unlink" data-marker-id="<%= marker.id %>" title="Отвязать тег">✕</a>
         <% else %>

@@ -12,6 +12,17 @@
   </form>
 </p>
 
+<style>
+  .marker-tag-picker { position: relative; display: inline-block; }
+  .marker-tag-results {
+    position: absolute; top: 100%; left: 0; z-index: 20;
+    background: white; border: 1px solid #dbdbdb; min-width: 180px;
+    max-height: 200px; overflow-y: auto;
+  }
+  .marker-tag-result-item { padding: 4px 8px; cursor: pointer; }
+  .marker-tag-result-item:hover, .marker-tag-result-item.is-active { background: #f5f5f5; }
+</style>
+
 <div class="content m-3">
 
 <form method="GET" action="/admin/tags">
@@ -140,6 +151,15 @@
         <td>
           <a href="/admin/tags/<%= tag.id %>" class="button is-small" target='_blank'>tag</a>
           <a href="/admin/tags/<%= tag.id %>/edit" class="button is-small" target='_blank'>edit</a>
+          <% unless tag.fixed? %>
+            <button type="button" class="button is-small tag-merge-toggle"
+                    data-tag-id="<%= tag.id %>" data-tag-name="<%= tag.name %>"
+                    data-tag-count="<%= @tagging_counts_by_tag[tag.id] || 0 %>">merge</button>
+            <div class="marker-tag-picker tag-merge-picker" data-tag-id="<%= tag.id %>" style="display:none;">
+              <input type="text" class="input is-small tag-merge-search" placeholder="слить с..." autocomplete="off">
+              <div class="marker-tag-results" style="display:none;"></div>
+            </div>
+          <% end %>
         </td>
       </tr>
     <% end %>
@@ -153,4 +173,5 @@
 </div>
 
 <script src="/javascripts/tag-group-toggle.js"></script>
+<script src="/javascripts/tag-merge.js"></script>
 
