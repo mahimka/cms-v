@@ -30,6 +30,44 @@ namespace :entities do
     puts "Готово: #{entities_touched} entity, всего добавлено #{total_taggings} привязок"
   end
 
+  desc "Записать address/latitude/longitude из profile.details в колонки Entity, только если у entity ещё пусто (rake entities:sync_address)"
+  task :sync_address do
+    total = 0
+    conflicts = []
+
+    Entity.find_each do |entity|
+      source = entity.profiles.find { |p| p.details && p.details['latitude'].present? && p.details['longitude'].present? }
+      next unless source
+
+      lat = source.details['latitude'].to_f
+      lng = source.details['longitude'].to_f
+      address = source.details['address'].presence
+
+      if entity.latitude.present? || entity.longitude.present?
+        if entity.latitude.to_f.round(4) != lat.round(4) || entity.longitude.to_f.round(4) != lng.round(4)
+          conflicts << "#{entity.name} (##{entity.id}): entity=(#{entity.latitude}, #{entity.longitude}) profile=(#{lat}, #{lng})"
+        end
+        next
+      end
+
+      entity.latitude = lat
+      entity.longitude = lng
+      entity.address = address if entity.address.blank? && address
+      entity.save!
+
+      total += 1
+      puts "#{entity.name} (##{entity.id}): address=#{entity.address.inspect}, lat=#{lat}, lng=#{lng}"
+    end
+
+    puts "Готово: заполнено #{total} entity"
+
+    unless conflicts.empty?
+      puts
+      puts "Конфликты (у entity уже есть координаты, отличные от profile.details — не тронуты, разобрать вручную):"
+      conflicts.each { |c| puts "  #{c}" }
+    end
+  end
+
   DAYS_OF_WEEK = %w[monday tuesday wednesday thursday friday saturday sunday].freeze
 
   desc "Записать часы работы (hours_monday..hours_sunday из profile.details) в Detail Entity, группа Label opening_hours (rake entities:sync_opening_hours)"

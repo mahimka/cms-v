@@ -286,6 +286,24 @@ module MiscHelpers
     "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"#{size}\" height=\"#{size}\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#{color}\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:inline-block; vertical-align:middle;\">#{inner}</svg>"
   end
 
+  # Сырой телефон со скрейпинга приходит вперемешку — "05 909 13 03",
+  # "386 56 417 440", "+386 41 476 037" — а Google в structured data
+  # ждёт E.164-подобный вид с "+". Приводим всё к "+386 X XXX XXXX":
+  # ведущий "0" (национальный формат) меняем на код страны, "386" без "+"
+  # дополняем им же, дальше просто группируем восьмизначный номер.
+  def format_phone_si(raw)
+    digits = raw.to_s.gsub(/\D/, '')
+    return '' if digits.blank?
+
+    digits = "386#{digits[1..]}" if digits.start_with?('0')
+    digits = "386#{digits}" unless digits.start_with?('386')
+
+    local = digits[3..]
+    return "+#{digits}" if local.blank? || local.length < 5
+
+    "+386 #{local[0]} #{local[1..3]} #{local[4..]}"
+  end
+
   # Безопасная вставка строки ВНУТРЬ уже написанных вручную JSON-LD литералов
   # ("key": "<%= json_escape(text) %>") — экранирует кавычки/бэкслэши/
   # переносы строк и т.п. Без этого перенос строки в @page.meta_description

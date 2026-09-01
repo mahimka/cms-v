@@ -7,24 +7,32 @@
 
 <h2 class='title is-4 mt-4'>tagged objects</h2>
 
+
 <% if @taggings.empty? %>
   <p class="help">этим тегом ничего не помечено</p>
 <% else %>
   <% @taggings.group_by(&:taggable_type).each do |type, taggings_of_type| %>
     <h3 class="title is-5 mt-3"><%= type %> (<%= taggings_of_type.size %>)</h3>
-    <ul>
+
+<table class="table">
       <% taggings_of_type.each do |tagging| %>
+
+      <tr>
         <% obj = tagging.taggable %>
-        <li>
+       
           <% if obj.nil? %>
             <span class="has-text-grey">#<%= tagging.taggable_id %> (запись удалена)</span>
           <% elsif type == "Page" %>
             <a href="<%= obj.uri %>" target="_blank"><%= obj.uri %></a>
           <% else %>
-            <a href="/admin/<%= type.underscore.pluralize %>/<%= obj.id %>"><%= obj.try(:name) || obj.try(:title) || obj.try(:alt).presence || obj.try(:file) || "##{obj.id}" %></a>
+            <td><%= obj.schema.name %></td>
+            <td><%= obj.page ? obj.page&.uri : 'no page' %></td>
+            <td><a href="/admin/<%= type.underscore.pluralize %>/<%= obj.id %>/edit_in_place" traget='_blank'><%= obj.try(:name) || obj.try(:title) || obj.try(:alt).presence || obj.try(:file) || "##{obj.id}" %></a></td>
           <% end %>
         </li>
+      </tr>
       <% end %>
-    </ul>
+</table>
   <% end %>
 <% end %>
+

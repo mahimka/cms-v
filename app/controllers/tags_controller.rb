@@ -11,7 +11,13 @@ class TagsController < App
 
       @q = Tag.ransack(params[:q])
       @tags_found = @q.result(distinct: true).size # for index.rb
-      @tags       = @q.result(distinct: true).includes(:parent).order(:parent_id, :position, :name).page(params[:page]).per(500)
+      # per(5000): группировка на странице собирается из @tags целиком (см.
+      # index.erb) — если родитель и дети разъедутся по разным страницам
+      # пагинации (легко происходит для новых групп с большим id, т.к.
+      # сортировка по parent_id — числовая, не по смыслу), группа рисуется
+      # "пустой". Тегов сильно меньше 5000, так что пагинация тут по факту
+      # не нужна — просто держим всё на одной странице.
+      @tags       = @q.result(distinct: true).includes(:parent).order(:parent_id, :position, :name).page(params[:page]).per(5000)
 
       # Один запрос на всю страницу вместо tag.usage_count на каждую строку.
       @tagging_counts_by_tag = Tagging.group(:tag_id).count
