@@ -1,5 +1,11 @@
 class LabelsController < App
 
+  # Импортируемые поля — без id, created_at, updated_at, ancestry (см.
+  # /labels/import). ancestry не входит — иерархия пересчитывается
+  # программно через parent=, id из файла мог не совпасть с id в текущей
+  # базе (тот же приём, что у /schemas/import).
+  LABEL_IMPORT_FIELDS = %w[translations field_type position active fixed icon_svg].freeze
+
   namespace '/admin' do
 
     get '/labels' do
@@ -69,6 +75,50 @@ class LabelsController < App
       sorted.each_with_index { |label, index| label.update_column(:position, index) }
 
       redirect back
+    end
+
+    # Выгружает все labels (все колонки) одним файлом в public/labels.json.
+    post '/labels/export' do
+      data = Label.all.map(&:attributes)
+      File.write(File.join(settings.public_folder, 'labels.json'), JSON.pretty_generate(data))
+
+      flash[:notice] = "Exported #{data.size} labels to /labels.json"
+      redirect '/admin/labels'
+    end
+
+    # Импорт из файла, выгруженного /labels/export. id/created_at/updated_at
+    # не переносятся; поиск — по name (уникален), так что повторный импорт
+    # того же файла обновляет существующие записи, а не дублирует их.
+    # Иерархия (ancestry) восстанавливается через parent= по имени родителя,
+    # а не по старому id — обрабатываем родителей раньше детей (сортировка
+    # по фактической глубине ancestry в файле).
+    post '/labels/import' do
+      upload = params[:import_file]
+      halt 422, "Файл не выбран" unless upload.is_a?(Hash) && upload[:tempfile]
+
+      records = JSON.parse(upload[:tempfile].read)
+      records = records.sort_by { |r| r['ancestry'].to_s.split('/').reject(&:blank?).size }
+
+      old_id_to_new = {}
+
+      records.each do |r|
+        old_parent_id = r['ancestry'].to_s.split('/').reject(&:blank?).last&.to_i
+        new_parent = old_parent_id ? old_id_to_new[old_parent_id] : nil
+
+        label = Label.find_or_initialize_by(name: r.fetch('name'))
+        label.parent = new_parent
+        label.assign_attributes(r.slice(*LABEL_IMPORT_FIELDS))
+        label.save!
+
+        old_id_to_new[r['id']] = label
+      end
+
+      flash[:notice] = "Imported #{records.size} labels"
+      redirect '/admin/labels'
+    rescue StandardError => e
+      flash[:error_title] = "Import failed:"
+      flash[:errors] = [e.message]
+      redirect '/admin/labels'
     end
 
     delete '/labels/:id' do
