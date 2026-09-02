@@ -1,0 +1,49 @@
+<% 
+  picture ||= Picture.tagged_with('hero').sample 
+  
+# if @page.conditions && !@page.conditions.blank?
+
+#   search_tags = Array(@page.conditions['tags']) - ["and", "or"] 
+#   pages = nil
+#   # pages = Page.tagged_with(search_tags, match: :all)
+
+#   # # Поочередно уменьшаем массив тегов, пока не найдем картинку или пока теги не закончатся
+#   # while search_tags.any? && pages.nil?
+#   #   pages = Page.tagged_with(search_tags, match: :all)
+#   #   search_tags.pop # Удаляем последний тег для следующей попытки
+#   # end
+
+#   # picture = pages.first.pageable&.pictures&.published
+#   # picture = pages.first.pageable&.pictures&.published
+#   entities = Entity.tagged_with(search_tags, match: :any)
+  
+#   pictures = []
+#   entities.each do |entity|
+
+#     pictures <<  entity.pictures
+
+#   end
+
+#   picture = pictures.flatten[0]
+
+# end
+
+%>
+
+
+<% if picture %>
+
+  <!-- Карусель — абсолютно позиционирована как фон -->
+  <div style="position: absolute; inset: 0; z-index: 0;">
+
+    <img
+      src="<%= asset_path(picture.file) %>"<%#= picture.filename %>
+      alt="<%= picture.translation @page.lang %>"
+      style="width:100%; height:100%; object-fit:cover; display:block;"
+    >
+
+  </div>
+
+<% end %>
+
+

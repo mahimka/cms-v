@@ -1,0 +1,111 @@
+<%# if defined?(pictures) && pictures.first.class.name == 'Picture' %>
+  <!-- Карусель — абсолютно позиционирована как фон -->
+  <div
+    id="dv-hero-splide"
+    class="splide"
+    aria-label="Апартаменты Diversorio в Изоле"
+    style="position: absolute; inset: 0; z-index: 0;"
+  >
+    <div class="splide__track" style="height: 100%;">
+      <ul class="splide__list">
+
+        <% pictures.each do |picture| %>
+          <li class="splide__slide">
+            <img
+              src="<%= asset_path(picture.file) %>"<%#= picture.filename %>
+              alt="<%= picture.translation @page.lang %>"
+              style="width:100%; height:100%; object-fit:cover; display:block;"
+              loading="lazy"
+            >
+          </li>
+        <% end %> 
+
+           <!--
+           <li class="splide__slide">
+              <%#= partial '_map_stay22', height: 400 %>
+           </li>
+           -->
+
+      </ul>
+    </div>
+  </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    new Splide('#dv-hero-splide', {
+
+      // Автопрокрутка
+      type       : 'loop',       // 'fade' — плавное растворение; 'loop' — слайд
+      autoplay   : true,
+      interval   : 5000,         // смена каждые 5 секунд
+      pauseOnHover: true,        // пауза при наведении мыши
+
+      // Управление
+      arrows     : false,        // стрелки скрыты — текст на фоне важнее
+      pagination : true,         // точки внизу
+
+      // Скорость
+      speed      : 3200,         // ms плавного перехода
+
+      // Доступность
+      rewind     : true,
+      drag       : 'free',
+      dragMinThreshold: { mouse: 10, touch: 10 },
+      i18n       : {
+        prev  : 'Prev',
+        next  : 'Next',
+        first : 'First',
+        last  : 'Last',
+      },
+
+    }).mount();
+  });
+</script>
+
+<style>
+  /* Точки пагинации Splide поверх оверлея */
+  #dv-hero-splide .splide__pagination {
+    position: absolute;
+    bottom: 1.2rem;
+    z-index: 3;
+  }
+
+  #dv-hero-splide .splide__pagination__page {
+    background: rgba(255, 255, 255, 0.45);
+    opacity: 1;
+    transform: scale(1);
+    transition: background 0.2s;
+  }
+
+  #dv-hero-splide .splide__pagination__page.is-active {
+    background: #ffffff;
+    transform: scale(1.2);
+  }
+
+  /* Фиксируем высоту карусели под размер hero */
+  #dv-hero-splide,
+  #dv-hero-splide .splide__track,
+  #dv-hero-splide .splide__list,
+  #dv-hero-splide .splide__slide {
+    height: 100% !important;
+  }
+
+  /* Убираем outline Splide если мешает дизайну */
+  #dv-hero-splide .splide__slide:focus-visible {
+    outline: 2px solid rgba(255,255,255,0.6);
+    outline-offset: -2px;
+  }
+
+  /* Мобильная адаптация */
+  @media (max-width: 768px) {
+    .hero .title.is-2  { font-size: 1.4rem !important; }
+    .hero .subtitle.is-5 { font-size: 0.9rem !important; }
+  }
+
+  /* Уважаем prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    #dv-hero-splide .splide__slide { transition: none !important; }
+  }
+</style>
+
+<%# end %>
