@@ -191,14 +191,16 @@
   <div class="column is-3  ml-1">
 
       <%= label(:page, :layout, "layout:", options = {class: 'label is-small'}) %>
-      <% values = Dir.glob("**", base: "project/views/layout").delete_if{|file| file.starts_with?("_")}.unshift("") %>
+      <% values = (Dir.glob("**", base: File.join(settings.views_project, "layout")) + Dir.glob("**", base: File.join(settings.views, "layout")))
+                    .delete_if{|file| file.starts_with?("_")}.uniq.sort.unshift("") %>
       <%= select(:page, :layout, values, options = {class: 'select input is-success is-size-7', value: @page.layout}) %>
 
   </div>
   <div class="column is-3 ml-1">
 
       <%= label(:page, :view, "view:", options = {class: 'label is-small'}) %>
-      <% values = Dir.glob("**", base: "project/views").delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.unshift("") %>
+      <% values = (Dir.glob("**", base: settings.views_project) + Dir.glob("**", base: settings.views))
+                    .delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.uniq.sort.unshift("") %>
       <%= select(:page, :view, values, options = {class: 'select input is-success is-size-7', value: @page.view}) %>
 
   </div>

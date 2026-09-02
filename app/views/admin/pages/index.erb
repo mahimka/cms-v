@@ -367,7 +367,8 @@
       <td width=370><%= input_in_place page, :anchor_1 %></td>
       <td width=370><%= input_in_place page, :anchor_2 %></td>
 
-      <% values = Dir.glob("**", base: "project/views").delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.unshift("") %>
+      <% values = (Dir.glob("**", base: settings.views_project) + Dir.glob("**", base: settings.views))
+                    .delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.uniq.sort.unshift("") %>
       <td width=170><%= select_in_place(page, :view, values, class: 'input is-success is-small mt-1') %></td>
 
       <!--
