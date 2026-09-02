@@ -1,0 +1,15 @@
+<% if @page.uri.start_with?(/\A\/[a-zA-Z]{2}\//) %>
+	<% town = @page.uri.split('/')[2] %>
+<% else %>
+	<% town = @page.uri.split('/')[1] %>
+<% end %>
+
+<% town = 'izola' if town.nil? || town == 'rooms' %>
+<% height ||= 600 %>
+
+<% begin %>
+<iframe id="stay22-widget" width="100%" height="<%= height %>" src="<%= settings.send(town) %>" frameborder="0"></iframe>
+<% rescue %>
+<iframe id="stay22-widget" width="100%" height="<%= height %>" src="izola" frameborder="0"></iframe>
+
+<% end %>

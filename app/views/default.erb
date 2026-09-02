@@ -1,5 +1,45 @@
-<h1 class="title"><%= @page.h1.presence || @page.title %></h1>
+<% content_for :head_extra do %>
+<% end %>
+
+<% content_for :hero do %>
+  <section class="hero is-medium" style="position: relative; overflow: hidden;">
+    <%= partial '_carousel' %>
+    <%= partial '_carousel_overlay' %>
+    <%= partial '_carousel_div_hero' %>
+  </section>
+<% end %> 
+
+<% content_for :sidebar do %>
+  <%#= parse_erb_and_markdown @page.sidebar_1 %>
+<% end %> 
 
 <div class="content">
-  <%= @page.body %>
+
+<%= parse_erb_and_markdown @page.body %>
+<%= parse_erb_and_markdown @page.block_1 %>
+<%= parse_erb_and_markdown @page.block_2 %>
+<%= parse_erb_and_markdown @page.block_3 %>
+<%= parse_erb_and_markdown @page.block_4 %>
+<%= parse_erb_and_markdown @page.faq %>
+
 </div>
+
+<% unless @page.faq.blank? %>
+  <h2 class="title is-4" id='faq'>
+    <%#= label_by_lang('_faq').capitalize %>
+  </h2>
+  <%#= parse_erb_and_markdown @page.faq %>
+<% end %>
+
+<% content_for :schema_main_entity do %>
+<% end %>
+
+<% content_for :schema_webpage do %>
+<% end %>
+
+<% content_for :schema_breadcrumb do %>
+<% end %>
+
+<% content_for :schema_faq_page do %>
+<% end %>
+

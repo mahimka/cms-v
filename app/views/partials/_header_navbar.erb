@@ -1,0 +1,251 @@
+<nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+<div class="container">
+  <div class="navbar-brand">
+    <a class="navbar-item is-size-5 has-text-weight-bold has-text-link" href="/">
+      <%= settings.site_name.upcase -%><span class="has-text-danger">.</span>
+    </a>
+
+    <% if current_user %>
+      <div class="navbar-item" style="position: relative;">
+        <button type="button" id="photo-upload-toggle" class="button is-small is-light">+ Добавить фото</button>
+
+        <div id="photo-upload-widget" class="is-hidden" style="position: absolute; top: 100%; left: 0; z-index: 100; background: #fff; border: 1px solid #dbdbdb; border-radius: 4px; padding: 0.75rem; width: 260px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+          <form id="photo-upload-form">
+            <input type="hidden" name="imageable_type" value="<%= @page.source_page.pageable_type %>">
+            <input type="hidden" name="imageable_id" value="<%= @page.source_page.pageable_id %>">
+
+            <div class="file is-small mb-2">
+              <label class="file-label">
+                <input class="file-input" type="file" accept="image/*" capture="environment" id="photo-upload-input">
+                <span class="file-cta">
+                  <span class="file-label">Сделать фото…</span>
+                </span>
+              </label>
+            </div>
+
+            <img id="photo-upload-preview" class="is-hidden mb-2" style="max-width: 220px; display: block;">
+
+            <p id="photo-upload-status" class="help mb-2"></p>
+
+            <button type="submit" id="photo-upload-submit" class="button is-small is-link" disabled>Отправить</button>
+          </form>
+        </div>
+      </div>
+
+      <script>
+        window.PHOTO_UPLOAD_CONFIG = <%= {
+          maxWidth: settings.photo_upload['max_width'],
+          targetMaxBytes: settings.photo_upload['target_max_kb'] * 1024,
+          startQuality: settings.photo_upload['start_quality'],
+          minQuality: settings.photo_upload['min_quality']
+        }.to_json %>;
+      </script>
+      <script src="/javascripts/vendor/exif.js"></script>
+      <script src="/javascripts/photo-upload.js"></script>
+    <% end %>
+
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <%#= link_to('/rooms', anchor_column: 'anchor_2', css_class: 'navbar-link', html_tag: '') %>
+        <div class="navbar-dropdown">
+          <%#= link_to('/rooms/1', anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to('/rooms/2', anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to('/rooms/3', anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to('/rooms/5', anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to('/rooms/6', anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <hr class="navbar-divider">
+          <a class="navbar-item">
+            <%#= link_to('/about/booking-terms', anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="navbar-end">
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <%#= link_to('/izola', anchor_column: 'anchor_1', css_class: 'navbar-link', html_tag: '') %>
+        <div class="navbar-dropdown">
+          <%#= link_to("/izola/parkings", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/izola/beaches", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/izola/eateries", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/izola/lodging/hotels", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/izola/lodging/apartment", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+        </div>
+      </div>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <%#= link_to('/koper', anchor_column: 'anchor_1', css_class: 'navbar-link', html_tag: '') %>
+        <div class="navbar-dropdown">
+          <%#= link_to("/koper/parkings", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/koper/beaches", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/koper/eateries", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/koper/lodging/hotels", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/koper/lodging/apartment", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+        </div>
+      </div>
+       
+      <div class="navbar-item has-dropdown is-hoverable">
+        <%#= link_to('/piran', anchor_column: 'anchor_1', css_class: 'navbar-link', html_tag: '') %>
+        <div class="navbar-dropdown">
+          <%#= link_to("/piran/parkings", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/piran/beaches", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/piran/eateries", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/piran/lodging/hotels", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/piran/lodging/apartment", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+        </div>
+      </div>
+      
+      <div class="navbar-item has-dropdown is-hoverable">
+        <%#= link_to('/portoroz', anchor_column: 'anchor_1', css_class: 'navbar-link', html_tag: '') %>
+        <div class="navbar-dropdown">
+          <%#= link_to("/portoroz/parkings", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/portoroz/beaches", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/portoroz/eateries", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/portoroz/lodging/hotels", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/portoroz/lodging/apartment", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+        </div>
+      </div>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <%#= link_to('/strunjan', anchor_column: 'anchor_1', css_class: 'navbar-link', html_tag: '') %>
+        <div class="navbar-dropdown">
+          <%#= link_to("/strunjan/parkings", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/strunjan/beaches", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/strunjan/eateries", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/strunjan/lodging/hotels", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/strunjan/lodging/apartment", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+        </div>
+      </div> 
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <%#= link_to('/ankaran', anchor_column: 'anchor_1', css_class: 'navbar-link', html_tag: '') %>
+        <div class="navbar-dropdown">
+          <%#= link_to("/ankaran/parkings", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/ankaran/beaches", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/ankaran/eateries", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/ankaran/lodging/hotels", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+          <%#= link_to("/ankaran/lodging/apartment", anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+        </div>
+      </div> 
+
+      <%#= link_to('#koper', anchor_column: 'anchor_1', css_class: 'navbar-item', html_tag: '') %>
+    <div class="navbar-item">
+
+      <form method="GET" action="/search">
+        <input type="hidden" name="lang" value="<%= @page.lang %>">
+        <div class="field has-addons pt-1">
+          <p class="control">
+            <input class="input is-size-7" type="text" placeholder="search for ..." name="q" />
+          </p>
+          <p class="control">
+
+            <button class="button is-size-7" aria-label="Search button">
+
+              <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#clip0_15_152)">
+              <rect width="16" height="16" fill="white"/>
+              <circle cx="10.5" cy="10.5" r="6.5" stroke="#000000" stroke-linejoin="round"/>
+              <path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="#000000"/>
+              </g>
+              <defs>
+              <clipPath id="clip0_15_152">
+              <rect width="24" height="24" fill="white"/>
+              </clipPath>
+              </defs>
+              </svg>
+
+            </button>
+
+          </p>
+        </div>
+      </form>
+    </div>
+
+      <div class="navbar-item">
+        <% if current_user %>
+          <span class="mr-2 is-size-7"><%= current_user.name %></span>
+          <a href="/logout" class="navbar-item p-0 is-size-7">log out</a>
+        <% else %>
+          <a href="/login?redirect_to=<%= Rack::Utils.escape(request.path) %>" class="navbar-item p-0 is-size-7">log in</a>
+        <% end %>
+      </div>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link is-size-5">
+          <%#= @page.lang %> <%= settings.languages[@page.lang]['icon'] %>
+        </a>
+        <div class="navbar-dropdown">
+
+
+          <%# lang_pages = Page.published.translations_only #.and(Page.where.not(lang_ref: [nil, 0])) %>
+           <% @page.published_language_versions.each do |lang_page| %>
+            <%# unless lang_page == @page %>
+              <a href='<%= lang_page.uri %>' class="navbar-item  is-size-5" >
+                <%#= lang_page.lang %> <%= settings.languages[lang_page.lang]['icon'] %> 
+              </a>
+            <%# end %>
+          <% end %>
+
+        </div>
+
+      </div>
+    </div>
+
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+
+
+  </div>
+</div>
+</nav>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+  // Get all "navbar-burger" elements
+  const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+  // Add a click event on each of them
+  $navbarBurgers.forEach( el => {
+    el.addEventListener('click', () => {
+
+      // Get the target from the "data-target" attribute
+      const target = el.dataset.target;
+      const $target = document.getElementById(target);
+
+      // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+      el.classList.toggle('is-active');
+      $target.classList.toggle('is-active');
+
+    });
+  });
+
+});
+
+</script>
+
+
+
+
+
+
+
+
+
+
+

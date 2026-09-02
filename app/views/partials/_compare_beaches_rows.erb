@@ -1,0 +1,164 @@
+<%
+  # Таблица сравнения пляжей — встраивается прямо в текст (body, faq,
+  # block_1..4 — любое поле, которое проходит через parse_erb_and_markdown),
+  # руками, без формы конструктора условий. Вызов (ERB-тег вывода,
+  # partial с ключом filter): filter — хэш вида
+  #   {"object" => "Entity", "tags" => ["and", "Beach", "Izola"]}
+  #
+  # filter — тот же формат, что у ListQuery/TagExpression (object + tags,
+  # AND/OR/NOT с вложенными группами, "not" бинарный — левое минус правое).
+
+  cmp_filter = (defined?(filter) && filter.is_a?(Hash)) ? filter : {}
+
+  cmp_entities = cmp_filter["object"].present? ? ListQuery.new(cmp_filter).objects.to_a : []
+
+  cmp_uid = "cmp-beaches-#{SecureRandom.hex(4)}"
+
+  cmp_beach_type_tags = ["concrete platform", "pebbles", "rocky", "sand", "shell"].freeze
+  cmp_amenities_tags  = ["public shower", "public wc"].freeze
+
+  cmp_rows = cmp_entities.map do |entity|
+    tag_names = entity.tags.pluck(:name)
+    page = entity.page&.version_for(@page&.lang)
+
+    {
+      name: page&.anchor_1,
+      url: page&.uri,
+      beach_type: cmp_beach_type_tags.select { |t| tag_names.include?(t) },
+      wild: tag_names.include?("wild"),
+      barrier_free: tag_names.include?("wheelchairAccessible"),
+      rent_a_chair: tag_names.include?("rent a chair"),
+      amenities: cmp_amenities_tags.select { |t| tag_names.include?(t) }
+    }
+  end
+%>
+
+<% if cmp_rows.empty? %>
+  <p class="has-text-grey is-size-7"><em>Нет пляжей, подходящих под фильтр.</em></p>
+<% else %>
+
+<div class="cmp-beaches-shell" id="<%= cmp_uid %>-shell">
+  <table class="table is-striped is-fullwidth is-size-7 cmp-beaches-table">
+    <thead>
+      <tr>
+        <th data-key="name" data-type="string"><%= label_by_lang('_beach') %></th>
+        <th data-key="beach_type" data-type="array"><%= label_by_lang('_beach_type') %></th>
+        <th data-key="wild" data-type="bool"><%= label_by_lang('_wild') %></th>
+        <th data-key="barrier_free" data-type="bool"><%= label_by_lang('_barrier_free') %></th>
+        <th data-key="rent_a_chair" data-type="bool"><%= label_by_lang('_rent_a_chair') %></th>
+        <th data-key="amenities" data-type="array"><%= label_by_lang('_amenities') %></th>
+      </tr>
+    </thead>
+    <tbody id="<%= cmp_uid %>-rows"></tbody>
+  </table>
+</div>
+
+<style>
+  .cmp-beaches-shell { overflow-x: auto; }
+  .cmp-beaches-table { min-width: 620px; }
+  .cmp-beaches-table th { cursor: pointer; user-select: none; white-space: nowrap; }
+  .cmp-beaches-table th .cmp-arrow { margin-left: 0.25rem; opacity: 0.3; font-size: 0.75em; }
+  .cmp-beaches-table th.cmp-sorted .cmp-arrow { opacity: 1; }
+  .cmp-beaches-table td.cmp-dim { color: #999; }
+  .cmp-beaches-table .cmp-tagset { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+</style>
+
+<script>
+(function () {
+  var DATA = <%= cmp_rows.to_json %>;
+  var shell = document.getElementById("<%= cmp_uid %>-shell");
+  var tbody = document.getElementById("<%= cmp_uid %>-rows");
+  var state = { key: "name", dir: 1 };
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function isEmpty(v) {
+    return v === null || v === undefined || (Array.isArray(v) && v.length === 0) || v === false;
+  }
+
+  function cmpBase(a, b, key, type) {
+    if (type === "array") {
+      var al = a[key].length, bl = b[key].length;
+      if (al !== bl) { return bl - al; }
+      return a[key].join(",").localeCompare(b[key].join(","));
+    }
+    if (type === "bool") { return (b[key] ? 1 : 0) - (a[key] ? 1 : 0); }
+    return String(a[key] || "").localeCompare(String(b[key] || ""), "ru");
+  }
+
+  function tagCell(arr) {
+    if (!arr || arr.length === 0) { return '<td class="cmp-dim">—</td>'; }
+    return '<td><div class="cmp-tagset">' + arr.map(function (t) {
+      return '<span class="tag is-light">' + escapeHtml(t) + '</span>';
+    }).join("") + '</div></td>';
+  }
+
+  function flagCell(on) {
+    if (!on) { return '<td class="cmp-dim">—</td>'; }
+    return '<td><span class="tag is-success is-light">Ok</span></td>';
+  }
+
+  function render() {
+    var th = shell.querySelector('th[data-key="' + state.key + '"]');
+    var type = th.dataset.type;
+
+    var rows = DATA.slice().sort(function (a, b) {
+      var aEmpty = isEmpty(a[state.key]);
+      var bEmpty = isEmpty(b[state.key]);
+      // Пустые значения — всегда в конец, независимо от направления
+      // сортировки (иначе "нет данных" на восходящей сортировке выглядит
+      // как "меньше всех").
+      if (aEmpty && bEmpty) { return 0; }
+      if (aEmpty) { return 1; }
+      if (bEmpty) { return -1; }
+      return cmpBase(a, b, state.key, type) * state.dir;
+    });
+
+    tbody.innerHTML = rows.map(function (r) {
+      var nameCell = r.url
+        ? '<td><a href="' + escapeHtml(r.url) + '">' + escapeHtml(r.name) + '</a></td>'
+        : '<td>' + escapeHtml(r.name) + '</td>';
+
+      return "<tr>" +
+        nameCell +
+        tagCell(r.beach_type) +
+        flagCell(r.wild) +
+        flagCell(r.barrier_free) +
+        flagCell(r.rent_a_chair) +
+        tagCell(r.amenities) +
+        "</tr>";
+    }).join("");
+  }
+
+  shell.querySelectorAll("thead th").forEach(function (th) {
+    th.addEventListener("click", function () {
+      var key = th.dataset.key;
+      if (state.key === key) {
+        state.dir *= -1;
+      } else {
+        state.key = key;
+        state.dir = 1;
+      }
+      shell.querySelectorAll("thead th").forEach(function (el) {
+        el.classList.remove("cmp-sorted");
+        var arrow = el.querySelector(".cmp-arrow");
+        if (arrow) { arrow.remove(); }
+      });
+      th.classList.add("cmp-sorted");
+      var arrow = document.createElement("span");
+      arrow.className = "cmp-arrow";
+      arrow.textContent = state.dir === 1 ? "▲" : "▼";
+      th.appendChild(arrow);
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+
+<% end %>

@@ -1,0 +1,37 @@
+<div class="card diversorio">
+
+  <% if page %>
+    <a href="<%= page.uri %>">
+  <% end %>
+
+    <% if picture %>
+      <div class="card-image">
+        <figure class="image is-4by3">
+          <img src="<%= asset_path(picture.file) %>" loading="lazy" alt="<%= picture.translation(@page.lang) %>" style="object-fit: cover;">
+        </figure>
+      </div>
+    <% end %>
+
+  <% if page %>
+    </a>
+  <% end %>
+
+<div class="card-content">
+  <p class="title is-size-6">
+    <% if page %>
+      <a href="<%= page.uri %>"><%= page.anchor_1.presence || object.name %> </a> <%= tags_by_group("addressLocality", page: page) %>
+    <% else %>
+      <%= object.name %>
+    <% end %>
+  </p>
+
+  <%#= detail_by_label('rate_high', page: page, only_value: true) %>
+
+  <p class="subtitle mt-3 is-7 has-text-grey">
+    <%= tags_by_group("beach features", page: page, limit: 3, css_class: 'tag is-light is-info') %><br>
+    <%= tags_by_group("beach facilities", page: page, limit: 3) %>
+    <%= tag_by_lang('petsAllowed', page: page, css_class: 'tag is-light is-success') %>
+  </p>
+
+  </div>
+</div>

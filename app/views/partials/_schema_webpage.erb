@@ -1,0 +1,39 @@
+<% page_type = 'WebPage' %>
+<% page_type = 'AboutPage' if @page.uri == '/about' %>
+<% page_type = 'ContactPage' if @page.uri == '/about/contact' %>
+<%# mainEntity = @page.schema&.name %>
+<%# mainEntity = '#business' if @page.schema.name&.include? '#about' %>
+<% base_page = @page.master || @page %>
+	{
+	  "@type": "<%= page_type %>",
+	  "@id": "https://<%= settings.domain -%><%= request.path_info %>#webpage",
+	  "url": "https://<%= settings.domain -%><%= request.path_info %>",
+	  "name": "<%= json_escape(@page.title) %>",
+	  "description": "<%= json_escape(@page.meta_description) %>",
+	  "inLanguage": "<%= @page.lang %>",
+	  "isPartOf": {
+	    "@id": "https://<%= settings.domain -%>/#website"
+	  },
+	  "mainEntity": {
+	    "@id": "https://<%= settings.domain -%><%= base_page.uri %><%#= mainEntity %>"
+	  }
+	  <% if @page.body.present? %>
+	    ,
+	    "author": {
+	      "@type": "Person",
+	      "@id": "https://<%= settings.domain %>/about#<%= settings.author_name.downcase %>",
+	      "name": "<%= settings.author_name %>",
+	      "url": "https://<%= settings.domain %>/about"
+	    }
+	  <% end %>
+	  <% unless @page.faq.blank? %>
+	    ,
+	    "hasPart": { "@id": "https://<%= settings.domain -%><%= request.path_info %>#faq" }
+	  <% end %> 
+      <% unless @page.uri == '/' %> 
+      ,
+	  "breadcrumb": {
+	  	"@id": "https://<%= settings.domain -%><%= request.path_info %>#breadcrumb"
+	  }
+	  <% end %>
+	}

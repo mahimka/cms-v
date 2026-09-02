@@ -1,0 +1,48 @@
+<div id="map" style="width: 100%; height: 400px;"></div>
+
+<script>
+function initMap() {
+  // Координаты из ERB
+  const point_of_interest = {
+    lat: Number("<%= @page.pageable&.latitude %>"),
+    lng: Number("<%= @page.pageable&.longitude %>")
+  };
+
+  const map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 15,
+    center: point_of_interest,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  });
+
+  // Безопасно передаем заголовок через JSON (кавычки не нужны, они добавятся автоматически)
+  const pageTitle = <%= @page.h1.to_json %>;
+
+  const contentString =
+    `<h1 class="title is-size-5 p-0 m-0">${pageTitle}</h1>` +
+    `<a href="https://www.google.com/maps/dir/?api=1&destination=${point_of_interest.lat},${point_of_interest.lng}" target="_blank">How to Get THERE</a>`;
+
+  const infowindow = new google.maps.InfoWindow({
+    content: contentString,
+  });
+
+  // Настройки маркера (без иконки - будет стандартный красный маркер)
+  const marker = new google.maps.Marker({
+    position: point_of_interest,
+    title: pageTitle, // Используем уже экранированную переменную названия
+    map: map
+  });
+
+  marker.addListener("click", () => {
+    infowindow.open({
+      anchor: marker,
+      map,
+      shouldFocus: false,
+    });
+  });
+}
+</script>
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=<%= settings.google_maps_javascript_api_key %>&callback=initMap&v=weekly"
+  async
+></script>

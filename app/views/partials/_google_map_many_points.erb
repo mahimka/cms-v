@@ -1,0 +1,69 @@
+<%
+  # Точки для карты — из @objects (Entity/Item/Event, см. Page#list_objects /
+  # ListQuery#objects), тот же набор, что выводится списком/сравнением на
+  # этой же странице. У Item нет своих колонок latitude/longitude (в отличие
+  # от Entity/Event) — фолбэк на details (Detail-записи по Label 'lat'/'lng',
+  # тот же паттерн, что Item#details уже даёт для остального).
+  points = (@objects || []).filter_map do |object|
+    lat = object.try(:effective_latitude) || object.try(:latitude)
+    lng = object.try(:effective_longitude) || object.try(:longitude)
+
+    if lat.blank? || lng.blank?
+      details = object.respond_to?(:details) ? (object.details || {}) : {}
+      lat = details['lat'] || details['latitude'] if lat.blank?
+      lng = details['lng'] || details['longitude'] if lng.blank?
+    end
+
+    next if lat.blank? || lng.blank?
+
+    object_page = object.respond_to?(:pages) ? object.pages.find_by(lang: @page.lang) : nil
+
+    { lat: lat.to_f, lng: lng.to_f, title: object.name, url: object_page&.uri }
+  end
+%>
+
+<div id="google-map-list" style="width:100%; height: 400px;"></div>
+
+<script>
+function initMap() {
+  const points = <%= points.to_json %>;
+
+  const map = new google.maps.Map(document.getElementById("google-map-list"), {
+    zoom: 12,
+    center: { lat: 45.5360177, lng: 13.6608397 },
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  });
+
+  if (points.length === 0) return;
+
+  const bounds = new google.maps.LatLngBounds();
+
+  points.forEach(function (point) {
+    const position = { lat: point.lat, lng: point.lng };
+    bounds.extend(position);
+
+    const marker = new google.maps.Marker({
+      position: position,
+      map: map,
+      title: point.title
+    });
+
+    const content = point.url
+      ? `<div class="card"><a href="${point.url}"><strong>${point.title}</strong></a></div>`
+      : `<div class="card"><strong>${point.title}</strong></div>`;
+
+    const infowindow = new google.maps.InfoWindow({ content: content });
+
+    marker.addListener("click", () => {
+      infowindow.open({ anchor: marker, map, shouldFocus: false });
+    });
+  });
+
+  map.fitBounds(bounds);
+}
+</script>
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=<%= settings.google_maps_javascript_api_key %>&callback=initMap&v=weekly"
+  async
+></script>

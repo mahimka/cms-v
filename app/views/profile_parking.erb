@@ -1,0 +1,588 @@
+
+<%#= settings.details['twenty_four_parking'][@page.lang] %>  
+<%#= details['twenty_four_parking'] %>
+
+
+<%#= settings.details['every_subsequent_hour'][@page.lang] %> 
+<%#= details['every_subsequent_hour'] %>
+<%#= @page_details %>
+
+<!-- ============================================================================================ -->
+
+<% content_for :details_table do %>
+   
+  <%#= label_by_lang('_price').capitalize %>
+
+<table class="table is-striped is-fullwidth mb-6">
+    <tr>
+      <td><%= label_by_lang('_address').downcase %></td>
+      <td><%= @page_details['streetAddress'] %> | <a target='_blank' href='https://www.google.com/maps/search/?api=1&query=<%= @page.h1 %>, Izola, Slovenia<%#= @page_details['address'] %>'>Maps Google</a>
+      </td>
+    </tr> 
+    <tr>
+      <td><%= label_by_lang('_vehicle_type').downcase %></td>
+      <td>
+        <%= tag_by_lang('Car') %>
+        <%= tag_by_lang('Motorcycle') %>
+        <%= tag_by_lang('Bus') %>
+        <%= tag_by_lang('Motorhome') %>
+      </td>
+    <tr>
+      <td><%= label_by_lang('_location').downcase %></td>
+      <td>
+        <%= tag_by_lang('Zone 1') %>
+        <%= tag_by_lang('Zone 2') %>
+        <%= tag_by_lang('Zone 3') %>
+        <%= @page.subtitle %>
+      </td>
+    </tr> 
+    <tr>
+      <td><%= label_by_lang('_parking_type').downcase %></td>
+      <td>
+        <%#= tag_by_lang('Outdoor', css_class: '', html_after: ' | ') %>
+        <%= tag_by_lang('Outdoor') %>
+        <%= tag_by_lang('Underground') %>
+        <%= tag_by_lang('Covered') %>
+        <%= tag_by_lang('Multi-storey') %>
+        <%= tag_by_lang('Unpaved') %>
+        <%= tag_by_lang('Paved ') %>
+        <%= tag_by_lang('Lift') %>
+        <%= @page_details['parkingCapacity'] %>
+      </td>
+    </tr> 
+    <tr>
+      <td><%= label_by_lang('_safety').downcase %></td>
+      <td>
+        <%= tag_by_lang('Lit') %>
+        <%= tag_by_lang('Partially Lit') %>
+        <%= tag_by_lang('CCTV') %>
+        <%= tag_by_lang('Partial CCTV') %>
+      </td>
+    </tr> 
+    <tr>
+      <td><%= label_by_lang('_free_time').downcase %></td>
+      <td>
+        <% unless tag_by_lang('First 60 Min Free').blank? %>
+          <%= tag_by_lang('First 60 Min Free') %>
+          <%= @page_details['rate_low_60'] %> 
+          <%= @page_details['rate_high_60'] %>
+        <% else %>
+          <span class='is-size-7'><%= label_by_lang('_not_available').downcase %></span>
+        <% end %>          
+      </td>
+    </tr> 
+
+    <tr>
+      <td><%= label_by_lang('_payment_methods').downcase %></td>
+      <td>
+        <% @page.pageable.tags.where(name: ['bills', 'card', 'cash', 'coins', 'easyPark', 'parkomat']).each do |tag| %>
+              <span class="tag is-info"><%#= tag.icon_svg %><%= tag.translation(@page.lang) %></span>
+            <% end %>
+      </td>
+    </tr> 
+
+
+    <tr>
+      <td><%= label_by_lang('_hourly_rate').downcase %></td>
+      <td>
+        <%= @page_details['rate_low'] %> €  -
+        <%= @page_details['rate_high'] %> € - <a href="#price-table"><%= label_by_lang('_price').downcase %></a>
+      </td>
+    </tr> 
+    <tr>
+      <td><%= label_by_lang('_daily_rate').downcase %></td>
+      <td>
+        <% unless tag_by_lang('24h Rate').blank? %>
+          <%= tag_by_lang('24h Rate') %>
+          <%= @page_details['rate_24h_low'] %> € - 
+          <%= @page_details['rate_24h_high'] %> €
+        <% else %>
+          <span class='is-size-7'><%= label_by_lang('_not_available').downcase %></span>
+        <% end %>
+
+      </td>
+    </tr> 
+    <tr>
+      <td><%= label_by_lang('_accessibility').downcase %></td>
+      <td>
+        <%= tag_by_lang('Disabled Parking') %>
+        <%= tag_by_lang('wheelchairAccessible') %>
+      </td>
+    </tr> 
+    <tr>
+      <td><%= label_by_lang('_charging_station').downcase %></td>
+      <td>
+        <%= tag_by_lang('Electric Charger') %>
+      </td>
+    </tr> 
+    <tr>
+      <td><%= label_by_lang('_maximum_height').downcase %></td>
+      <td>
+        <%= 
+          if @page_details['max_height'] && !@page_details['max_height'].empty?
+            "#{@page_details['max_height']}m"
+          else
+            "<span class='is-size-7'>#{ label_by_lang('_not_limited').downcase }</span>"
+          end
+        %>
+        <%= tag_by_lang('Height Restriction') %>
+      </td>
+    </tr> 
+
+
+<!--
+    <tr>
+      <td><%= label_by_lang('price_low_season_1st_h').downcase %></td>
+      <th>
+        <% if @page_details['price_low_season_1st_h'] && !@page_details['price_low_season_1st_h'].blank? %>
+          <%= @page_details['price_low_season_1st_h'] %> €
+        <% else %>
+          <%= label_by_lang('not_available') %>
+          <%= label_by_lang('_not_available').capitalize %>
+        <% end %>
+      </th>
+    </tr> 
+
+    <tr>
+      <td><%= label_by_lang('price_low_season_next_h').downcase %></td>
+      <th><%= "#{@page_details['price_low_season_next_h']}" %> €</th>
+    </tr> 
+-->
+
+
+  </table>  
+
+<% end %>
+
+
+<% content_for :price_table do %>
+   
+  <%#= label_by_lang('_price').capitalize %>
+
+  <span id="price-table"></span>
+
+  <table class="table is-striped is-fullwidth">
+    <tr class="is-info">
+      <th colspan=2><%= label_by_lang('season_low').capitalize %> 1.10 - 30.4</th>
+    </tr> 
+
+    <tr>
+      <td><%= label_by_lang('_hourly_rate').downcase %></td>
+      <th><%= "#{@page_details['rate_low']}" %> €</th>
+    </tr> 
+
+    <tr>
+      <td><%= label_by_lang('_24h').downcase %></td>
+      <th>
+        <% if @page_details['rate_24h_low'] && !@page_details['rate_24h_low'].blank? %>
+          <%= @page_details['rate_24h_low'] %> €
+        <% else %>
+          <%= label_by_lang('_not_available').capitalize %>
+        <% end %>
+      </th>
+    </tr> 
+
+    <tr>
+      <td><%= label_by_lang('_24h').downcase %> <%= label_by_lang('_motorhome').downcase %></td>
+      <th>
+        <% if @page_details['rate_24h_RV_low'] && !@page_details['rate_24h_RV_low'].blank? %>
+          <%= @page_details['rate_24h_RV_low'] %> €
+        <% else %>
+          <%= label_by_lang('_not_available').capitalize %>
+        <% end %>
+      </th>
+    </tr> 
+
+    <tr>
+      <td></td>
+      <td></td>
+
+    </tr>
+
+    <tr class="is-info">
+      <th class="pt-3" colspan=2><%= label_by_lang('season_high').capitalize %> 1.5 - 30.9</th>
+    </tr> 
+
+    <tr>
+      <td><%= label_by_lang('_hourly_rate').downcase %></td>
+      <th><%= "#{@page_details['rate_high']}" %> €</th>
+    </tr> 
+
+    <tr>
+      <td><%= label_by_lang('_24h').downcase %></td>
+      <th>
+        <% if @page_details['rate_24h_high'] && !@page_details['price_high_season_24_h'].blank? %>
+          <%= @page_details['rate_24h_high'] %> €
+        <% else %>
+          <%= label_by_lang('_not_available').capitalize %>
+        <% end %>
+      </th>
+    </tr> 
+
+    <tr>
+      <td><%= label_by_lang('_24h').downcase %> <%= label_by_lang('_motorhome').downcase %></td>
+      <th>
+        <% if @page_details['rate_24h_RV_high'] && !@page_details['rate_24h_RV_high'].blank? %>
+          <%= @page_details['rate_24h_RV_high'] %> €
+        <% else %>
+          <%= label_by_lang('_not_available').capitalize %>
+        <% end %>
+      </th>
+    </tr>  
+
+  </table>  
+
+<% end %>
+
+<% content_for :hero do %>
+<section class="hero is-small has-background-grey-lighter mt-0 pb-0">
+  <div class="hero-body">
+    <div class="container">
+
+      <div class="columns is-vcentered">
+
+        <div class="column is-5">
+     
+          <h1 class="title title_hero"><%= @page.h1 %></h1>
+          <p class='subtitle mb-4'><%= @page.subtitle %></p>
+          
+          <strong class="is-size-5" style="color:#2c6fad;">€<%= "#{@page_details['rate_low']}" %></strong>  
+          <span class="is-size-7 has-text-grey">/ <%= label_by_lang('season_low') %> &nbsp; &nbsp;   -  &nbsp; &nbsp;</span>
+          <strong class="is-size-5" style="color:#2c6fad;"> €<%= "#{@page_details['rate_high']}" %> </strong> 
+          <span class="is-size-7 has-text-grey">/ <%= label_by_lang('season_high') %></span> 
+
+          <!--<p class="subtitle is-6  mb-5 mt-5" style="opacity: 0.92; max-width: 640px; line-height: 1.7;">-->
+            <%= @page.hero_1 %>
+          <!--</p>-->
+
+          <div class="tags mt-3 mb-1">
+            <%= @page.hero_2 %>
+            <% if tag_by_lang('24h Rate') == '' %>
+              <span class="tag is-danger is-light has-text-weight-semibold">
+                <span class="icon is-small mr-1">
+                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                Ni 24h tarife
+              </span>
+            <% else %>
+              <%= tag_by_lang('24h Rate') %>
+            <% end %>
+
+            <% @page.pageable.tags.where(name: ['24h', 'Electric Charger', 'First 60 Min Free', 'Motorhome']).each do |tag| %>
+              <span class="tag is-info is-light"><%#= tag.icon_svg %><%= tag.translation(@page.lang) %></span>
+            <% end %>
+          </div>
+
+          <!-- Оптимизированная группа кнопок навигации -->
+          <div class="field has-addons mt-5 mb-3">
+            <!-- Google Maps (Primary Action) -->
+            <p class="control is-expanded">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=<%= @page.pageable.latitude %>,<%= @page.pageable.longitude %>"
+                 target="_blank" 
+                 rel="noopener" 
+                 class="button is-primary is-medium is-fullwidth has-text-weight-bold">
+                <!-- MapPin -->
+                <span class="icon mr-1">
+                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <span>Google Maps</span>
+              </a>
+            </p>
+
+            <!-- Waze -->
+            <p class="control">
+              <a href="https://waze.com/ul?ll=<%= @page.pageable.latitude %>,<%= @page.pageable.longitude %>&navigate=yes" 
+                 target="_blank" 
+                 rel="noopener" 
+                 class="button is-info is-medium" 
+                 title="Odpri v Waze">
+                <!-- Navigation -->
+                <span class="icon mr-1">
+                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                </span>
+                <span>Waze</span>
+              </a>
+            </p>
+          </div>
+
+          <div class="buttons mt-5">
+            <%= @page.hero_3 %>
+
+            <a href="#price-table" class="tag is-rounded">
+              <span class="icon is-small mr-1">
+                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><circle cx="7" cy="7" r=".5" fill="currentColor"/></svg>
+              </span>
+              <%= label_by_lang('_price') %>
+            </a>
+            
+            <a href="#faq" class="tag is-rounded">
+              <span class="icon is-small mr-1">
+                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </span>
+              <%= label_by_lang('_faq') %>
+            </a>
+            
+            <a href="#gallery" class="tag is-rounded">
+              <span class="icon is-small mr-1">
+                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              </span>
+              <%= label_by_lang('_gallery') %>
+            </a>
+
+            <a href="#near" class="tag is-rounded">
+              <span class="icon is-small mr-1">
+                <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              </span>
+              <%= label_by_lang('_what_is_near') %>
+            </a> 
+          </div>
+
+          <%= partial('_share_buttons') %>
+
+        </div>
+
+        <div class="column is-7">
+          <%= partial '_picture_pageable' %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<% end %> <!-- end of content_for :hero -->
+
+<% content_for :sidebar do %>
+
+  <div id='near'></div> 
+
+  <div class="mt-0 mb-5 pt-0 pl-0 pr-0">
+    <h2 class="title is-5" ><%= label_by_lang('_what_is_near').capitalize %></h2>
+
+    <h3 class="title is-6 mb-0"><%= label_by_lang('_parkings').capitalize %></h3>
+    <%= partial '_near_pages', tags: ['ParkingFacility', 'Izola'], match: :all, limit: 3, anchor: 'anchor_1'  %>
+
+    <h3 class="title is-6 mb-0"><%= label_by_lang('_24h').capitalize %> <%= label_by_lang('_parkings').capitalize %> </h3>
+    <%= partial '_near_pages', tags: ['24h Rate', 'ParkingFacility', 'Izola'], match: :all, limit: 3, anchor: 'anchor_1'  %>
+
+    <h3 class="title is-6 mb-0"><%= label_by_lang('_beaches').capitalize %></h3>
+    <%= partial '_near_pages', tags: ['Beach', 'Izola'], match: :all, limit: 3, anchor: 'anchor_1' %>
+
+    <h3 class="title is-6 mb-0"><%= label_by_lang('_restaurants').capitalize %></h3>
+    <%= partial '_near_pages', tags: ['FoodEstablishment', 'Izola'], match: :all, limit: 3, anchor: 'anchor_1'  %>
+  </div>
+
+  <div class="container mt-0 pt-0 content pl-0 pr-0">
+    <%= partial '_google_map_one_point', views: settings.views, locals: {map_icon: 'parking'}  %>
+  </div>
+
+  <%= partial '_sidebar_address' %>
+  <%#= partial '_sidebar_links' %>  
+  <%#= partial '_tags_div' %>
+
+<% end %> <!-- end of content_for :sidebar -->
+<%= partial '_sidebar_links' %> 
+
+<%= yield_content :details_table %>
+
+  <%#= parse_body_markdown @page.body if @page.body %>
+
+
+  <%= parse_erb_and_markdown(@page.body, options = {}) if @page.body %>
+
+  <% unless @page.body.include?("yield_content :price_table") %> 
+    <%= yield_content :price_table %>
+  <% end %>
+
+  <%#= partial '_map_stay22' %>
+ <%= partial '/_map_stay22' %>
+
+  <h3 class="title is-4" id='faq'>
+    <%= label_by_lang('_faq').capitalize %>
+  </h3>
+
+  <%= parse_erb_and_markdown(@page.faq, options = {}) if @page.faq %>
+  
+  <h3 class="title is-4" id='gallery'>
+    <%= label_by_lang('_gallery').capitalize %>
+  </h3>
+
+ <%= partial '_gallery_page_id', views: settings.views %>
+
+<% content_for :footer do %>
+
+  <%#= partial 'pages_by_tag', locals: {lang: @page.lang, item_name: 'parking', tag_name: '24h'} %>
+  <%#= partial 'pages_by_tag', locals: {lang: @page.lang, item_name: 'parking', tag_name: 'Electric Charger'} %>
+  <%#= partial 'pages_by_tag', locals: {lang: @page.lang, item_name: 'parking', tag_name: 'Motorhome'} %>
+<% end %> 
+
+<!-- нужно врендирть наазад
+
+
+    "offers": [
+    <%# details = @page.pageable.details
+                        .joins(:label)
+                        .where(labels: { additional_property: true })
+                        .where("labels.name LIKE ?", "price_%") %>
+    <%# details.each_with_index do |detail, index| %>
+        {
+          "@type": "Offer",
+          "name": "<%#= detail.label.send(@page.lang) %>",
+          "price": "<%#= detail.body %>",
+          "priceCurrency": "EUR"
+        }<%#= ',' unless index == details.size - 1 %> 
+    <%# end %>
+    ],
+
+
+
+    "additionalProperty": [
+      <%# details = @page.pageable.details
+                          .joins(:label)
+                          .where(labels: { additional_property: true })
+                          .where.not("labels.name LIKE ?", "price_%") %>
+      <%# details.each_with_index do |detail, index| %>
+              {
+            "@type": "PropertyValue",
+            "name": "<%#= detail.label.send(@page.lang) %>",
+            "value": "<%#= detail.body %>"
+           }<%#= ',' unless index == details.size - 1 %> 
+      <%# end %>
+    ]
+
+
+
+
+-->
+
+
+
+<% content_for :schema_main_entity do %>
+
+  <%
+    # additionalProperty: как в _beach/_restaurant — все details сущности,
+    # кроме технических ключей и того, что уже отдельно вынесено выше
+    # (адрес, часы работы).
+    technical_detail_keys = %w[thumb_image gallery_old_yaml distance_to_diversorio latitude longitude]
+    technical_detail_prefixes = %w[season beds24 panorama hours]
+    schema_details = (@page.pageable&.details || {}).reject do |key, _|
+      technical_detail_keys.include?(key) || technical_detail_prefixes.any? { |p| key.start_with?(p) }
+    end
+
+    day_names = {
+      'monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday',
+      'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday', 'sunday' => 'Sunday'
+    }
+    opening_hours = day_names.flat_map do |key, label|
+      hours = @page_details["hours_#{key}"]
+      next [] if hours.blank? || hours.strip.casecmp('closed').zero?
+
+      hours.split(',').filter_map do |range|
+        opens, closes = range.strip.split('-').map(&:strip)
+        { day: label, opens: opens, closes: closes } if opens.present? && closes.present?
+      end
+    end
+  %>
+
+  {
+    "@type": ["ParkingFacility", "LocalBusiness"],
+    "@id": "https://<%= settings.domain -%><%= request.path_info %>",
+    "name": "<%= json_escape(@page.h1) %>",
+    <% unless @page_details['alternateName'].blank? %>
+    "alternateName": "<%= json_escape(@page_details['alternateName']) %>",
+    <% end %>
+    "url": "https://<%= settings.domain -%><%= request.path_info %>",
+    "sameAs": [
+    <% (@page_links || {}).each_with_index do |(_key, url), index| %>
+        "<%= json_escape(url) %>"<%= ',' unless index == @page_links.size - 1 %>
+    <% end %>
+    ],
+    "image": [
+
+    <% pictures = @page.pageable&.pictures&.published || [] %>
+    <% pictures.each_with_index do |picture, index| %>
+      {
+        "@type": "ImageObject",
+        "contentUrl": "https://<%= settings.domain %><%= picture.file %>",
+        "alternateName": "<%= json_escape(picture.translation(@page.lang)) %>"
+      }<%= ',' unless index == pictures.size - 1 %>
+    <% end %>
+    ],
+    "keywords": [<%= (@page.pageable&.tags&.active || []).collect{|tag| json_escape(tag&.name).then { |n| "\"#{n}\"" } }.join(', ') %>],
+    <% unless @page.meta_description.blank? %>
+    "description": "<%= json_escape(@page.meta_description) %>",
+    <% end %>
+    <% unless @page_details['email'].blank? %>
+    "email": "<%= json_escape(@page_details['email']) %>",
+    <% end %>
+    <% unless @page_details['telephone'].blank? %>
+    "telephone": "<%= json_escape(format_phone_si(@page_details['telephone'])) %>",
+    <% end %>
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "<%= json_escape(schema_details['streetAddress']) %>",
+      "addressLocality": "<%= json_escape(@page.pageable&.first_tag_of_group('addressLocality', @page.lang)) %>",
+      "addressRegion": "<%= json_escape(@page.pageable&.first_tag_of_group('addressRegion', @page.lang)) %>",
+      "postalCode": "<%= json_escape(@page.pageable&.first_tag_of_group('postalCode', @page.lang)) %>",
+      "addressCountry": "<%= json_escape(@page.pageable&.first_tag_of_group('addressCountry')) %>"
+    },
+    <% if @page.pageable&.latitude.present? && @page.pageable&.longitude.present? %>
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": <%= @page.pageable.latitude %>,
+      "longitude": <%= @page.pageable.longitude %>
+    },
+    <% end %>
+    <% unless @page_details['priceRange'].blank? %>
+    "priceRange": "<%= json_escape(@page_details['priceRange']) %>",
+    <% end %>
+    <% unless opening_hours.empty? %>
+    "openingHoursSpecification": [
+      <% opening_hours.each_with_index do |oh, index| %>
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": "<%= oh[:day] %>",
+        "opens": "<%= oh[:opens] %>",
+        "closes": "<%= oh[:closes] %>"
+      }<%= ',' unless index == opening_hours.size - 1 %>
+      <% end %>
+    ],
+    <% end %>
+    <% payment_methods = @page.pageable&.tags_of_group_localized('payment_options', @page.lang) || [] %>
+    <% unless payment_methods.empty? %>
+    "currenciesAccepted": "EUR",
+    "paymentAccepted": [<%= payment_methods.map { |p| "\"#{json_escape(p)}\"" }.join(', ') %>],
+    <% end %>
+    <% amenity_tags = Tag.active.joins(:parent).where(parent: { name: 'parking features' }) %>
+    <% present_amenities = @page.pageable ? amenity_tags.select { |tag| @page.pageable.tags.include?(tag) } : [] %>
+    <% unless present_amenities.empty? %>
+    "amenityFeature": [
+      <% present_amenities.each_with_index do |tag, index| -%>
+         {
+          "@type": "LocationFeatureSpecification",
+          "name": "<%= json_escape(tag.translation(@page.lang)) %>",
+          "value": true
+         }<%= ',' unless index == present_amenities.size - 1 %>
+      <% end %>
+    ],
+    <% end %>
+    "additionalProperty": [
+      <% schema_details.each_with_index do |(key, value), index| %>
+              {
+            "@type": "PropertyValue",
+            "name": "<%= json_escape(label_by_lang(key)) %>",
+            "value": "<%= json_escape(value) %>"
+           }<%= ',' unless index == schema_details.size - 1 %>
+      <% end %>
+    ]
+  }
+<% end %>
+
+<% content_for :schema_webpage do %>
+<% end %>
+
+<% content_for :schema_breadcrumb do %>
+<% end %>
+
+<% content_for :schema_faq_page do %>
+<% end %>

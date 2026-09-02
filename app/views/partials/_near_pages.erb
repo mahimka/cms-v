@@ -1,0 +1,22 @@
+<% limit = limit || 3 %>
+<% anchor = anchor || 'anchor_1' %>
+<% match = match || :any %>
+<% tags = tags || '' %>
+
+<%#
+  item_id больше не используется: в старой схеме это была категория
+  (beach/parking/food...) через отдельную модель Item, которая в новую
+  схему не переехала. Пока просто ближайшие сущности без фильтра по типу —
+  если нужна фильтрация по категории, для этого потребуется завести её
+  заново (например через Entity#schema, когда он будет размечен).
+%>
+
+<% closest_entities = @closest_entities & Entity.tagged_with(tags, match: match) %>
+
+<ul class='mt-2'>
+  <% (closest_entities || Entity.none).first(limit).each do |nearby_entity| %>
+    <% nearby_page = nearby_entity.pages.find_by(lang: @page.lang) %>
+    <% next unless nearby_page %>
+    <li><a href="<%= nearby_page.uri %>"><%= nearby_page.send(anchor) %></a> - <%= nearby_entity.distance.round(2) %> km</li>
+  <% end %>
+</ul>

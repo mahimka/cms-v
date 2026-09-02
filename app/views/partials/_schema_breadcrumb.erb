@@ -1,0 +1,27 @@
+<% 'ОБРАБОТАТЬ для home  и для /LANG' %>
+
+<% if !@page.ancestry.blank? && !@page.ancestry.nil?  %>
+  ,
+  {
+    "@type": "BreadcrumbList",
+    "@id": "https://<%= settings.domain -%><%= request.path_info %>#breadcrumb",
+    "itemListElement": [
+    <% ancestors = @page.ancestors %>
+    <% ancestors.each_with_index do |page, index| %>
+      {
+        "@type": "ListItem",
+        "position": <%= index + 1 %>,
+        "name": "<%= page.h1 %>",
+        "item": "https://<%= settings.domain -%><%= page.uri %>"
+      },
+    <% end %>
+      {
+        "@type": "ListItem",
+        "position": <%= ancestors.size + 1 %>,
+        "name": "<%= json_escape(@page.h1) %>",
+        "item": "https://<%= settings.domain -%><%= @page.uri %>"
+      }
+    ]
+  } 
+
+<% end %>

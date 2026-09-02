@@ -1,0 +1,625 @@
+<script src="/3d/rooms/pano2vr_player.js"></script>
+<script type="text/javascript" src="/3d/rooms/skin.js"></script>
+<noscript>
+  <p><b>Please enable Javascript!</b></p>
+</noscript>
+
+<%#= settings.details['twenty_four_parking'][@page.lang] %>  
+<%#= details['twenty_four_parking'] %>
+
+
+<%#= settings.details['every_subsequent_hour'][@page.lang] %> 
+<%#= details['every_subsequent_hour'] %>
+<%#= @page_details %>
+
+<!-- ============================================================================================ -->
+
+
+<% content_for :head_extra do %>
+  <!-- bookingWidget requires jQuery and jQueryUI -->
+  <!-- Include the following line ONCE ONLY on the page, preferably in the document head -->
+  <script src='https://media.xmlcal.com/widget/1.00/js/bookWidget.min.js' defer></script>
+<% end %>
+
+
+
+<% content_for :room_tags do %>
+  <!-- ### <%= label_by_lang('_room').capitalize %> -->
+  <div class="tags mb-1">  
+    <%= tag_by_lang('double bed') %>
+    <%= tag_by_lang('chair') %>
+    <%= tag_by_lang('table') %>
+    <%= tag_by_lang('lock box') %>
+    <%= tag_by_lang('ac') %>
+    <%= tag_by_lang('tv') %>
+    <%= tag_by_lang('wifi') %>
+    <%= tag_by_lang('netflix') %>
+    <%= tag_by_lang('youtube') %>
+  </div>
+
+<% end %>
+
+<% content_for :kitchen_tags do %>
+  <!-- ### <%= label_by_lang('_kitchen').capitalize %> -->
+  <div class="tags mb-1">
+    <%= tag_by_lang('fridge') %>
+    <%= tag_by_lang('mini fridge') %>
+    <%= tag_by_lang('microwave') %>
+    <%= tag_by_lang('oven') %>
+    <%= tag_by_lang('dish washer') %>
+  </div>
+
+<% end %>
+
+<% content_for :bathroom_tags do %>
+  <!-- ### <%= label_by_lang('_bathroom').capitalize %> -->
+  <div class="tags mb-1">
+    <%= tag_by_lang('wc') %>
+    <%= tag_by_lang('shower') %>
+    <span class='tag'><%= label_by_lang('_towels') %></span>
+    <span class='tag'><%= label_by_lang('_soap') %></span>
+    <span class='tag'><%= label_by_lang('_detergent') %></span>
+    <span class='tag'><%= label_by_lang('_gel') %></span>
+    <span class='tag'><%= label_by_lang('_hairdryer') %></span>
+  </div>
+
+<% end %>
+
+<% content_for :hero do %>
+<section class="hero is-small has-background-grey-lighter mt-0 pb-0">
+  <div class="hero-body">
+    <div class="container">
+
+      <div class="columns is-vcentered">
+
+        <div class="column is-5">
+     
+          <h1 class="title title_hero mb-0"> <%= @page.h1 %><span class="subtitle"> Izola</span></h1>
+<!--
+          <div class="mt-1">          
+            <strong class="is-size-6">€<%= @page_details['season_low'] %></strong>  
+            <span class="is-size-7 has-text-grey">/ <%= label_by_lang('season_low') %> &nbsp; &nbsp;   -  &nbsp; &nbsp;</span>
+            <strong class="is-size-6" > €<%= @page_details['season_high'] %> </strong> 
+            <span class="is-size-7 has-text-grey">/ <%= label_by_lang('season_high') %></span> 
+          </div>
+-->
+
+<!--
+          <span class='subtitle is-7'><%= @page.subtitle %></span>
+
+-->
+<!--
+          <div class="mt-3">          
+            <strong class="is-size-4" style="color:#2c6fad;">€<%= @page_details['season_low'] %></strong>  
+            <span class="is-size-7 has-text-grey">/ <%= label_by_lang('season_low') %> &nbsp; &nbsp;   -  &nbsp; &nbsp;</span>
+            <strong class="is-size-4" style="color:#2c6fad;"> €<%= @page_details['season_high'] %> </strong> 
+            <span class="is-size-7 has-text-grey">/ <%= label_by_lang('season_high') %></span> 
+          </div>
+-->
+             <!--
+             <div class="tags mt-5 mb-5">
+               <%#= partial 'tags_div' %>
+             </div>
+             -->
+
+            <% unless @page.hero_1.blank? %>
+              <%= @page.hero_1 %>
+            <% else %>
+
+              <div class="mt-2 mb-5 is-size-7">
+                Sleeps 2 adults  - 1 Queen bed<br>
+
+                <%= @page_details['room_area'] %>
+                <% if @page_details['terrace_area'] %> 
+                   - terrace <%= @page_details['terrace_area'] %> 
+                <% end %>
+                <%#= tag_by_lang('terrace', css_class: '', html_after: '<br>') %>
+                - <%= tag_by_lang('ground floor', css_class: '', html_after: '') %>
+                <%= tag_by_lang('1st floor', css_class: '', html_after: '') %>
+                <%= tag_by_lang('2nd floor', css_class: '', html_after: '<') %>
+    
+                <%= tag_by_lang('parking lot', css_class: '', html_after: '') %>
+                <%= tag_by_lang('kitchen', css_class: '') %>
+                <%= tag_by_lang('mini-kitchen', css_class: '') %>
+                <br>
+                check out: 10-00  - check in: 15-00 
+              </div>
+
+
+              <div class="tags mb-1">
+                
+                <!-- 
+                  <span class="tag "><%= @page_details['room_area'] %></span>
+
+                  <% if @page_details['terrace_area'] %> 
+                    <span class="tag "><%= @page_details['terrace_area'] %> terrace</span>
+                  <% end %>
+                -->
+
+                  <%#= tag_by_lang('double bed') %>
+                  <%#= tag_by_lang('parking lot', css_class: 'tag is-info ') %>
+
+                  <%= tag_by_lang('tv') %>
+                  <%= tag_by_lang('ac') %>
+                  <%= tag_by_lang('microwave') %>
+                  <%= tag_by_lang('fridge') %>
+                  <%= tag_by_lang('mini fridge') %>
+                  <%= tag_by_lang('oven') %>
+                  <%= tag_by_lang('dish washer') %>
+                  <%= tag_by_lang('wc') %>
+                  <%= tag_by_lang('shower') %>
+ 
+                  <%#= tag_by_lang('ground floor') %>
+                  <%#= tag_by_lang('ac') %>
+              </div>
+
+              <div class="tags mt-5 ">
+
+                  <%= tag_by_lang('narrow stairs', css_class: 'tag is-danger is-light') %>
+                  <%= tag_by_lang('no parking lot', css_class: 'tag is-danger is-light') %>
+                  <%= tag_by_lang('1st floor', css_class: 'tag is-danger is-light') %>
+                  <%= tag_by_lang('2nd floor', css_class: 'tag is-danger is-light') %>
+
+                  <%= tag_by_lang('no dogs', css_class: 'tag is-danger is-light') %>
+                  <%= tag_by_lang('non smoking', css_class: 'tag is-danger is-light') %>
+                  <%= tag_by_lang('adults only', css_class: 'tag is-danger is-light') %>
+ 
+                  <%#= tag_by_lang('ground floor') %>
+                  <%#= tag_by_lang('ac') %>
+              </div>
+
+            <% end %>
+
+<%#= tag_by_lang( css_class: 'tag is-warning') %>
+
+          <% unless @page.hero_2.blank? %>
+            <div class="tags mb-1">
+              <%= @page.hero_2 %>
+            </div>
+          <% else %>
+
+          <% end %>
+
+          <div class="buttons">
+            <%= @page.hero_3 %>
+            <a href="#3d" class="button is-small"><%= label_by_lang('_3d') %></a>
+            <a href="#calendar" class="button is-small"><%= label_by_lang('_calendar') %></a>
+            <a href="#faq" class="button is-small"><%= label_by_lang('_faq') %></a>
+            <a href="#gallery" class="button  is-small"><%= label_by_lang('_gallery') %></a>
+            <!--<a href="#description" class="button is-small"><%= label_by_lang('_description') %></a>-->
+          </div>
+
+          <%= partial('_share_buttons') %>
+
+          <%#= tag.localized_name(@page.lang) %>
+          <%#= label_by_lang('_more_details_and_dates') %>
+   
+            <!--
+            <a href="#contact" class="button is-primary is-big">
+              <%= label_by_lang('_book') %>
+            </a>
+            -->
+
+<!--
+      <div class="buttons mb-1">
+        <a href="https://beds24.com/booking.php?numadult=2&roomid=<%= @page_details['beds_24_room_id'] %>&checkin=<%= DateTime.now.strftime("%Y-%m-%d") %>&checkout=<%= (DateTime.now + 2).strftime("%Y-%m-%d") %>&lang=<%= @page.lang %>&referer=BookingLink'" class="button is-success is-medium has-text-white is-size-4 py-2" style="flex:1"><%= label_by_lang('_book').capitalize %> * </a>
+        <a class="button is-medium is-light"><i class="ti ti-message-circle mr-1" aria-hidden="true"></i>Написать</a> 
+      </div>
+
+      <p class="is-size-7 has-text-grey">* <%= label_by_lang '_beds_24_note' %></p>
+-->
+
+        </div>
+
+        <div class="column is-7">
+          <%= partial '_picture_pageable' %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<% end %> <!-- end of content_for :hero -->
+
+
+<% content_for :sidebar do %>
+    <div>
+      <%#= @page_details['beds24_booking_box_mini'] %>
+    </div>
+    <!--<p class='is-size-7 mt-3 ml-2'>* <%= label_by_lang '_beds_24_note' %>-->
+    <div class="box mt-5">
+
+      <h2 class="title is-3-size mt-0"><%= label_by_lang('price')&.capitalize %></h2>
+
+
+
+      <table class="table is-fullwidth">
+        <tr>
+          <td>16/06 - 15/09</td>
+          <td><%= @page_details['season_high'] %></td>
+        </tr>
+        <tr>
+          <td>
+            15/04 - 15/06
+            <br>
+            16/09 - 31/09
+          </td>
+          <td><%= @page_details['season_mid'] %></td>
+        </tr>
+        <tr>
+          <td>01/11 - 14/04</td>
+          <td><%= @page_details['season_low'] %></td>
+        </tr>
+      </table>
+
+       
+      <ul> 
+        <li><%= link_to '#about-booking-terms' %>
+        <li><%= link_to '#about-house-rules' %>
+      </ul>
+     
+      <span class='is-size-7'>
+            <!--<p>Cene so v evrih in vključujejo DDV.-->
+        <p>Tourist tax per person per day:
+        <p>
+        3.10 EUR adults <br>
+        1.00 EUR children from 7 to 18 years<br>
+        0.00 EUR children up to 7 years<br>
+
+        <p>Supplements:
+        <p>Extra bed: 20.00 EUR
+      </span>
+
+
+
+          <div class="tags mt-3  is-light">
+            <%# @base_page.tags.where(name: ['24h', 'Electric Charger', 'First Hour Free', 'Motorhome']).each do |tag| %>
+            <% @page.pageable.tags.each do |tag| %>
+              <span class="tag"><%#= tag.icon_svg %><%= tag.translation(@page.lang) %></span>
+            <% end %>
+          </div>
+
+
+
+      <%= @page.sidebar_1 %>
+  </div>
+
+<% end %> <!-- end of content_for :sidebar -->
+
+<!--
+    <div class='tags has-addons'>
+      <span class='tag'><img class='m-0 p-0' src='/icons/amenities/safe.png'></span>
+      <span class='tag i'>Safe</span>
+    </div>
+-->
+
+
+
+<iframe 
+  src ="https://beds24.com/booking2.php?roomid=<%= @page_details['beds24_roomid'] %>&hideheader=yes&hidefooter=yes&referer=iframe&&layout=1&lang=<%= @page.lang %>" 
+  width="100%" 
+  height="100%"
+  style="max-width:100%;border:none;overflow:auto;  height: 100vh; margin-bottom: 0px; padding-bottom: 0px;">
+
+
+</iframe>
+
+
+<%#= @page_details['beds24_availability_calendar'] %>
+
+<h2 class="title is-4"><%= label_by_lang('_description').capitalize %></h2>
+
+<div class="tags mt-0 mb-1">
+<span class="tag "><%= @page_details['room_area'] %></span>
+<% if @page_details['terrace_area'] %> 
+<span class="tag "><%= @page_details['terrace_area'] %> terrace</span>
+<% end %>
+<%= tag_by_lang('parking lot', css_class: 'tag is-info ') %>
+  <%= tag_by_lang('terrace') %>
+  <%= tag_by_lang('ground floor') %>
+  <%= tag_by_lang('1st floor') %>
+  <%= tag_by_lang('2nd floor') %>
+  <%= tag_by_lang('kitchen') %>
+</div>
+
+<div class="tags mt-0 ">
+  <%= tag_by_lang('narrow stairs', css_class: 'tag is-danger is-light') %>
+  <%= tag_by_lang('no parking lot', css_class: 'tag is-danger is-light') %>
+  <%= tag_by_lang('no dogs', css_class: 'tag is-danger is-light') %>
+  <%= tag_by_lang('non smoking', css_class: 'tag is-danger is-light') %>
+  <%= tag_by_lang('adults only', css_class: 'tag is-danger is-light') %>
+</div>
+
+<%= parse_erb_and_markdown @page.body %>
+
+
+
+<div id='gallery' class='mt-6'>
+<%= partial '_gallery_page_id', views: settings.views %>
+</div>
+
+<%#= parse_erb_and_markdown @page.block_1 %>
+
+<%#= parse_erb_and_markdown @page.block_2 %>
+
+<h3 class="title is-4" id="faq" id='#faq'><%= label_by_lang('_faq').capitalize %></h3>
+<p><%= link_to('#about-faq', options={}) %>  → </p>
+<%= parse_erb_and_markdown @page.faq %>
+<blockquote>
+<%= link_to('/about') %> - 
+<%= link_to('/about/booking-terms') %> - 
+<%= link_to('/about/house-rules') %> - 
+<%= link_to('/about/contacts') %>
+</blockquote>
+
+
+<h3 class="title is-4" id="location"><%= label_by_lang('_location').capitalize %></h3>
+<%= parse_erb_and_markdown @page.block_3 %>
+<blockquote>
+<%= link_to('/izola/parkings') %> - 
+<%= link_to('/izola/eateries') %> - 
+<%= link_to('/izola/lodging') %> - 
+<%= link_to('/izola/beaches') %> - 
+<%= link_to('/izola/info') %>
+</blockquote>
+
+<%= parse_erb_and_markdown @page.block_4 %>
+
+<h3 class="title is-4" id="3d"><%= label_by_lang('_3d').capitalize %></h3>
+
+<% if @page_details['panorama_1'] && !@page_details['panorama_1'].blank? %> 
+  <div class='box p-2'>
+    <figure class="image is-3by2">
+        <span class="has-ratio"  id="container_1">
+          This content requires HTML5/CSS3, WebGL, or Adobe Flash Player Version 9 or higher.
+        </span>
+    </figure>  
+  </div>      
+  <%= @page_details['panorama_1'] %>
+<% end %> 
+
+<% if @page_details['panorama_2'] && !@page_details['panorama_2'].blank? %> 
+  <div class='box p-2'>
+    <figure class="image is-3by2">
+        <span class="has-ratio"  id="container_2">
+          This content requires HTML5/CSS3, WebGL, or Adobe Flash Player Version 9 or higher.
+        </span>
+    </figure>  
+  </div>      
+  <%= @page_details['panorama_2'] %>
+<% end %> 
+
+<% if @page_details['panorama_3'] && !@page_details['panorama_3'].blank? %> 
+  <div class='box p-2'>
+    <figure class="image is-3by2">
+        <span class="has-ratio"  id="container_3">
+          This content requires HTML5/CSS3, WebGL, or Adobe Flash Player Version 9 or higher.
+        </span>
+    </figure>  
+  </div>      
+  <%= @page_details['panorama_3'] %>
+<% end %> 
+
+
+<% content_for :schema_main_entity do %>
+{
+  "@type": "Accommodation",
+  "additionalType": ["Apartment", "EntirePlace"],
+  "@id": "https://<%= settings.domain -%><%= @page.source_page.uri %><%= @page.pageable.name %>",
+  "containedInPlace": {
+    "@id": "https://diversorio.com/rooms#rooms"
+  },
+  "identifier": "<%= @page.pageable.ld_id %>",
+  "name": "<%= json_escape(@page.title) %>",
+  "description": "<%= json_escape(@page.meta_description) %>",
+  "url": "https://<%= settings.domain -%><%= @page.uri %>",
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 45.535951221307386,
+    "longitude": 13.661016735477904
+  },
+  "address": {
+     "addressCountry": "SI",
+     "addressLocality": "Izola",
+     "addressRegion": "Obalna-Kraska",
+     "postalCode": "6310",
+     "streetAddress": "Postojnska 1"
+  },
+  "checkinTime": "15:00:00+02:00",
+  "checkoutTime": "10:00:00+02:00",
+  "telephone": "+38630410823",
+  "email": "diversorio.izola@gmail.com",  
+  "numberOfRooms": 1,
+  "numberOfBedrooms": 1,
+  "numberOfBathroomsTotal": 1,
+  "occupancy": {
+    "@type": "QuantitativeValue",
+    "value": 2
+  },
+  "bed": {
+    "@type": "BedDetails",
+    "numberOfBeds" : 1,
+    "typeOfBed": "Double"
+  },
+  "floorSize": {
+    "@type": "QuantitativeValue",
+    "value": <%= @page_details['floor_area'] %>,
+    "unitCode": "MTK"
+  },
+  "image": [
+  <% pictures = @page.pageable.pictures.published %>
+  <% pictures.each_with_index do |picture, index| %>
+    "https://<%= settings.domain %><%= picture.file %>"<%= ',' unless index == pictures.size - 1 %> 
+  <% end %>
+  ],
+  "amenityFeature": [
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "ac",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "wifi",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "tv",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "microwave",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "heating",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "washerDryer",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "ironingBoard",
+      "value": true
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "beachAccess",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "airportShuttle",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "childFriendly",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "elevator",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "fireplace",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "freeBreakfast",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "gymFitnessEquipment",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "hotTub",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "instantBookable",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "outdoorGrill",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "petsAllowed",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "pool",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "privateBeachAccess",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "selfCheckinCheckout",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "smokingAllowed",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "wheelchairAccessible",
+      "value": false
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "balcony",
+      "value": <%= @page.pageable.tags.collect{|tag| tag.name}.include?('terrace') ? 'true' : 'false' %>
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "crib",
+      "value": <%= @page.pageable.tags.collect{|tag| tag.name}.include?('crib') ? 'true' : 'false' %>
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "kitchen",
+      "value": <%= @page.pageable.tags.collect{|tag| tag.name}.include?('kitchen') ? 'true' : 'false' %>
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "ovenStove",
+      "value": <%= @page.pageable.tags.collect{|tag| tag.name}.include?('oven') ? 'true' : 'false' %>
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "patio",
+      "value": <%= @page.pageable.tags.collect{|tag| tag.name}.include?('patio') ? 'true' : 'false' %>
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "internetType",
+      "value": "Free"
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "poolType",
+      "value": "None"
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "licenseNum",
+      "value": "112735"
+    },
+    {
+      "@type": "LocationFeatureSpecification",
+      "name": "parkingType",
+      "value": <%= ["/rooms/1", "/rooms/2"].include?(@page.source_page.uri) ? "\"Free\"" : "\"None\"" %>
+    }
+  ]
+}
+<% end %>
+<% content_for :schema_webpage do %>
+<% end %>
+<% content_for :schema_breadcrumb do %>
+<% end %>
+<% content_for :schema_faq_page do %>
+<% end %>

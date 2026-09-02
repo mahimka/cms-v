@@ -1,0 +1,35 @@
+<% unless @page.faq.blank? %>
+  <% blocks = @page.faq.split(/(?=###)/)  %>
+  <% faq_hash = {} %>
+  <% blocks.each do |block| %>
+    <% next unless block.include?('###') %>
+      <% lines = block.strip.lines %>
+      <% key = lines.first.strip.sub('###', '') %>
+      <% value = lines[1..-1].join.strip %>
+      <% faq_hash[key] = value %>
+  <% end %>
+
+    ,
+	{
+	"@type": "FAQPage",
+	"@id": "https://<%= settings.domain -%><%= request.path_info %>#faq",
+	"isPartOf": {
+	  "@id": "https://<%= settings.domain -%><%= request.path_info %>#webpage"
+	},
+	"mainEntity": [
+	  <% if !faq_hash.nil? %>
+	  <% faq_hash.each_with_index do |question, index| %>
+	  {
+	    "@type": "Question",
+	    "name": "<%= clean_text_from_erb_code question[0] %>",
+	    "acceptedAnswer": {
+	      "@type": "Answer",
+	      "text": "<%= clean_text_from_erb_code question[1] %>"
+	    }
+	  }<%= ',' unless index == faq_hash.size - 1 %> 
+	  <% end %>
+	  <% end %>
+	]
+	}  
+
+<% end %>

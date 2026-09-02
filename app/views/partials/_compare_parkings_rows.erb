@@ -1,0 +1,194 @@
+<%
+  # Таблица сравнения парковок — встраивается прямо в текст (body, faq,
+  # block_1..4 — любое поле, которое проходит через parse_erb_and_markdown),
+  # руками, без формы конструктора условий. Вызов (ERB-тег вывода,
+  # partial с ключом filter): filter — хэш вида
+  #   {"object" => "Entity", "tags" => ["and", ["or", "Hotel", "Hostel"], "Izola"]}
+  #
+  # filter — тот же формат, что у ListQuery/TagExpression (object + tags,
+  # AND/OR/NOT с вложенными группами, "not" бинарный — левое минус правое).
+
+  cmp_filter = (defined?(filter) && filter.is_a?(Hash)) ? filter : {}
+
+  cmp_entities = cmp_filter["object"].present? ? ListQuery.new(cmp_filter).objects.to_a : []
+
+  cmp_uid = "cmp-parkings-#{SecureRandom.hex(4)}"
+
+  cmp_price = lambda do |details, key|
+    raw = details[key]
+    next nil if raw.blank?
+    raw.to_s.tr(",", ".").to_f
+  end
+
+  cmp_free_tier = lambda do |tag_names|
+    if tag_names.include?("First 30 Min Free") then 30
+    elsif tag_names.include?("First 60 Min Free") then 60
+    elsif tag_names.include?("First 90 Min Free") then 90
+    end
+  end
+
+  # addressLocality — не Label/Detail, а группа тегов (Ankaran, Izola,
+  # Koper, Piran... — дети тега "addressLocality"). Город сущности — тот
+  # из её тегов, что входит в эту группу. Считаем группу один раз до
+  # цикла, а не на каждую сущность.
+  cmp_city_tags = Tag.find_by(name: "addressLocality")&.children&.pluck(:name) || []
+
+  cmp_rows = cmp_entities.map do |entity|
+    details = entity.details
+    tag_names = entity.tags.pluck(:name)
+    page = entity.page&.version_for(@page&.lang)
+
+    {
+      name: page&.anchor_1,
+      url: page&.uri,
+      rate_low: cmp_price.call(details, "rate_low"),
+      rate_24h_high: cmp_price.call(details, "rate_24h_high"),
+      vehicle: %w[Car Bus Motorhome].select { |t| tag_names.include?(t) },
+      ev: tag_names.include?("Electric Charger"),
+      free_tier: cmp_free_tier.call(tag_names),
+      easypark: tag_names.include?("easyPark"),
+      city: (tag_names & cmp_city_tags).first
+    }
+  end
+%>
+
+<% if cmp_rows.empty? %>
+  <p class="has-text-grey is-size-7"><em>Нет парковок, подходящих под фильтр.</em></p>
+<% else %>
+
+<div class="cmp-parkings-shell" id="<%= cmp_uid %>-shell">
+  <table class="table is-striped is-fullwidth is-size-7 cmp-parkings-table">
+    <thead>
+      <tr>
+        <th data-key="name" data-type="string"><%= label_by_lang('_parking') %></th>
+        <th data-key="rate_low" data-type="number"><%= label_by_lang('_price') %></th>
+        <th data-key="rate_24h_high" data-type="number"><%= label_by_lang('_24h') %></th>
+        <th data-key="vehicle" data-type="array"><%= label_by_lang('_parking_type') %></th>
+        <th data-key="ev" data-type="bool"><%= label_by_lang('_charging_station') %></th>
+        <th data-key="free_tier" data-type="number"><%= label_by_lang('_free_time') %></th>
+        <th data-key="easypark" data-type="bool">easyPark</th>
+        <th data-key="city" data-type="string"><%= label_by_lang('_town') %></th>
+      </tr>
+    </thead>
+    <tbody id="<%= cmp_uid %>-rows"></tbody>
+  </table>
+</div>
+
+<style>
+  .cmp-parkings-shell { overflow-x: auto; }
+  .cmp-parkings-table { min-width: 720px; }
+  .cmp-parkings-table th { cursor: pointer; user-select: none; white-space: nowrap; }
+  .cmp-parkings-table th .cmp-arrow { margin-left: 0.25rem; opacity: 0.3; font-size: 0.75em; }
+  .cmp-parkings-table th.cmp-sorted .cmp-arrow { opacity: 1; }
+  .cmp-parkings-table td.cmp-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cmp-parkings-table td.cmp-dim { color: #999; }
+  .cmp-parkings-table .cmp-tagset { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+</style>
+
+<script>
+(function () {
+  var DATA = <%= cmp_rows.to_json %>;
+  var shell = document.getElementById("<%= cmp_uid %>-shell");
+  var tbody = document.getElementById("<%= cmp_uid %>-rows");
+  var state = { key: "name", dir: 1 };
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function isEmpty(v) {
+    return v === null || v === undefined || (Array.isArray(v) && v.length === 0) || v === false;
+  }
+
+  function cmpBase(a, b, key, type) {
+    if (type === "number") { return (a[key] || 0) - (b[key] || 0); }
+    if (type === "array") {
+      var al = a[key].length, bl = b[key].length;
+      if (al !== bl) { return bl - al; }
+      return a[key].join(",").localeCompare(b[key].join(","));
+    }
+    if (type === "bool") { return (b[key] ? 1 : 0) - (a[key] ? 1 : 0); }
+    return String(a[key] || "").localeCompare(String(b[key] || ""), "ru");
+  }
+
+  function numCell(v) {
+    if (v === null || v === undefined) { return '<td class="cmp-num cmp-dim">—</td>'; }
+    return '<td class="cmp-num">' + v.toFixed(2).replace(/\.00$/, "") + '<span style="color:#999;font-size:0.85em;"> €</span></td>';
+  }
+
+  function tagCell(arr) {
+    if (!arr || arr.length === 0) { return '<td class="cmp-dim">—</td>'; }
+    return '<td><div class="cmp-tagset">' + arr.map(function (t) {
+      return '<span class="tag is-light">' + escapeHtml(t) + '</span>';
+    }).join("") + '</div></td>';
+  }
+
+  function flagCell(on, labelOn) {
+    if (!on) { return '<td class="cmp-dim">—</td>'; }
+    return '<td><span class="tag is-success is-light">' + escapeHtml(labelOn) + '</span></td>';
+  }
+
+  function render() {
+    var th = shell.querySelector('th[data-key="' + state.key + '"]');
+    var type = th.dataset.type;
+
+    var rows = DATA.slice().sort(function (a, b) {
+      var aEmpty = isEmpty(a[state.key]);
+      var bEmpty = isEmpty(b[state.key]);
+      // Пустые значения — всегда в конец, независимо от направления
+      // сортировки (иначе "нет данных" на восходящей сортировке выглядит
+      // как "меньше всех").
+      if (aEmpty && bEmpty) { return 0; }
+      if (aEmpty) { return 1; }
+      if (bEmpty) { return -1; }
+      return cmpBase(a, b, state.key, type) * state.dir;
+    });
+
+    tbody.innerHTML = rows.map(function (r) {
+      var nameCell = r.url
+        ? '<td><a href="' + escapeHtml(r.url) + '">' + escapeHtml(r.name) + '</a></td>'
+        : '<td>' + escapeHtml(r.name) + '</td>';
+
+      return "<tr>" +
+        nameCell +
+        numCell(r.rate_low) +
+        numCell(r.rate_24h_high) +
+        tagCell(r.vehicle) +
+        flagCell(r.ev, "Ok") +
+        (r.free_tier ? '<td><span class="tag is-light">' + r.free_tier + ' min</span></td>' : '<td class="cmp-dim">—</td>') +
+        flagCell(r.easypark, "EasyPark") +
+        '<td>' + (r.city ? escapeHtml(r.city) : '<span class="cmp-dim">—</span>') + '</td>' +
+        "</tr>";
+    }).join("");
+  }
+
+  shell.querySelectorAll("thead th").forEach(function (th) {
+    th.addEventListener("click", function () {
+      var key = th.dataset.key;
+      if (state.key === key) {
+        state.dir *= -1;
+      } else {
+        state.key = key;
+        state.dir = 1;
+      }
+      shell.querySelectorAll("thead th").forEach(function (el) {
+        el.classList.remove("cmp-sorted");
+        var arrow = el.querySelector(".cmp-arrow");
+        if (arrow) { arrow.remove(); }
+      });
+      th.classList.add("cmp-sorted");
+      var arrow = document.createElement("span");
+      arrow.className = "cmp-arrow";
+      arrow.textContent = state.dir === 1 ? "▲" : "▼";
+      th.appendChild(arrow);
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+
+<% end %>

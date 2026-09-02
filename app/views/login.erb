@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход — Diversorio</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/versions/bulma-no-dark-mode.min.css">
+</head>
+<body>
+
+  <section class="section">
+    <div class="container" style="max-width: 420px;">
+
+      <h1 class="title is-4">Вход</h1>
+
+      <% if flash.has?(:error_title) %>
+        <div class="notification is-warning">
+          <%= flash[:error_title] %>
+        </div>
+      <% end %>
+
+      <form method="POST" action="/login">
+        <% if params[:redirect_to].present? %>
+          <input type="hidden" name="redirect_to" value="<%= params[:redirect_to] %>">
+        <% end %>
+
+        <div class="field">
+          <label class="label">Email</label>
+          <div class="control">
+            <input class="input" type="email" name="email" required autofocus>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Пароль</label>
+          <div class="control">
+            <input class="input" type="password" name="password" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="control">
+            <button type="submit" class="button is-link">Войти</button>
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </section>
+
+</body>
+</html>

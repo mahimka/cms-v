@@ -1,0 +1,122 @@
+<footer class="footer has-background-dark">
+  <div class="container">
+
+    <!-- ░░ 4 КОЛОНКИ ░░ -->
+    <div class="columns">
+
+      <!-- ── Колонка 1: Бренд + контакты ── -->
+      <div class="column is-4">
+        <p class="title is-5 has-text-white mb-3"><%= settings.site_name %></p>
+        <p class="is-size-7 has-text-white mb-3" style="line-height:1.8;">
+          #########<br>
+          #########<br>
+          #########<br>
+          #########
+        </p>
+        <p class="is-size-7 has-text-white mb-1">
+          <a href="tel:+#########<" class="has-text-white">
+            📞 +386 #########
+          </a>
+        </p>
+        <p class="is-size-7 has-text-white mb-4">
+          <a href="mailto:diversorio.izola@gmail.com" class="has-text-white">
+            ✉ #########@gmail.com
+          </a>
+        </p>
+        <!--
+        <a
+          href="https://beds24.com/booking2.php?page=enquire&hideback=yes&propid=259691"
+          class="button is-info is-small"
+          title="Book Now — Diversorio Apartments Izola"
+        >
+          Rezerviraj zdaj →
+        </a>
+        -->
+      </div>
+
+      <!-- ── Колонка 2: Navigacija ── -->
+      <div class="column">
+        <p class="heading has-text-white mb-3"><%#= label_by_lang('_navigation').capitalize %></p>
+        <ul>
+          <li class="mb-2">
+            <%#= link_to('/', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/rooms', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/art', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/about/location', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/izola/parkings', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/izola/beaches', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/izola/lodging', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/izola/eateries', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ── Колонка 3: O nas ── -->
+      <div class="column">
+        <p class="heading has-text-white mb-3"><%#= label_by_lang('_about_us').capitalize %></p>
+        <ul>
+          <li class="mb-2">
+            <%#= link_to('/about', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/about/booking-terms', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/about/house-rules', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/about/contacts', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ── Колонка 4: Pravno ── -->
+      <div class="column">
+        <p class="heading has-text-white mb-3"><%#= label_by_lang('_legal').capitalize %></p>
+        <ul>
+          <li class="mb-2">
+            <%#= link_to('/about/privacy-policy', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+          <li class="mb-2">
+            <%#= link_to('/about/surveillance', options={css_class: "is-size-7 has-text-white"}) %>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+    <!-- /columns -->
+
+    <!-- ░░ РАЗДЕЛИТЕЛЬ ░░ -->
+    <hr style="background-color:rgba(255,255,255,0.1); height:1px; border:none;">
+
+    <!-- ░░ КОПИРАЙТ ░░ -->
+    <div class="columns is-mobile is-vcentered">
+      <div class="column">
+        <p class="is-size-7 has-text-white">
+          © 2026
+          <a href="/" class="has-text-white"><%= settings.site_name %></a> <!-- · Izola, Slovenia -->
+        </p>
+      </div>
+      <div class="column has-text-right">
+        <p class="is-size-7 has-text-white">
+          <!-- name doo IBAN -->
+        </p>
+      </div>
+    </div>
+
+  </div>
+</footer>

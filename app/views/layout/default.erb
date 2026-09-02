@@ -36,19 +36,21 @@
   <link rel="sitemap" type="application/xml" title="Sitemap" href="https://<%= settings.domain -%>/<%= @page.lang == 'sl' ? '' : "#{@page.lang}/" %>sitemap.xml" />
 
   <!-- Favicon.io-->
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="<%= asset_path('/favicon/apple-touch-icon.png') %>">
+  <link rel="icon" type="image/png" sizes="32x32" href="<%= asset_path('/favicon/favicon-32x32.png') %>">
+  <link rel="icon" type="image/png" sizes="16x16" href="<%= asset_path('/favicon/favicon-16x16.png') %>">
   <link rel="manifest" href="/favicon/site.webmanifest">
   
-  <link rel="stylesheet" href="/stylesheets/bulma.min.css">
-  <link rel="stylesheet" href="/stylesheets/splide.min.css">
-  <link rel="stylesheet" href="/stylesheets/photoswipe.css">
-  <link rel="stylesheet" href="/stylesheets/cookieconsent.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="<%= asset_path('/stylesheets/bulma.min.css') %>">
 
-  <script defer src="/javascripts/cookieconsent.js"></script>
-  <script defer src="/javascripts/cookieconsent-init.js"></script>
-  <script defer src="/javascripts/splide.min.js"></script>
+  <!-- Откладываем загрузку плагинов -->
+  <link rel="stylesheet" href="<%= asset_path('/stylesheets/splide.min.css') %>" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="<%= asset_path('/stylesheets/photoswipe.css') %>" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="<%= asset_path('/stylesheets/cookieconsent.css') %>" media="print" onload="this.media='all'">
+
+  <script defer src="<%= asset_path('/javascripts/cookieconsent.js') %>"></script>
+  <script defer src="<%= asset_path('/javascripts/cookieconsent-init.min.js') %>"></script>
+  <script defer src="<%= asset_path('/javascripts/splide.min.js') %>"></script>
   
   <%= yield_content :head_extra -%>
    
@@ -91,14 +93,26 @@
     </div>
   </section>
 
-  <%= yield_content :hero %>
-
-  <section class="section pt-3 pb-3">
+  <style>
+    .breadcrumb-sticky-bar {
+      position: sticky;
+      top: var(--bulma-navbar-height, 3.25rem);
+      z-index: 20;
+      background-color: var(--bulma-scheme-main, #fff);
+      border-bottom: 1px solid var(--bulma-border, #dbdbdb);
+    }
+    .breadcrumb-sticky-bar .breadcrumb {
+      margin-bottom: 0;
+    }
+  </style>
+  <section class="breadcrumb-sticky-bar pb-3 px-2">
     <div class="container">
      <%= partial '_header_breadcrumbs' %>
     </div>
   </section>
-  
+
+  <%= yield_content :hero %>
+
   <main>
 
     <% unless yield_content(:sidebar).blank? %>
@@ -174,5 +188,41 @@
       });
     });
   </script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.share-buttons-white') || document.querySelector('.share-buttons');
+
+    if (!container) return;
+
+    container.addEventListener('click', (event) => {
+      // Находим ближайшую кнопку или ссылку
+      const btn = event.target.closest('.button, .share-btn');
+      if (!btn) return;
+
+      // Определяем имя кнопки из aria-label, title или CSS-классов
+      const buttonName = btn.getAttribute('aria-label') || btn.getAttribute('title') || 'share-button';
+      const pageUrl = window.location.href;
+
+      const payload = JSON.stringify({
+        button: buttonName,
+        page_url: pageUrl
+      });
+
+      // sendBeacon гарантирует доставку данных даже при переходе на другой сайт
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/log-share', payload);
+      } else {
+        fetch('/api/log-share', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true
+        });
+      }
+    });
+  });
+  </script>
+  
 
 </body>

@@ -1,0 +1,47 @@
+<% content_for :head_extra do %>
+<% end %>
+
+<% content_for :hero do %>
+  <section class="hero is-medium" style="position: relative; overflow: hidden;">
+    <%= partial '_carousel' %>
+    <%= partial '_carousel_overlay' %>
+    <%= partial '_carousel_div_hero' %>
+  </section>
+<% end %> 
+
+<% content_for :sidebar do %>
+<% end %> <!-- end of content_for :sidebar -->
+
+<% list_item = '_list_item_default' %>
+
+<%= parse_erb_and_markdown @page.body if @page.body %>
+
+<% if @objects %>
+
+  <div class="columns is-multiline">
+    <% @objects.each do |object| %>
+      <div class="column is-4">
+        <%= partial list_item, object: object %>
+      </div>
+    <% end %>
+  </div>
+
+<% end %>
+
+<%= partial '_map_stay22' %>
+
+<p class="is-size-7">
+  * - <%= label_by_lang('distance_explanation') %><br>
+</p>
+
+<% content_for :schema_main_entity do %>
+<% end %>
+
+<% content_for :schema_webpage do %>
+<% end %>
+
+<% content_for :schema_breadcrumb do %>
+<% end %>
+
+<% content_for :schema_faq_page do %>
+<% end %>

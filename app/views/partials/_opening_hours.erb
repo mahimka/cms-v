@@ -1,0 +1,12 @@
+<% days = %w[monday tuesday wednesday thursday friday saturday sunday] %>
+<% hours_by_day = days.each_with_object({}) { |day, h| h[day] = @page_details["hours_#{day}"] if @page_details["hours_#{day}"] } %>
+
+<% unless hours_by_day.empty? %>
+<ul style='list-style-type: none;' class='m-0 p-0 mt-5 mb-5 is-size-7'>
+
+  <% hours_by_day.each do |day, hours| %>
+    <li><%= label_by_lang("hours_#{day}") %>: <%= hours %></li>
+  <% end %>
+
+</ul>
+<% end %>

@@ -1,0 +1,215 @@
+<% entity = @page.pageable %>
+
+<!-- ============================================================================================ -->
+
+<% content_for :hero do %>
+  <section class="hero is-small has-background-grey-lighter mt-0 pb-0">
+    <div class="hero-body">
+      <div class="container">
+
+        <div class="columns is-vcentered">
+
+          <div class="column is-5">
+
+            <h1 class="title title_hero mb-3"><%= @page.h1 %></h1>
+            <span class='subtitle is-size-6'><%= @page.subtitle %></span>
+
+          <!--<p class="subtitle is-6  mb-5 mt-5" style="opacity: 0.92; max-width: 640px; line-height: 1.7;">-->
+            <%= @page.hero_1 %>
+          <!--</p>-->
+
+          <div class="tags mt-3 mb-1">
+
+          </div>
+
+          <div class="tags mt-3 is-light">
+            <% @page.pageable.tags.where(name: ['wild', 'sand', 'pebbles', 'rocky', 'concrete platform']).each do |tag| %>
+              <span class="tag is-info"><%#= tag.icon_svg %><%= tag.translation(@page.lang) %></span>
+            <% end %>
+          </div>
+
+            <div class="buttons">
+              <%= @page.hero_3 %>
+
+
+              <a href="#faq" class="tag is-rounded">
+                <span class="icon is-small mr-1">
+                  <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                <%= label_by_lang('_faq') %>
+              </a>
+
+              <a href="#gallery" class="tag is-rounded">
+                <span class="icon is-small mr-1">
+                  <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                </span>
+                <%= label_by_lang('_gallery') %>
+              </a>
+
+              <a href="#near" class="tag is-rounded">
+                <span class="icon is-small mr-1">
+                  <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                </span>
+                <%= label_by_lang('_what_is_near') %>
+              </a>
+
+             </div>
+
+             <%= partial('_share_buttons') %>
+
+          </div>
+
+        <div class="column is-7">
+          <%= partial '_picture_pageable' %>
+        </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+<% end %>
+
+<% content_for :sidebar do %>
+
+  <div class="mt-0 mb-5 pt-0 pl-0 pr-0">
+    <h2 class="title is-5" id='near'><%= label_by_lang('_what_is_near').capitalize %></h2>
+
+    <h3 class="title is-6 mb-0"><%= label_by_lang('_parkings').capitalize %></h3>
+    <%= partial '_near_pages', tags: ['ParkingFacility', 'Izola'], match: :all, limit: 3, anchor: 'anchor_1'  %>
+
+    <h3 class="title is-6 mb-0"><%= label_by_lang('_restaurants').capitalize %></h3>
+    <%= partial '_near_pages', tags: ['FoodEstablishment', 'Izola'], match: :all, limit: 3, anchor: 'anchor_1'  %>
+
+    <h3 class="title is-6 mb-0"><%= label_by_lang('_beaches').capitalize %></h3>
+    <%= partial '_near_pages', tags: ['Beach', 'Izola'], match: :all, limit: 3, anchor: 'anchor_1' %>
+  </div>
+
+  <div class="container mt-0 pt-0 content pl-0 pr-0">
+    <%= partial '_google_map_one_point', map_icon: 'beach' %>
+  </div>
+
+  <%= partial '_sidebar_address' %>
+
+<% end %>
+
+<div class="tags mt-1 is-light">
+  <%= (@page.pageable&.tags_of_group_localized('beach features', @page.lang) || []).collect{|tag| "<span class='tag is-size-7'>#{tag}</span> "}.join(' ') %>
+</div>
+
+<%= partial '_sidebar_links' %>
+
+<%= parse_erb_and_markdown @page.body if @page.body %>
+  <%= partial '_map_stay22' %>
+
+  <h3 class="title is-4" id='faq'>
+    <%= label_by_lang('_faq').capitalize %>
+  </h3>
+  <%= parse_erb_and_markdown(@page.faq, options = {}) if @page.faq %>
+
+  <h3 class="title is-4" id='gallery'>
+    <%= label_by_lang('_gallery').capitalize %>
+  </h3>
+
+<%= partial '_gallery_page_id' %>
+
+<% content_for :footer do %>
+
+  <%= partial '_pages_by_tag', lang: @page.lang, tag_name: 'Rent a Deck Chair' %>
+  <%= partial '_pages_by_tag', lang: @page.lang, tag_name: 'Shower' %>
+  <%= partial '_pages_by_tag', lang: @page.lang, tag_name: 'WC' %>
+
+<% end %>
+
+<% content_for :schema_main_entity do %>
+
+  <%
+    # additionalProperty: раньше это были Detail, у которых Label был
+    # помечен additional_property: true (плюс исключали price_*) — этот
+    # флаг при переносе не сохранился (в новой labels такой колонки нет
+    # вообще), поэтому берём все details сущности, кроме явно технических
+    # ключей (цены/сезоны и служебные виджеты).
+    technical_detail_keys = %w[thumb_image gallery_old_yaml]
+    technical_detail_prefixes = %w[price season beds24 panorama]
+    schema_details = (@page.pageable&.details || {}).reject do |key, _|
+      technical_detail_keys.include?(key) || technical_detail_prefixes.any? { |p| key.start_with?(p) }
+    end
+  %>
+
+  {
+    "@type": ["Beach", "TouristAttraction", "Place"],
+    "@id": "https://<%= settings.domain -%><%= request.path_info %>",
+    "name": "<%= json_escape(@page.h1) %>",
+    <% unless schema_details['alternateName'].blank? %>
+    "alternateName": "<%= json_escape(schema_details['alternateName']) %>",
+    <% end %>
+    "url": "https://<%= settings.domain -%><%= request.path_info %>",
+    "sameAs": [
+    <% (@page_links || {}).each_with_index do |(_key, url), index| %>
+        "<%= json_escape(url) %>"<%= ',' unless index == @page_links.size - 1 %>
+    <% end %>
+    ],
+    "image": [
+
+    <% pictures = @page.pageable&.pictures&.published || [] %>
+    <% pictures.each_with_index do |picture, index| %>
+      {
+        "@type": "ImageObject",
+        "contentUrl": "https://<%= settings.domain %><%= picture.file %>",
+        "alternateName": "<%= json_escape(picture.translation(@page.lang)) %>"
+      }<%= ',' unless index == pictures.size - 1 %>
+    <% end %>
+    ],
+    "keywords": [<%= (@page.pageable&.tags&.active || []).collect{|tag| json_escape(tag&.name).then { |n| "\"#{n}\"" } }.join(', ') %>],
+    <% unless @page.meta_description.blank? %>
+    "description": "<%= json_escape(@page.meta_description) %>",
+    <% end %>
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "<%= json_escape(schema_details['streetAddress']) %>",
+      "addressLocality": "<%= json_escape(@page.pageable&.first_tag_of_group('addressLocality', @page.lang)) %>",
+      "addressRegion": "<%= json_escape(@page.pageable&.first_tag_of_group('addressRegion', @page.lang)) %>",
+      "postalCode": "<%= json_escape(@page.pageable&.first_tag_of_group('postalCode', @page.lang)) %>",
+      "addressCountry": "<%= json_escape(@page.pageable&.first_tag_of_group('addressCountry')) %>"
+    },
+    <% if @page.pageable&.latitude.present? && @page.pageable&.longitude.present? %>
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": <%= @page.pageable.latitude %>,
+      "longitude": <%= @page.pageable.longitude %>
+    },
+    <% end %>
+
+    <% amenity_tags = Tag.active.joins(:parent).where(parent: { name: 'beach features' }) %>
+    <% present_amenities = @page.pageable ? amenity_tags.select { |tag| @page.pageable.tags.include?(tag) } : [] %>
+    <% unless present_amenities.empty? %>
+    "amenityFeature": [
+      <% present_amenities.each_with_index do |tag, index| -%>
+         {
+          "@type": "LocationFeatureSpecification",
+          "name": "<%= json_escape(tag.translation(@page.lang)) %>",
+          "value": true
+         }<%= ',' unless index == present_amenities.size - 1 %>
+      <% end %>
+    ],
+    <% end %>
+
+    "additionalProperty": [
+      <% schema_details.each_with_index do |(key, value), index| %>
+              {
+            "@type": "PropertyValue",
+            "name": "<%= json_escape(label_by_lang(key)) %>",
+            "value": "<%= json_escape(value) %>"
+           }<%= ',' unless index == schema_details.size - 1 %>
+      <% end %>
+    ]
+  }
+<% end %>
+
+<% content_for :schema_webpage do %>
+<% end %>
+
+<% content_for :schema_breadcrumb do %>
+<% end %>
+
+<% content_for :schema_faq_page do %>
+<% end %>
