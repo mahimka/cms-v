@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_08_26_170000) do
+ActiveRecord::Schema.define(version: 2026_09_02_080000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -94,6 +94,7 @@ ActiveRecord::Schema.define(version: 2026_08_26_170000) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "translations"
     t.boolean "fixed", default: false
+    t.text "icon_svg"
     t.index ["ancestry"], name: "index_labels_on_ancestry"
     t.index ["name"], name: "index_labels_on_name", unique: true
   end
@@ -316,6 +317,7 @@ ActiveRecord::Schema.define(version: 2026_08_26_170000) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "translations"
     t.boolean "fixed", default: false
+    t.text "icon_svg"
     t.index ["name"], name: "index_tags_on_name", unique: true
     t.index ["parent_id"], name: "index_tags_on_parent_id"
   end

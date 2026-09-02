@@ -34,6 +34,7 @@
     <tr class="is-size-6 has-text-weight-semibold">
       <td>active</td>
       <td title="запрещает менять name — на него ссылается List conditions">fixed 🔒</td>
+      <td>icon</td>
       <td>name</td>
       <td>field_type</td>
       <td title="сколько раз используется в details">details</td>
@@ -48,6 +49,7 @@
     <tr class="has-background-light">
       <td><%= checkbox_in_place(group, :active) %></td>
       <td><%= checkbox_in_place(group, :fixed) %></td>
+      <td><span class="icon"><%= group.icon_svg %></span></td>
       <td class="has-text-weight-semibold"><%= group.name %></td>
       <td><%= group.field_type %></td>
       <td><%= @detail_counts_by_label[group.id] || 0 %></td>
@@ -77,6 +79,7 @@
       <tr>
         <td><%= checkbox_in_place(label, :active) %></td>
         <td><%= checkbox_in_place(label, :fixed) %></td>
+        <td><span class="icon"><%= label.icon_svg %></span></td>
         <td class="pl-5"><%= label.name %></td>
         <td><%= label.field_type %></td>
         <td><%= @detail_counts_by_label[label.id] || 0 %></td>

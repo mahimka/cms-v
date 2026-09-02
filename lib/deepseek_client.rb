@@ -39,7 +39,34 @@ class DeepseekClient
     }
   end
 
+  # Текстовое наполнение detail-страницы сущности (характеристика/subtitle/
+  # meta_description/body) по уже собранным данным (теги/детали) — без
+  # обращения к внешнему поиску, тем же приёмом, что и extract_profile_data:
+  # просим чистый JSON, чистим возможную markdown-обёртку.
+  def generate_page_copy(context)
+    JSON.parse(strip_markdown_fence(generate(build_page_copy_prompt(context))))
+  end
+
   private
+
+  def build_page_copy_prompt(context)
+    <<~PROMPT
+      Napiši besedilo za stran restavracije na turističnem spletnem mestu o slovenski obali. Piši SAMO v slovenščini.
+
+      Uporabi izključno spodnje podatke — ničesar si ne izmišljuj (ne omenjaj ocen, nagrad, let delovanja ipd., če jih ni v podatkih).
+
+      Podatki o gostinskem lokalu:
+      #{context}
+
+      Vrni JSON strogo take strukture, brez pojasnil, brez markdown ovoja (brez ```), samo JSON:
+      {
+        "characteristic": "kratka značilnost lokala, 2-5 besed, za naslov strani (npr. 'italijanska restavracija ob morju')",
+        "subtitle": "en kratek stavek o glavni prednosti lokala",
+        "meta_description": "1-2 stavka za iskalnike, do 155 znakov",
+        "body": "2-4 kratki odstavki v markdown (navadni odstavki, prazna vrstica med njimi; naslovi/seznami/poudarki po potrebi): po čem lokal izstopa, kje se nahaja (terasa/mize zunaj/pogled, če je znano), katera kuhinja, najbolj priljubljene jedi"
+      }
+    PROMPT
+  end
 
   def build_extract_prompt(instructions, html)
     <<~PROMPT

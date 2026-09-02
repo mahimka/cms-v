@@ -102,6 +102,7 @@
       <td>active</td>
       <td title="запрещает менять name — на него ссылается List conditions (tags)">fixed 🔒</td>
       <td>position</td>
+      <td>icon</td>
       <td>name</td>
       <td title="сколько объектов помечено этим тегом">used</td>
       <td>admin_notes</td>
@@ -119,6 +120,7 @@
       <td><%= checkbox_in_place(group, :active) %></td>
       <td><%= checkbox_in_place(group, :fixed) %></td>
       <td><%= group.position %></td>
+      <td><span class="icon"><%= group.icon_svg %></span></td>
       <td class="has-text-weight-semibold"><%= group.name %></td>
       <td><%= @tagging_counts_by_tag[group.id] || 0 %></td>
       <td><%= group.admin_notes %></td>
@@ -145,6 +147,7 @@
         <td><%= checkbox_in_place(tag, :active) %></td>
         <td><%= checkbox_in_place(tag, :fixed) %></td>
         <td width=15><%= input_in_place(tag, :position) %></td>
+        <td><span class="icon"><%= tag.icon_svg %></span></td>
         <td class="pl-5"><%= tag.name %></td>
         <td><%= @tagging_counts_by_tag[tag.id] || 0 %></td>
         <td><%= input_in_place(tag, :admin_notes) %></td>

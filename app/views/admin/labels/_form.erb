@@ -85,3 +85,24 @@
   </div>
 
 </div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:label, :icon_svg, "icon_svg", options = {class: 'label'}) %>
+    <p class="help">сырой &lt;svg&gt;...&lt;/svg&gt; markup</p>
+  </div>
+
+  <div class="column is-9">
+    <div class="columns">
+      <div class="column">
+        <textarea name="label[icon_svg]" class="textarea is-success is-family-monospace" rows="4" placeholder="<svg ...>...</svg>"><%= fast_escape_html(@label.icon_svg) %></textarea>
+      </div>
+      <div class="column is-narrow">
+        <p class="help mb-1">preview</p>
+        <%= @label.icon_svg %>
+      </div>
+    </div>
+  </div>
+
+</div>

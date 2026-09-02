@@ -184,6 +184,14 @@ module MiscHelpers
       label.translation(lang)
     end
 
+    def label_icon(label_name, icon_column = 'icon_svg')
+      label = Label.find_by(name: label_name)
+
+      return '' unless label
+
+      label.send(icon_column) if label.respond_to?(icon_column)
+    end
+
     # Тот же ListQuery, что у Page#list_objects, но без страницы вообще —
     # для инлайн-подборок прямо в контенте.
     #

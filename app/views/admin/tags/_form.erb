@@ -84,4 +84,25 @@
     <%= input(:tag, :admin_notes, options = {class: 'input is-success', value: @tag.admin_notes, placeholder: "enter tag admin_notes"}) %>
   </div>
 
-</div>  
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :icon_svg, "icon_svg", options = {class: 'label'}) %>
+    <p class="help">сырой &lt;svg&gt;...&lt;/svg&gt; markup</p>
+  </div>
+
+  <div class="column is-9">
+    <div class="columns">
+      <div class="column">
+        <textarea name="tag[icon_svg]" class="textarea is-success is-family-monospace" rows="4" placeholder="<svg ...>...</svg>"><%= fast_escape_html(@tag.icon_svg) %></textarea>
+      </div>
+      <div class="column is-narrow">
+        <p class="help mb-1">preview</p>
+        <%= @tag.icon_svg %>
+      </div>
+    </div>
+  </div>
+
+</div>

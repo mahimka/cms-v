@@ -346,6 +346,28 @@ class App < Sinatra::Base
     { status: 'ok', snap_shot_id: snap_shot.id, profile_id: profile&.id }.to_json
   end
 
+  def link_on_page(label, options={})
 
+    # return 'xxx' unless label
+
+    # label         = options[:label] || 'labeffff'
+    anchor_column = options[:anchor_column] || 'anchor_1' #h1
+    a_css_class     = options[:a_css_class] || 'tag is-rounded'
+    icon_css_class  = options[:icon_css_class] || 'icon is-small mr-1'
+    # title         = options[:title] || 'title'
+    
+     # <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+
+    "<a href='##{label}' class='#{a_css_class}'>
+     <span class='#{icon_css_class}'>
+     #{label_icon(label)}
+     </span>
+     #{label_by_lang(label)}
+     </a>
+    "
+
+
+
+  end
 
 end
