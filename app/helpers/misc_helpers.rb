@@ -321,4 +321,55 @@ module MiscHelpers
     text.to_s.to_json[1..-2]
   end
 
+
+
+  def parse_erb_and_markdown(body, options = {})
+
+    return '' unless body
+
+    if body.include?("<%=")
+
+      # begin
+        content = ERB.new(body).result(binding)
+      # rescue JSON::ParserError => e
+      #   if e.message.include?("unexpected end-of-input")
+      #     "<div class='notification is-danger px-4 py-2'><strong>Ошибка JSON в блоке #{block_name}: не закрыт объект/массив</strong></div>"
+      #   else
+      #     "<div class='notification is-danger px-4 py-2'><strong>JSON ошибка: #{e.message}</strong></div>"
+      #   end
+      # rescue SyntaxError, StandardError => e
+      #   "<div class='notification is-danger px-4 py-2'><strong>Ошибка в блоке #{block_name}: #{e.message}</strong></div>"
+      # end
+
+      text = Kramdown::Document.new(content, parse_block_html: false, parse_span_html: true).to_html 
+      # text = Kramdown::Document.new(body, {auto_ids: true}).to_html 
+      text = text.gsub("<h2 ", "<h2 class='title is-size-4' " )
+      text = text.gsub("<h3 ", "<h3 class='title is-size-5' " )  
+      return text
+
+    else
+
+      # Kramdown::Document.new(body).to_html 
+
+      text = Kramdown::Document.new(body, parse_block_html: true, parse_span_html: true).to_html 
+      # text = Kramdown::Document.new(body, {auto_ids: true}).to_html 
+      text = text.gsub("<h2 ", "<h2 class='title is-size-4' " )
+      text = text.gsub("<h3 ", "<h3 class='title is-size-5' " ) 
+      return text
+    end
+
+  end
+
+  # Убирает встроенный ERB-код и '>' перед выводом текста и в HTML,
+  # и в JSON-LD (см. partials/_schema_faq.erb) — там его в одном месте
+  # используют оба раза.
+  def clean_text_from_erb_code(text)
+
+    return '' unless text
+    text.gsub(/<%.*?%>/, "").gsub('>', "").gsub(/\s{2,}/, " ")
+  end
+
+
+
+
 end
