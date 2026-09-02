@@ -1,0 +1,16 @@
+<%  picture = @page.pageable&.pictures&.published&.first %>
+
+<% if picture %>
+  <figure class="image is-16by9">
+
+      <img
+        src="<%= asset_path(picture.file) %>"<%#= picture.filename %>
+        alt="<%= picture.translation @page.lang %>"
+        style="width:100%; height:100%; object-fit:cover; display:block;"
+      >
+  </figure>     
+
+  <p class='is-size-7'><%= picture.translation @page.lang %> 
+    - <a href="#gallery" ><%= label_by_lang('_gallery') %></a>
+  </p>   
+<% end %>

@@ -1,0 +1,39 @@
+<ul style='list-style-type: none;' class='m-0 p-0 mt-5 mb-5 is-size-7' >
+
+  <% if @page_details['operator'] %>
+    <li><%= @page_details['operator'] %>
+  <% end %>
+
+  <% if @page_details['telephone'] %>
+    <li><%= svg_icon('phone') %> <%= @page_details['telephone'] %>
+  <% end %>
+
+  <% if @page_details['email'] %>
+    <li><%= svg_icon('mail') %> <%= @page_details['email'] %>
+  <% end %>
+
+  <% if @page_links['website'] %>
+    <li><%= svg_icon('globe') %> <a href="<%= @page_links['website'] %>" target="_blank"><%= @page_links['website'] %></a>
+  <% end %>
+
+  <% if @page_links['facebook'] %>
+    <li><a href="<%= @page_links['facebook'] %>" target="_blank"><%= @page_links['facebook'] %></a>
+  <% end %>
+
+  <% if @page_links['twitter'] %>
+    <li><a href="<%= @page_links['twitter'] %>" target="_blank"><%= @page_links['twitter'] %></a>
+  <% end %>
+
+  <% if @page_links['instagram'] %>
+    <li><a href="<%= @page_links['instagram'] %>" target="_blank"><%= @page_links['instagram'] %></a>
+  <% end %>
+
+  <% if @page_links['tripadviser'] %>
+    <li><a href="<%= @page_links['tripadviser'] %>" target="_blank"><%= @page_links['tripadviser'] %></a>
+  <% end %>
+
+  <% if @page_links['visitizola'] %>
+    <li><a href="<%= @page_links['visitizola'] %>" target="_blank"><%= @page_links['visitizola'] %></a>
+  <% end %>
+
+</ul>

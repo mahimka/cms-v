@@ -1,0 +1,27 @@
+<div class=''>
+
+
+    <%#= "#{@page_details['operator']} <br>" if @page_details['operator'] %>
+    <%#= "#{@page_details['streetAddress']} <br>" if !@page_details['streetAddress'].blank? %>
+    <% if !@page_details['address'].blank? || !@page_details['postalCode'].blank? || !@page_details['addressLocality'].blank? || !@page_details['addressCountry'].blank? %>
+      <%= svg_icon('map-pin') %>
+      <%= "#{@page_details['address']} " if !@page_details['address'].blank? %>
+      <%= "#{@page_details['postalCode']} " if !@page_details['postalCode'].blank? %>
+      <%= "#{@page_details['addressLocality']} " if !@page_details['addressLocality'].blank? %>
+      <%= "#{@page_details['addressCountry']}" if !@page_details['addressCountry'].blank? %>
+      <br>
+    <% end %>
+
+
+
+    <a href='http://maps.google.com/?saddr=My+Location&daddr=<%= @page.pageable&.latitude %>,<%= @page.pageable&.longitude %>' target='_blank' class='button is-success is-small'>
+      <%= label_by_lang('how_to_get_there').capitalize %>?
+    </a>
+
+    <!--
+    <br>
+    <span class="is-size-7"><%= label_by_lang('_distance').capitalize %>: <%= @page_details['distance_to_diversorio'] %></span>
+    -->
+
+
+</div>

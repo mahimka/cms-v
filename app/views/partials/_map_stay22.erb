@@ -5,6 +5,7 @@
 <% end %>
 
 <% town = 'izola' if town.nil? || town == 'rooms' %>
+<% town = 'trieste' if settings.domain == 'triestia.com' %>
 <% height ||= 600 %>
 
 <% begin %>

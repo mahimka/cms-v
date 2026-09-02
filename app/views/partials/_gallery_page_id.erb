@@ -1,0 +1,54 @@
+<%# if @page.base_id.blank? %>
+  <%# page_id = @page.id %>
+<%# else %>
+  <%# page_id = @page.base_page.id %>
+<%# end %>
+
+
+<%# page_id = @page.source_page.id %>
+
+<div class="box">
+  <div class="grid pswp-gallery mb-5 " id="my-gallery">
+
+    <% Picture.where(imageable_id: @page.source_page.pageable_id, imageable_type: @page.source_page.pageable_type).published.each do |picture| %>
+        <div class="cell">
+          <figure class="image <%= picture['ratio'] %> pswp-gallery__item">
+                <a href="<%= asset_path(picture.file.gsub('public', '')) %>"                   
+                  data-pswp-width="<%= picture['width'] || 1600 %>"
+                  data-pswp-height="<%= picture['height'] || 1200 %>"
+                  target="_blank">
+                  <img src="<%= picture.file.gsub('public', '') %>"
+                  alt="<%= picture.translation(@page.lang) %>" />
+
+                </a>
+          </figure>
+        </div>
+
+  	<% end %>
+
+  </div>
+</div>
+
+<script type="module">
+
+  import PhotoSwipeLightbox from '/javascripts/photoswipe-lightbox.esm.js';
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallerySelector: '#my-gallery',
+    childSelector: '.pswp-gallery__item',
+    //children: 'a',
+    pswpModule: () => import('/javascripts/photoswipe.esm.js'),
+
+    paddingFn: (viewportSize) => {
+      return {
+        top: 0, bottom: 0, left: 0, right: 0
+      }
+    },
+
+  });
+
+
+
+  lightbox.init();
+</script>
+
