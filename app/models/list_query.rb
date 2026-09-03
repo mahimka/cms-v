@@ -56,6 +56,16 @@ class ListQuery
       scope = scope.where(id: ids.to_a)
     end
 
+    # Публичные листинги (конструктор condition-страниц, objects_matching)
+    # не должны показывать draft-объекты — только те, у кого есть
+    # опубликованная detail-страница (Picture — не Pageable, пропускаем).
+    # До details-фильтра ниже: тот через .select превращает scope в
+    # обычный Array, на котором .where уже не сработает.
+    if klass.include?(Pageable)
+      published_ids = Page.where(pageable_type: object_type, published: true).select(:pageable_id)
+      scope = scope.where(id: published_ids)
+    end
+
     if @conditions["details"].present?
       scope = scope.select { |object| @conditions["details"].all? { |key, value| object.details.to_h[key].to_s == value.to_s } }
     end
