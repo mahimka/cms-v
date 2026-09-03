@@ -14,34 +14,36 @@
             <h1 class="title title_hero mb-3"><%= @page.h1 %></h1>
             <span class='subtitle is-size-6'><%= @page.subtitle %></span>
 
-          <!--<p class="subtitle is-6  mb-5 mt-5" style="opacity: 0.92; max-width: 640px; line-height: 1.7;">-->
+            <!--<p class="subtitle is-6  mb-5 mt-5" style="opacity: 0.92; max-width: 640px; line-height: 1.7;">-->
             <%= @page.hero_1 %>
-          <!--</p>-->
+            <!--</p>-->
 
-          <div class="tags mt-3 mb-1">
+            <div class="tags mt-3 mb-1">
+
+            </div>
+
+            <div class="tags mt-3 is-light">
+              <% @page.pageable.tags.where(name: ['wild', 'sand', 'pebbles', 'rocky', 'concrete platform']).each do |tag| %>
+                <span class="tag is-info"><%#= tag.icon_svg %><%= tag.translation(@page.lang) %></span>
+              <% end %>
+            </div>
+
+            <div class="buttons mt-5">
+              <%= link_on_page '_faq' %>
+              <%= link_on_page '_gallery' %>
+              <%= link_on_page '_what_is_near' %>
+
+              <%= partial('_share_buttons') %>
+            </div>
 
           </div>
 
-          <div class="tags mt-3 is-light">
-            <% @page.pageable.tags.where(name: ['wild', 'sand', 'pebbles', 'rocky', 'concrete platform']).each do |tag| %>
-              <span class="tag is-info"><%#= tag.icon_svg %><%= tag.translation(@page.lang) %></span>
-            <% end %>
+          <div class="column is-7">
+            <%= partial '_picture_pageable' %>
           </div>
 
-
-        <div class="buttons mt-5">
-          <%= link_on_page '_faq' %>
-          <%= link_on_page '_gallery' %>
-          <%= link_on_page '_what_is_near' %>
-
-          <%= partial('_share_buttons') %>
         </div>
-
-        <div class="column is-7">
-          <%= partial '_picture_pageable' %>
-        </div>
-
-        </div>
+        
       </div>
     </div>
   </section>

@@ -49,6 +49,24 @@ class GeminiClient
     translate_batch({ "value" => text }, from: from, to: to)["value"]
   end
 
+  # Переводит ОДНУ строку сразу на несколько языков одним вызовом — для
+  # Tag/Label, где все переводы лежат в одном hash-столбце translations
+  # (в отличие от Page, где у каждого языка отдельная запись, см.
+  # translate_batch выше).
+  #
+  # to — массив кодов языков. Возвращает { "en" => "...", "de" => "..." }.
+  def translate_to_languages(text, from:, to:)
+    return {} if text.nil? || text.strip.empty? || to.empty?
+
+    schema = {
+      type: "OBJECT",
+      properties: to.to_h { |lang| [lang, { type: "STRING" }] },
+      required: to
+    }
+
+    JSON.parse(generate(build_translate_to_languages_prompt(text, from: from, to: to), response_schema: schema))
+  end
+
   # instructions — сайт/тип-специфичный текст (см. project/prompts/*.txt),
   # что именно извлекать. Формат ответа (markers/details) — общий для всех
   # промптов, задаётся здесь, чтобы вызывающий код не зависел от того, как
@@ -142,6 +160,17 @@ class GeminiClient
 
       JSON:
       #{JSON.generate(texts)}
+    PROMPT
+  end
+
+  def build_translate_to_languages_prompt(text, from:, to:)
+    <<~PROMPT
+      Переведи текст ниже с языка "#{from}" на каждый из языков: #{to.join(', ')}.
+      Верни JSON, где ключ — код языка, значение — перевод текста на этот язык.
+      Без пояснений, без markdown-обёртки, без комментариев — только сам JSON.
+
+      Текст:
+      #{text}
     PROMPT
   end
 

@@ -73,6 +73,9 @@
         </form>
         <a href="/admin/labels/<%= group.id %>" class="button is-small">show</a>
         <a href="/admin/labels/<%= group.id %>/edit" class="button is-small">edit</a>
+        <button type="button" class="button is-small is-info is-light" data-taggable-translate-all
+                data-translate-url="/admin/labels/<%= group.id %>/translate_missing_languages"
+                title="Перевести name на все языки, где перевода ещё нет">✨</button>
         <% if !group.active? && !group.fixed? %>
           <form method="POST" action="/admin/labels/<%= group.id %>" style="display:inline;" onsubmit="return confirm('Delete this label?')">
             <input type="hidden" name="_method" value="DELETE">
@@ -95,6 +98,9 @@
         <td>
           <a href="/admin/labels/<%= label.id %>" class="button is-small">show</a>
           <a href="/admin/labels/<%= label.id %>/edit" class="button is-small">edit</a>
+          <button type="button" class="button is-small is-info is-light" data-taggable-translate-all
+                  data-translate-url="/admin/labels/<%= label.id %>/translate_missing_languages"
+                  title="Перевести name на все языки, где перевода ещё нет">✨</button>
           <% if !label.active? && !label.fixed? %>
             <form method="POST" action="/admin/labels/<%= label.id %>" style="display:inline;" onsubmit="return confirm('Delete this label?')">
               <input type="hidden" name="_method" value="DELETE">
@@ -114,3 +120,5 @@
 </div>
 
 </div>
+
+<script src="/javascripts/taggable-translate.js"></script>

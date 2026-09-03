@@ -64,6 +64,26 @@ class LabelsController < App
       end
     end
 
+    # Переводит name лейбла на все языки, для которых в translations ещё
+    # нет значения — см. аналогичный /tags/:id/translate_missing_languages.
+    post '/labels/:id/translate_missing_languages' do
+      label = Label.find(params[:id])
+      content_type :json
+
+      missing_langs = settings.languages.keys.map(&:to_s) - [settings.home_language.to_s]
+      missing_langs = missing_langs.select { |lang| label.translations&.dig(lang).blank? }
+
+      halt 200, [].to_json if missing_langs.empty?
+
+      client = GeminiClient.new(api_key: settings.gemini_api_key)
+      translated = client.translate_to_languages(label.name, from: settings.home_language, to: missing_langs)
+      label.update!(translations: (label.translations || {}).merge(translated))
+
+      missing_langs.map { |lang| { lang: lang, ok: translated[lang].present?, value: translated[lang] } }.to_json
+    rescue StandardError => e
+      halt 422, [{ lang: nil, ok: false, error: e.message }].to_json
+    end
+
     # Пересортировать детей группы по name — как строки ("string") или
     # как числа ("float", для лейблов вроде "0.01", "0.5", "3", "44").
     post '/labels/:id/sort_children' do

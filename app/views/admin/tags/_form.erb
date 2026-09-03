@@ -46,6 +46,11 @@
   </div>
 
   <div class="column is-9">
+    <% if @tag.persisted? %>
+      <button type="button" class="button is-small is-info is-light mb-2"
+        data-taggable-translate-all data-translate-url="/admin/tags/<%= @tag.id %>/translate_missing_languages"
+        title="Перевести name через Gemini на все языки, где перевода ещё нет — уже заполненные не трогает">✨ перевести на все отсутствующие</button>
+    <% end %>
     <% settings.languages.each do |lang_code, lang_info| %>
       <% lang_code = lang_code.to_s %>
       <div class="field has-addons mb-1">
@@ -53,7 +58,7 @@
           <span class="button is-small is-static"><%= lang_info[:icon] %> <%= lang_code.upcase %></span>
         </div>
         <div class="control is-expanded">
-          <input type="text" class="input is-small" name="tag[translations][<%= lang_code %>]" value="<%= fast_escape_html(@tag.translations&.dig(lang_code)) %>" placeholder="<%= fast_escape_html(@tag.name) %>">
+          <input type="text" class="input is-small" data-translation-lang="<%= lang_code %>" name="tag[translations][<%= lang_code %>]" value="<%= fast_escape_html(@tag.translations&.dig(lang_code)) %>" placeholder="<%= fast_escape_html(@tag.name) %>">
         </div>
       </div>
     <% end %>

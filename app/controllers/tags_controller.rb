@@ -97,6 +97,30 @@ class TagsController < App
       
     end
 
+    # Переводит name тега на все языки, для которых в translations ещё
+    # нет значения (уже заполненные вручную — не трогает), одним вызовом
+    # Gemini на все недостающие языки сразу (см.
+    # GeminiClient#translate_to_languages — тот же приём, что у кнопки
+    # "перевести на все" у Page, но здесь один record = один hash со
+    # всеми языками, а не отдельная запись на каждый).
+    post '/tags/:id/translate_missing_languages' do
+      tag = Tag.find(params[:id])
+      content_type :json
+
+      missing_langs = settings.languages.keys.map(&:to_s) - [settings.home_language.to_s]
+      missing_langs = missing_langs.select { |lang| tag.translations&.dig(lang).blank? }
+
+      halt 200, [].to_json if missing_langs.empty?
+
+      client = GeminiClient.new(api_key: settings.gemini_api_key)
+      translated = client.translate_to_languages(tag.name, from: settings.home_language, to: missing_langs)
+      tag.update!(translations: (tag.translations || {}).merge(translated))
+
+      missing_langs.map { |lang| { lang: lang, ok: translated[lang].present?, value: translated[lang] } }.to_json
+    rescue StandardError => e
+      halt 422, [{ lang: nil, ok: false, error: e.message }].to_json
+    end
+
     # Пересортировать детей группы по name — как строки ("string") или
     # как числа ("float", для тегов вроде "0.01", "0.5", "3", "44").
     post '/tags/:id/sort_children' do

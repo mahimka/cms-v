@@ -135,6 +135,9 @@
         </form>
         <a href="/admin/tags/<%= group.id %>" class="button is-small" target='_blank'>tag</a>
         <a href="/admin/tags/<%= group.id %>/edit" class="button is-small" target='_blank'>edit</a>
+        <button type="button" class="button is-small is-info is-light" data-taggable-translate-all
+                data-translate-url="/admin/tags/<%= group.id %>/translate_missing_languages"
+                title="Перевести name на все языки, где перевода ещё нет">✨</button>
         <form method="POST" action="/admin/tags/<%= group.id %>/export" style="display:inline;">
           <button type="submit" class="button is-small is-info" title="группа + дети, все колонки, в /<%= group.name.parameterize %>.json">export</button>
         </form>
@@ -154,6 +157,9 @@
         <td>
           <a href="/admin/tags/<%= tag.id %>" class="button is-small" target='_blank'>tag</a>
           <a href="/admin/tags/<%= tag.id %>/edit" class="button is-small" target='_blank'>edit</a>
+          <button type="button" class="button is-small is-info is-light" data-taggable-translate-all
+                  data-translate-url="/admin/tags/<%= tag.id %>/translate_missing_languages"
+                  title="Перевести name на все языки, где перевода ещё нет">✨</button>
           <% unless tag.fixed? %>
             <button type="button" class="button is-small tag-merge-toggle"
                     data-tag-id="<%= tag.id %>" data-tag-name="<%= tag.name %>"
@@ -177,4 +183,5 @@
 
 <script src="/javascripts/tag-group-toggle.js"></script>
 <script src="/javascripts/tag-merge.js"></script>
+<script src="/javascripts/taggable-translate.js"></script>
 
