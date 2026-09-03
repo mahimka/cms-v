@@ -312,6 +312,16 @@ module MiscHelpers
     "+386 #{local[0]} #{local[1..3]} #{local[4..]}"
   end
 
+  # Слияние translations при импорте тегов/labels между проектами (см.
+  # /tags/import, /labels/import): заполняет только языки, которых ещё
+  # нет или которые пустые в existing — уже заполненные вручную/через
+  # Gemini переводы не трогает, даже если импортируемый файл принёс для
+  # них пустое значение (например, в проекте-источнике этот язык ещё не
+  # заведён).
+  def merge_translations(existing, incoming)
+    (existing || {}).merge(incoming || {}) { |_, existing_value, incoming_value| existing_value.presence || incoming_value }
+  end
+
   # Безопасная вставка строки ВНУТРЬ уже написанных вручную JSON-LD литералов
   # ("key": "<%= json_escape(text) %>") — экранирует кавычки/бэкслэши/
   # переносы строк и т.п. Без этого перенос строки в @page.meta_description

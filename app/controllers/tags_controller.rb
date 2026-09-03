@@ -1,9 +1,11 @@
 class TagsController < App
 
-  # Импортируемые поля тега/группы — без id, created_at, updated_at,
-  # translations (см. /tags/import) и без parent_id (он всегда
-  # пересчитывается программно, не берётся из файла).
-  TAG_IMPORT_FIELDS = %w[active short short_2 admin_notes fixed position].freeze
+  # Импортируемые поля тега/группы — без id, created_at, updated_at
+  # и без parent_id (он всегда пересчитывается программно, не берётся
+  # из файла). translations/icon_svg — как у LABEL_IMPORT_FIELDS
+  # (см. labels_controller.rb), чтобы экспорт/импорт между проектами
+  # переносил переводы и иконки, а не только базовые поля.
+  TAG_IMPORT_FIELDS = %w[active short short_2 admin_notes fixed position translations icon_svg].freeze
 
   namespace '/admin' do
 
@@ -200,11 +202,14 @@ class TagsController < App
     end
 
     # Импорт группы + детей из файла, выгруженного /tags/:id/export.
-    # id/created_at/updated_at/translations сознательно не переносятся —
-    # только TAG_IMPORT_FIELDS; поиск группы/тега — по name (уникален),
-    # так что повторный импорт того же файла обновляет, а не дублирует.
+    # id/created_at/updated_at сознательно не переносятся — только
+    # TAG_IMPORT_FIELDS; поиск группы/тега — по name (уникален), так что
+    # повторный импорт того же файла обновляет, а не дублирует.
     # parent_id детей всегда пересчитывается на актуальный id найденной/
     # созданной группы, а не на id из файла (он может уже не существовать).
+    # translations — не replace, а merge_translations: пустой/частичный
+    # набор языков в файле-источнике не затирает то, что уже переведено
+    # на этой стороне (см. misc_helpers.rb#merge_translations).
     post '/tags/import' do
       upload = params[:import_file]
       halt 422, "Файл не выбран" unless upload.is_a?(Hash) && upload[:tempfile]
@@ -213,13 +218,15 @@ class TagsController < App
 
       group = Tag.find_or_initialize_by(name: data.fetch('name'))
       group.parent_id = nil
-      group.assign_attributes(data.slice(*TAG_IMPORT_FIELDS))
+      group.assign_attributes(data.slice(*(TAG_IMPORT_FIELDS - %w[translations])))
+      group.translations = merge_translations(group.translations, data['translations'])
       group.save!
 
       imported = Array(data['children']).map do |child_data|
         child = Tag.find_or_initialize_by(name: child_data.fetch('name'))
         child.parent_id = group.id
-        child.assign_attributes(child_data.slice(*TAG_IMPORT_FIELDS))
+        child.assign_attributes(child_data.slice(*(TAG_IMPORT_FIELDS - %w[translations])))
+        child.translations = merge_translations(child.translations, child_data['translations'])
         child.save!
         child
       end

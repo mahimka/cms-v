@@ -122,6 +122,9 @@ class LabelsController < App
     # Иерархия (ancestry) восстанавливается через parent= по имени родителя,
     # а не по старому id — обрабатываем родителей раньше детей (сортировка
     # по фактической глубине ancestry в файле).
+    # translations — не replace, а merge_translations: пустой/частичный
+    # набор языков в файле-источнике не затирает то, что уже переведено
+    # на этой стороне (см. misc_helpers.rb#merge_translations).
     post '/labels/import' do
       upload = params[:import_file]
       halt 422, "Файл не выбран" unless upload.is_a?(Hash) && upload[:tempfile]
@@ -137,7 +140,8 @@ class LabelsController < App
 
         label = Label.find_or_initialize_by(name: r.fetch('name'))
         label.parent = new_parent
-        label.assign_attributes(r.slice(*LABEL_IMPORT_FIELDS))
+        label.assign_attributes(r.slice(*(LABEL_IMPORT_FIELDS - %w[translations])))
+        label.translations = merge_translations(label.translations, r['translations'])
         label.save!
 
         old_id_to_new[r['id']] = label
