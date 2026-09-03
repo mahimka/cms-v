@@ -117,8 +117,12 @@ class TagsController < App
 
       halt 200, [].to_json if missing_langs.empty?
 
+      # Если translations['en'] уже заполнен вручную человеческим текстом —
+      # переводим его, а не сырое name (см. аналогичный /labels/:id/...).
+      source_text = tag.translations&.dig('en').presence || tag.name
+
       client = GeminiClient.new(api_key: settings.gemini_api_key)
-      translated = client.translate_to_languages(tag.name, from: 'en', to: missing_langs)
+      translated = client.translate_to_languages(source_text, from: 'en', to: missing_langs)
       tag.update!(translations: (tag.translations || {}).merge(translated))
 
       missing_langs.map { |lang| { lang: lang, ok: translated[lang].present?, value: translated[lang] } }.to_json

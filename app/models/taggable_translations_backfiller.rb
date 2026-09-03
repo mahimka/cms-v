@@ -40,7 +40,11 @@ class TaggableTranslationsBackfiller
   private
 
   def translate_batch(records, lang)
-    texts = records.each_with_object({}) { |record, h| h[record.id.to_s] = record.name }
+    # Если translations['en'] уже заполнен вручную человеческим текстом —
+    # переводим его, а не сырой (иногда technical snake_case) name.
+    texts = records.each_with_object({}) do |record, h|
+      h[record.id.to_s] = record.translations&.dig('en').presence || record.name
+    end
     translated = @gemini.translate_batch(texts, from: SOURCE_LANGUAGE, to: lang)
 
     records.each_with_object({}) do |record, result|

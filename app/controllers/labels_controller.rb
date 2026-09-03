@@ -80,8 +80,13 @@ class LabelsController < App
 
       halt 200, [].to_json if missing_langs.empty?
 
+      # name у части labels — технический snake_case-ключ ("_whats_included"),
+      # а не человеческий текст — если для него уже есть human-написанный
+      # translations['en'] ("What's included"), переводим его, а не сырой key.
+      source_text = label.translations&.dig('en').presence || label.name
+
       client = GeminiClient.new(api_key: settings.gemini_api_key)
-      translated = client.translate_to_languages(label.name, from: 'en', to: missing_langs)
+      translated = client.translate_to_languages(source_text, from: 'en', to: missing_langs)
       label.update!(translations: (label.translations || {}).merge(translated))
 
       missing_langs.map { |lang| { lang: lang, ok: translated[lang].present?, value: translated[lang] } }.to_json
