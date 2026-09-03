@@ -149,9 +149,17 @@
         <td></td>
         <td><%= checkbox_in_place(tag, :active) %></td>
         <td><%= checkbox_in_place(tag, :fixed) %></td>
-        <td width=15><%= input_in_place(tag, :position) %></td>
+        <td width=15><%= tag.position %><%#= input_in_place(tag, :position) %></td>
         <td><span class="icon"><%= tag.icon_svg %></span></td>
-        <td class="pl-5"><%= tag.name %></td>
+        <td class="">
+
+          <% unless tag.fixed %>
+            <%= input_in_place(tag, :name) %><%#= tag.name %>
+          <% else %>
+            <%= tag.name %>
+          <% end %>  
+
+        </td>
         <td><%= @tagging_counts_by_tag[tag.id] || 0 %></td>
         <td><%= input_in_place(tag, :admin_notes) %></td>
         <td>
