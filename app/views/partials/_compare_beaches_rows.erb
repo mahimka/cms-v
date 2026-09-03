@@ -7,10 +7,18 @@
   #
   # filter — тот же формат, что у ListQuery/TagExpression (object + tags,
   # AND/OR/NOT с вложенными группами, "not" бинарный — левое минус правое).
+  #
+  # entities: — опционально, готовый список объектов (например @objects
+  # той же страницы) вместо filter — тогда ListQuery не гоняется второй
+  # раз тем же условием, что уже отфильтровало @page.list_objects.
 
-  cmp_filter = (defined?(filter) && filter.is_a?(Hash)) ? filter : {}
-
-  cmp_entities = cmp_filter["object"].present? ? ListQuery.new(cmp_filter).objects.to_a : []
+  cmp_entities =
+    if defined?(entities) && entities
+      entities.to_a
+    else
+      cmp_filter = (defined?(filter) && filter.is_a?(Hash)) ? filter : {}
+      cmp_filter["object"].present? ? ListQuery.new(cmp_filter).objects.to_a : []
+    end
 
   cmp_uid = "cmp-beaches-#{SecureRandom.hex(4)}"
 

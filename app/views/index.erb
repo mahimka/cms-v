@@ -35,6 +35,17 @@
         <% end %>
 
       <% if @page.hero_3.blank? %>
+
+        <div class="buttons mt-5">
+        <%= link_on_page '_comparison' %>
+        <%= link_on_page '_list' %>
+        <%= link_on_page '_lodging' %>
+        <%= link_on_page '_map' %>
+        </div>
+
+        <%= partial('_share_buttons') %>
+
+      
       <% else %>
         <div class="buttons">
           <%= parse_erb_and_markdown @page.hero_3 %>
@@ -52,16 +63,50 @@
 <% content_for :sidebar do %>
 <% end %>
 
-<%= parse_erb_and_markdown(@page.block_1, options = {}) unless @page.block_1.blank? %>
+<% if @page.block_1.blank? && @objects %>
+  <div id="_comparison"></div>
+
+  <% if @objects.first&.schema&.name == 'Beach' %>
+    <h2 class="title is-4"><%= label_by_lang('_beaches').capitalize %> : <%= label_by_lang('_comparison') %></h2>
+    <%= partial '_compare_beaches_rows', entities: @objects %>
+  <% elsif @objects.first&.schema&.name == 'ParkingFacility' %>
+    <h2 class="title is-4"><%= label_by_lang('_parkings').capitalize %> : <%= label_by_lang('_comparison') %></h2>
+    <%= partial '_compare_parkings_rows', entities: @objects %>
+  <% end %>
+
+<% else %>
+  <%= parse_erb_and_markdown(@page.block_1, options = {}) %>
+<% end %>
 
 <%= parse_erb_and_markdown @page.body %>
 
-<%= parse_erb_and_markdown(@page.block_2)%>
+<%#= parse_erb_and_markdown(@page.block_2)%>
+
+<% if @page.block_2.blank? && @objects %>
+  <div id="_comparison"></div>
+
+  <% if @objects.first&.schema&.name == 'Beach' %>
+    <h2 id="_list" class="title is-4"><%= label_by_lang('_beaches').capitalize %> : <%= label_by_lang('_all') %></h2>
+  <% elsif @objects.first&.schema&.name == 'ParkingFacility' %>
+    <h2 id="_list" class="title is-4"><%= label_by_lang('_parkings').capitalize %> : <%= label_by_lang('_all') %></h2>
+  <% end %>
+
+  <div class="columns is-multiline">
+    <% @objects.each do |object| %>
+      <div class="column is-4">
+        <%= partial '_list_item_default', object: object %>
+      </div>
+    <% end %>
+  </div>
+
+<% else %>
+  <%= parse_erb_and_markdown(@page.block_2, options = {}) %>
+<% end %>
 
 
 <% if @page.block_3.blank? && @objects %>
   <div id="_lodging"></div>
-  <h2 class="title is-4"><%= label_by_lang('_map') %> - <%= label_by_lang('_lodging') %></h2>
+  <h2 class="title is-4"><%= label_by_lang('_map').capitalize %> : <%= label_by_lang('_lodging') %></h2>
   <%= partial '_map_stay22' %>
 <% else %>
   <%= parse_erb_and_markdown(@page.block_3, options = {}) %>
@@ -69,7 +114,7 @@
 
 <% if @page.block_4.blank? && @objects %>
   <div id="_map"></div>
-  <h2 class="title is-4"><%= label_by_lang('_map') %> - <%= @page.h1 %></h2>
+  <h2 class="title is-4"><%= label_by_lang('_map').capitalize %> : <%= @page.h1 %></h2>
   <%= partial '_google_map_many_points' %>
 <% else %>
   <%= parse_erb_and_markdown(@page.block_4, options = {}) %>

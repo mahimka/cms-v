@@ -28,6 +28,40 @@
               <% end %>
             </div>
 
+
+          <div class="field has-addons mt-5 mb-3">
+            <!-- Google Maps (Primary Action) -->
+            <p class="control is-expanded">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=<%= @page.pageable.latitude %>,<%= @page.pageable.longitude %>"
+                 target="_blank" 
+                 rel="noopener" 
+                 class="button is-primary is-medium is-fullwidth has-text-weight-bold">
+                <!-- MapPin -->
+                <span class="icon mr-1">
+                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <span>Google Maps</span>
+              </a>
+            </p>
+
+            <!-- Waze -->
+            <p class="control">
+              <a href="https://waze.com/ul?ll=<%= @page.pageable.latitude %>,<%= @page.pageable.longitude %>&navigate=yes" 
+                 target="_blank" 
+                 rel="noopener" 
+                 class="button is-info is-medium" 
+                 title="Odpri v Waze">
+                <!-- Navigation -->
+                <span class="icon mr-1">
+                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                </span>
+                <span>Waze</span>
+              </a>
+            </p>
+          </div>
+
+
+
             <div class="buttons mt-5">
               <%= link_on_page '_faq' %>
               <%= link_on_page '_gallery' %>
@@ -51,7 +85,7 @@
 
 <% content_for :sidebar do %>
 
-  <div class="mt-0 mb-5 pt-0 pl-0 pr-0">
+  <div class="mt-0 mb-5 pt-0 pl-0 pr-0" id='_what_is_near'>
     <h2 class="title is-5" id='near'><%= label_by_lang('_what_is_near').capitalize %></h2>
 
     <h3 class="title is-6 mb-0"><%= label_by_lang('_parkings').capitalize %></h3>
@@ -81,12 +115,12 @@
 <%= parse_erb_and_markdown @page.body if @page.body %>
   <%= partial '_map_stay22' %>
 
-  <h3 class="title is-4" id='faq'>
+  <h3 class="title is-4" id='_faq'>
     <%= label_by_lang('_faq').capitalize %>
   </h3>
   <%= parse_erb_and_markdown(@page.faq, options = {}) if @page.faq %>
 
-  <h3 class="title is-4" id='gallery'>
+  <h3 class="title is-4" id='_gallery'>
     <%= label_by_lang('_gallery').capitalize %>
   </h3>
 

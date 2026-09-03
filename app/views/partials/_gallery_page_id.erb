@@ -8,7 +8,7 @@
 <%# page_id = @page.source_page.id %>
 
 <div class="box">
-  <div class="grid pswp-gallery mb-5 " id="my-gallery">
+  <div class="grid pswp-gallery mb-5 " id="_gallery">
 
     <% Picture.where(imageable_id: @page.source_page.pageable_id, imageable_type: @page.source_page.pageable_type).published.each do |picture| %>
         <div class="cell">
