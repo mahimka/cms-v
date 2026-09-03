@@ -27,8 +27,7 @@ namespace :translate do
   task :taggables do
     backfiller = TaggableTranslationsBackfiller.new(
       gemini_client: GeminiClient.new(api_key: App.settings.gemini_api_key),
-      languages: App.settings.languages.keys,
-      home_language: App.settings.home_language
+      languages: App.settings.languages.keys
     )
 
     [Tag, Label].each do |klass|

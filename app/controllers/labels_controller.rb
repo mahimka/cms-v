@@ -66,17 +66,22 @@ class LabelsController < App
 
     # Переводит name лейбла на все языки, для которых в translations ещё
     # нет значения — см. аналогичный /tags/:id/translate_missing_languages.
+    #
+    # source language — "en", не settings.home_language ("sl")! name у
+    # Tag/Label заведён по-английски (в отличие от Page, где sl — основной
+    # язык сайта) — исключать sl из целей было багом: словенский перевод
+    # никогда не генерировался (см. отчёт по /labels/1082).
     post '/labels/:id/translate_missing_languages' do
       label = Label.find(params[:id])
       content_type :json
 
-      missing_langs = settings.languages.keys.map(&:to_s) - [settings.home_language.to_s]
+      missing_langs = settings.languages.keys.map(&:to_s) - ['en']
       missing_langs = missing_langs.select { |lang| label.translations&.dig(lang).blank? }
 
       halt 200, [].to_json if missing_langs.empty?
 
       client = GeminiClient.new(api_key: settings.gemini_api_key)
-      translated = client.translate_to_languages(label.name, from: settings.home_language, to: missing_langs)
+      translated = client.translate_to_languages(label.name, from: 'en', to: missing_langs)
       label.update!(translations: (label.translations || {}).merge(translated))
 
       missing_langs.map { |lang| { lang: lang, ok: translated[lang].present?, value: translated[lang] } }.to_json

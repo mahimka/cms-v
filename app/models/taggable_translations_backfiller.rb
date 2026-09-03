@@ -6,13 +6,18 @@
 #
 # Никогда не перезаписывает уже заполненные вручную translations[lang] —
 # только доливает то, чего не хватает.
+#
+# source language — всегда "en": name у Tag/Label заведён по-английски
+# (в отличие от Page, где settings.home_language — основной язык сайта).
+# Раньше сюда передавался home_language и он же исключался из целей —
+# из-за этого sl-перевод никогда не генерировался (см. /admin/labels/1082).
 class TaggableTranslationsBackfiller
   BATCH_SIZE = 25
+  SOURCE_LANGUAGE = 'en'.freeze
 
-  def initialize(gemini_client:, languages:, home_language:)
+  def initialize(gemini_client:, languages:)
     @gemini = gemini_client
-    @languages = languages.map(&:to_s) - [home_language.to_s]
-    @home_language = home_language.to_s
+    @languages = languages.map(&:to_s) - [SOURCE_LANGUAGE]
   end
 
   # klass — Tag или Label (любая модель со столбцом translations и полем
@@ -36,7 +41,7 @@ class TaggableTranslationsBackfiller
 
   def translate_batch(records, lang)
     texts = records.each_with_object({}) { |record, h| h[record.id.to_s] = record.name }
-    translated = @gemini.translate_batch(texts, from: @home_language, to: lang)
+    translated = @gemini.translate_batch(texts, from: SOURCE_LANGUAGE, to: lang)
 
     records.each_with_object({}) do |record, result|
       value = translated[record.id.to_s]
