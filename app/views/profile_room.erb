@@ -182,11 +182,12 @@
 
           <div class="buttons">
             <%= @page.hero_3 %>
-            <a href="#3d" class="button is-small"><%= label_by_lang('_3d') %></a>
-            <a href="#calendar" class="button is-small"><%= label_by_lang('_calendar') %></a>
-            <a href="#faq" class="button is-small"><%= label_by_lang('_faq') %></a>
-            <a href="#gallery" class="button  is-small"><%= label_by_lang('_gallery') %></a>
-            <!--<a href="#description" class="button is-small"><%= label_by_lang('_description') %></a>-->
+
+            <%= link_on_page('_3d') %>
+            <%= link_on_page('_calendar') %>
+            <%= link_on_page('_gallery') %>
+            <%= link_on_page('_faq') %>
+
           </div>
 
           <%= partial('_share_buttons') %>
