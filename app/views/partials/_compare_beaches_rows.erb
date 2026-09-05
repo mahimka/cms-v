@@ -22,8 +22,8 @@
 
   cmp_uid = "cmp-beaches-#{SecureRandom.hex(4)}"
 
-  cmp_beach_type_tags = ["concrete platform", "pebbles", "rocky", "sand", "shell"].freeze
-  cmp_amenities_tags  = ["public shower", "public wc"].freeze
+  cmp_beach_type_tags = ["Concrete platform", "Pebbles", "Rocky", "Sand", "Shell"].freeze
+  cmp_amenities_tags  = ["Public shower", "Public wc"].freeze
 
   cmp_rows = cmp_entities.map do |entity|
     tag_names = entity.tags.pluck(:name)
@@ -33,9 +33,9 @@
       name: page&.anchor_1,
       url: page&.uri,
       beach_type: cmp_beach_type_tags.select { |t| tag_names.include?(t) },
-      wild: tag_names.include?("wild"),
+      wild: tag_names.include?("Wild"),
       barrier_free: tag_names.include?("wheelchairAccessible"),
-      rent_a_chair: tag_names.include?("rent a chair"),
+      rent_a_chair: tag_names.include?("Rent a chair"),
       amenities: cmp_amenities_tags.select { |t| tag_names.include?(t) }
     }
   end
