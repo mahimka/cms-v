@@ -18,7 +18,10 @@ config/certs/*
 Gemfile.lock
 main.db
 *.db
+*.db-wal
+*.db-shm
 *.sqlite
+db/*.corrupt-*
 
 log/*
 !log/.gitkeep 
