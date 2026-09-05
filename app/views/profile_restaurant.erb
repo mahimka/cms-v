@@ -86,7 +86,7 @@
 <table class="table">
   <% unless @page.pageable.tags_of_group('cuisines').active.blank? %>
     <tr>
-      <td nowrap><%= label_by_lang('_cuisines').capitalize %></td>
+      <td nowrap><%= label_by_lang('_cuisine').capitalize %></td>
       <td><%= @page.pageable.tags_of_group('cuisines').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
     </tr>
   <% end %>
