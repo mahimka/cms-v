@@ -87,70 +87,70 @@
   <% unless @page.pageable.tags_of_group('cuisines').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_cuisine').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('cuisines').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('cuisines').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
   <% unless @page.pageable.tags_of_group('drinks').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_drinks').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('drinks').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('drinks').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
   <% unless @page.pageable.tags_of_group('good_for').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_good_for').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('good_for').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('good_for').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
   <% unless @page.pageable.tags_of_group('meal_type').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_meal_type').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('meal_type').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('meal_type').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
   <% unless @page.pageable.tags_of_group('payment_options').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_pay_with').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('payment_options').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('payment_options').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
   <% unless @page.pageable.tags_of_group('price_range').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_how_expensive').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('price_range').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('price_range').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
   <% unless @page.pageable.tags_of_group('restrictions').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_restrictions').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('restrictions').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('restrictions').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
   <% unless @page.pageable.tags_of_group('restaurant_features').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_amenities').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('restaurant_features').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('restaurant_features').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
   <% unless @page.pageable.tags_of_group('_dietary_options').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_special_diet').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('special_diet').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('special_diet').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
   <% unless @page.pageable.tags_of_group('dishes').active.blank? %>
     <tr>
       <td nowrap><%= label_by_lang('_dishes').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('dishes').active.map{|tag| "<span class='tag ml-1'>#{tag.name.downcase}</span>"}.join %></td>
+      <td><%= @page.pageable.tags_of_group('dishes').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>
 
