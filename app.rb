@@ -366,7 +366,23 @@ class App < Sinatra::Base
      </a>
     "
 
+  end
 
+  def count_profile_pages(parent_page_uri, view='any') 
+
+    return '0' unless parent_page_uri
+
+    parent_page = Page.where(uri: parent_page_uri, lang: @page.lang).first
+
+    return '0' unless parent_page
+
+    if view == 'any'
+      children_pages = parent_page.children.published
+    else 
+      children_pages = parent_page.children.published.where(view: view)
+    end
+
+    children_pages.length 
 
   end
 

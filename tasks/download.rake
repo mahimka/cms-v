@@ -19,10 +19,17 @@ namespace :download do
 
   task :db do
     desc "Downloads main.db from remote/db and unzips to local/db"
-    
+
     puts ''
-    puts "Zipping on remote ...............".white.on_green
-    @commands << "zip #{@app_name}/db/main_db.zip #{@app_name}/db/main.db"
+    puts "Snapshotting on remote (rake db:snapshot) ...............".white.on_green
+    # zip живого main.db на бегу (сервер продолжает в него писать, а в
+    # WAL-режиме свежие данные вообще лежат отдельно в main.db-wal) уже
+    # ловил гонку и скачивал битый файл (database disk image is
+    # malformed). db:snapshot делает атомарный VACUUM INTO — безопасно
+    # при работающем сервере, см. tasks/db_snapshot.rake.
+    @commands << "cd #{@app_name} && bundle exec rake db:snapshot"
+    @commands << "zip #{@app_name}/db/main_db.zip #{@app_name}/db/main_snapshot.db -j"
+    @commands << "rm -f #{@app_name}/db/main_snapshot.db"
     run_ssh_commands @commands
 
     puts "Downloading ...........".white.on_green

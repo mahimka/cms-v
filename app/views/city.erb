@@ -1,0 +1,128 @@
+<% content_for :head_extra do %>
+<% end %>
+
+<% content_for :hero do %>
+
+  <section class="hero is-medium" style="position: relative; overflow: hidden;">
+    <%= partial '_carousel' %>
+    <%= partial '_carousel_overlay' %>
+    <%#= partial '_carousel_div_hero' %>
+
+    <!-- Контент Hero поверх карусели -->
+    <div class="hero-body" style="position: relative; z-index: 2;">
+      <div class="container">
+
+        <h1 class="title is-2 has-text-white mb-1">
+          <%= @page.h1 %> 
+        </h1>
+
+        <% unless @page.subtitle.blank? %>
+          <p class='subtitle has-text-white mt-0' style="opacity: 0.82; max-width: 640px; ">
+            <%= @page.subtitle %>
+          </p>
+        <% end %>
+
+        <% unless @page.hero_1.blank? %>
+          <p class='is-6 subtitle has-text-white mt-0' style="opacity: 0.82; max-width: 640px; ">
+            <%= @page.hero_1 %>
+          </p>
+        <% end %>
+
+        <% unless @page.hero_2.blank? %>
+          <p class='is-6 subtitle has-text-white mt-0' style="opacity: 0.82; max-width: 640px; ">
+            <%= @page.hero_2 %>
+          </p>
+        <% end %>
+
+        <% if @page.hero_3.blank? %>
+
+          <div class="buttons">
+          <%= link_on_page '_beaches' %>
+          <%= link_on_page '_parkings' %>
+          <%= link_on_page '_restaurants' %>
+          <%= link_on_page '_accommodations' %>
+          <%= link_on_page '_faq' %>
+          </div>
+
+        <% else %>
+          <div class="buttons">
+            <%= parse_erb_and_markdown @page.hero_3 %>
+          </div>
+          <%= partial('_share_buttons') %>
+        <% end %>
+
+      </div>
+    </div>
+
+  </section>
+
+<% end %> 
+
+<% content_for :sidebar do %>
+  <%#= parse_erb_and_markdown @page.sidebar_1 %>
+<% end %> 
+
+<div class="content">
+
+<div class="columns is-multiline">
+
+<% city = @page.uri %>  
+
+<%= partial '_card_manual',
+  link: '#_beaches',
+  title: count_profile_pages("#{city}/beaches", 'profile_beach.erb'),
+  text:  label_by_lang('_beaches'),
+  anchor: ''
+ %>
+
+<%= partial '_card_manual',
+  link: '#_parkings',
+  title: count_profile_pages("#{city}/parkings", 'profile_parking.erb'),
+  text:  label_by_lang('_parkings'),
+  anchor: ''
+ %>
+
+ <%= partial '_card_manual',
+  link: '#_parkings',
+  title: count_profile_pages("#{city}/lodging", 'profile_hotel.erb'),
+  text:  label_by_lang('_hotels'),
+  anchor: ''
+ %>
+
+ <%= partial '_card_manual',
+  link: '#_parkings',
+  title: count_profile_pages("#{city}/lodging", 'profile_apartment.erb'),
+  text:  label_by_lang('_apartments'),
+  anchor: ''
+ %>
+
+</div>
+
+<%= parse_erb_and_markdown @page.body %>
+<%= parse_erb_and_markdown @page.block_1 %>
+<%= parse_erb_and_markdown @page.block_2 %>
+<%= parse_erb_and_markdown @page.block_3 %>
+<%= parse_erb_and_markdown @page.block_4 %>
+
+<% unless @page.faq.blank? %>
+
+  <h3 class="title is-3" id='_faq'>
+    <%= label_by_lang('_faq').capitalize %>
+  </h3>
+  <div class='notification'>
+  <%= parse_erb_and_markdown(@page.faq, options = {}) if @page.faq %>
+  </div>
+
+<% end %>
+
+<% content_for :schema_main_entity do %>
+<% end %>
+
+<% content_for :schema_webpage do %>
+<% end %>
+
+<% content_for :schema_breadcrumb do %>
+<% end %>
+
+<% content_for :schema_faq_page do %>
+<% end %>

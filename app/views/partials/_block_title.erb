@@ -1,0 +1,17 @@
+<% kicker        ||= 'kicker' %>
+<% title         ||= 'title' %>
+<% link          ||= 'link' %>
+
+<div class="columns mt-6">
+
+  <div class="column is-10">
+    <p class="is-size-7 is-uppercase has-text-grey has-text-weight-bold mb-0"><%= kicker %></p>
+    <h2 class="title is-3 mt-0 mb-0"><%= title || 'title' %></h2>
+  </div>
+
+  <div class="column is-2 is-hidden-mobile has-text-right-desktop"><%= link %></div>
+
+</div>
+
+<div class="is-hidden-desktop mb-4"><%= link %></div>
+

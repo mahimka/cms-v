@@ -55,14 +55,56 @@
 
 <div class="content">
 
+<div class="columns is-multiline">
+
+<% city = @page.uri %>  
+
+<%= partial '_card_manual',
+  link: '#_beaches',
+  title: count_profile_pages("#{city}/beaches", 'profile_beach.erb'),
+  text:  label_by_lang('_beaches'),
+  anchor: ''
+ %>
+
+<%= partial '_card_manual',
+  link: '#_parkings',
+  title: count_profile_pages("#{city}/parkings", 'profile_parking.erb'),
+  text:  label_by_lang('_parkings'),
+  anchor: ''
+ %>
+
+ <%= partial '_card_manual',
+  link: '#_parkings',
+  title: count_profile_pages("#{city}/lodging", 'profile_hotel.erb'),
+  text:  label_by_lang('_hotels'),
+  anchor: ''
+ %>
+
+ <%= partial '_card_manual',
+  link: '#_parkings',
+  title: count_profile_pages("#{city}/lodging", 'profile_apartment.erb'),
+  text:  label_by_lang('_apartments'),
+  anchor: ''
+ %>
+
+</div>
+
 <%= parse_erb_and_markdown @page.body %>
 <%= parse_erb_and_markdown @page.block_1 %>
 <%= parse_erb_and_markdown @page.block_2 %>
 <%= parse_erb_and_markdown @page.block_3 %>
 <%= parse_erb_and_markdown @page.block_4 %>
-<%= parse_erb_and_markdown @page.faq %>
 
-</div>
+<% unless @page.faq.blank? %>
+
+  <h3 class="title is-3" id='_faq'>
+    <%= label_by_lang('_faq').capitalize %>
+  </h3>
+  <div class='notification'>
+  <%= parse_erb_and_markdown(@page.faq, options = {}) if @page.faq %>
+  </div>
+
+<% end %>
 
 <% unless @page.faq.blank? %>
   <h2 class="title is-4" id='faq'>
@@ -82,4 +124,3 @@
 
 <% content_for :schema_faq_page do %>
 <% end %>
-

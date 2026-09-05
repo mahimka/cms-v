@@ -234,7 +234,7 @@ module MiscHelpers
           anchor = anchor_text 
         end
 
-        "<a href='#{page.uri}' class='#{css_class} is-underlined' title='#{title}'>#{anchor}</a>"
+        "<a href=\"#{page.uri}\" class=\"#{css_class} is-underlined\" title=\"#{title}\">#{anchor}</a>"
 
       else
         "<!--page is not found-->"
@@ -353,8 +353,8 @@ module MiscHelpers
 
       text = Kramdown::Document.new(content, parse_block_html: false, parse_span_html: true).to_html 
       # text = Kramdown::Document.new(body, {auto_ids: true}).to_html 
-      text = text.gsub("<h2 ", "<h2 class='title is-size-4' " )
-      text = text.gsub("<h3 ", "<h3 class='title is-size-5' " )  
+      # text = text.gsub("<h2 ", "<h2 class='title is-size-4' " )
+      # text = text.gsub("<h3 ", "<h3 class='title is-size-5' " )  
       return text
 
     else
@@ -363,8 +363,8 @@ module MiscHelpers
 
       text = Kramdown::Document.new(body, parse_block_html: true, parse_span_html: true).to_html 
       # text = Kramdown::Document.new(body, {auto_ids: true}).to_html 
-      text = text.gsub("<h2 ", "<h2 class='title is-size-4' " )
-      text = text.gsub("<h3 ", "<h3 class='title is-size-5' " ) 
+      # text = text.gsub("<h2 ", "<h2 class='title is-size-4' " )
+      # text = text.gsub("<h3 ", "<h3 class='title is-size-5' " ) 
       return text
     end
 

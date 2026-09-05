@@ -1,0 +1,11 @@
+<% text_on_card  ||= '' %>
+
+<% @objects = Page.where(uri: cards_uris).map(&:pageable) %>
+
+<div class="columns is-multiline mt-4">
+<% @objects.each do |object| %>
+<div class="column is-4">
+<%= partial '_card', object: object, text_on_card: text_on_card %>
+</div>
+<% end %>
+</div>

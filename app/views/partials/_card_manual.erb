@@ -1,0 +1,45 @@
+<% kicker         ||= '' %>
+<% title          ||= 'title' %>
+<% title_selector ||= 'h3' %>
+<% title_css      ||= 'title is-5 mb-2' %>
+<% text_css       ||= 'is-size-7 has-text-grey-dark' %>
+<% card_css       ||= ''  %>                         
+<% anchor         ||= label_by_lang('_explore') + ' → ' %>
+<% link           ||= "/" %>
+
+<% if link.starts_with? '#' %>
+  <% href = "#{@page.uri}#{link}" %>
+<% else %>
+
+<% href = link[/href="([^"]+)"/, 1] %>
+
+<% end %>
+
+<div class="column">
+
+  <a href="<%= href %>" class="box <%= card_css %>">
+
+    <% unless kicker.blank? %>
+      <p class="is-size-7 is-uppercase has-text-grey has-text-weight-bold mb-0"><%= kicker %></p>
+    <% end %>
+
+    <<%= title_selector %> class="<%= title_css %> mt-0">
+      <%= title %>
+    </<%= title_selector %>>
+
+  <% unless text.blank? %>
+    <p class="<%= text_css %>">
+      <%= text %>
+    </p>
+  <% end %>
+
+  <% unless anchor.blank? %>
+    <p class="is-size-7 has-text-grey-dark mt-2 has-text-weight-bold">
+        <%= anchor %>
+    </p>
+  <% end %>
+
+
+  </a>
+
+</div>
