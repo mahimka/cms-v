@@ -143,23 +143,25 @@
         block_3
       </div>
       <div class="column is-1">
-        <input type="checkbox" name="q[block_4_present]" value='1'  <%#= @q.block_4_present  ? "checked" : "" %>>
+        <input type="checkbox" name="q[block_4_present]" value='1'  <%= @q.block_4_present  ? "checked" : "" %>>
         block_4
       </div>
-
+      <div class="column is-1">
+        <input type="checkbox" name="q[block_5_present]" value='1'  <%= @q.block_5_present  ? "checked" : "" %>>
+        block_5
+      </div>
+      <div class="column is-1">
+        <input type="checkbox" name="q[block_6_present]" value='1'  <%= @q.block_6_present  ? "checked" : "" %>>
+        block_6
+      </div>
 
     </div>
-
-
 
     <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
 
       <div class="column is-1">
         <b>not present:</b>
       </div>
-
-
-
 
       <div class="column is-1">
         <input type="checkbox" name="q[pictures_filename_blank]" value='1'  <%#= @q.pictures_filename_blank  ? "checked" : "" %>>
@@ -186,15 +188,7 @@
         faq
       </div>
 
-
     </div>
-
-
-
-
-
-
-
 
     <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
       <div class="column is-1">
@@ -207,7 +201,6 @@
           is_master_id_null?
         </span>
       </div>
-
 
       <div class="column is-1">
         <input type="checkbox" name="q[ready_true]" value='1'  <%= @q.ready_true  ? "checked" : "" %>>
@@ -259,8 +252,6 @@
       </div>
     </div>
 
-
-
     <hr class="my-2">
 
     <div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
@@ -293,7 +284,6 @@
       <% end %>
 
       </div>
-
 
     </div>
 
@@ -340,7 +330,6 @@
     <%# is_base_page = page.base_page.blank? %>
     <%# is_base_page %>
     <%# disabled = is_base_page ? "" : "pointer-events: none; background-color: lightgrey;" %>
-
     
     <tr>
       <!--<td><%= page.id %></td>-->

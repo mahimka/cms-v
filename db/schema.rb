@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_02_080000) do
+ActiveRecord::Schema.define(version: 2026_09_06_090000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -170,6 +170,8 @@ ActiveRecord::Schema.define(version: 2026_09_02_080000) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "conditions"
+    t.text "block_5"
+    t.text "block_6"
     t.index ["ancestry"], name: "index_pages_on_ancestry"
     t.index ["master_id", "lang"], name: "index_pages_on_master_and_lang", unique: true, where: "master_id IS NOT NULL"
     t.index ["master_id"], name: "index_pages_on_master_id"

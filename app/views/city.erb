@@ -63,6 +63,7 @@
 <% end %> 
 
 <div class="content">
+<%= parse_erb_and_markdown @page.body %>
 
 <div class="columns is-multiline">
 
@@ -98,11 +99,28 @@
 
 </div>
 
-<%= parse_erb_and_markdown @page.body %>
 <%= parse_erb_and_markdown @page.block_1 %>
 <%= parse_erb_and_markdown @page.block_2 %>
 <%= parse_erb_and_markdown @page.block_3 %>
 <%= parse_erb_and_markdown @page.block_4 %>
+<%= parse_erb_and_markdown @page.block_5 %>
+<%= parse_erb_and_markdown @page.block_6 %>
+
+<%= partial '_block_title', kicker: label_by_lang('_slovenska_obala'), title: label_by_lang('_explore_nearby_places'), link: '' %>
+ 
+<div class="columns is-multiline">
+   
+  <% city_pages = Page.where(lang: @page.lang, view: 'city.erb').each do |city_page| %>
+    <%= partial '_card_manual', link: link_to(city_page.uri), title: "#{city_page.anchor_1} → ", text: "#{city_page.subtitle}", anchor: '' %>
+  <% end %> 
+
+  <%#= partial '_card_manual', link: link_to("/piran"), title: 'Piran→ ', text: "", anchor: '' %>
+  <%#= partial '_card_manual', link: link_to("/portoroz"), title: 'Portoroz → ', text: "", anchor: '' %>
+  <%#= partial '_card_manual', link: link_to("/ankaran"), title: 'Ankaran → ', text: "", anchor: '' %> 
+  <%#= partial '_card_manual', link: link_to("/strunjan"), title: 'Strunjan → ', text: "", anchor: '' %>
+</div>
+
+
 
 <% unless @page.faq.blank? %>
 

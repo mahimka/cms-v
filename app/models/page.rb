@@ -30,6 +30,8 @@ class Page < ActiveRecord::Base
     block_2
     block_3
     block_4
+    block_5
+    block_6
   ].freeze
 
   # Эти поля заполняются только у основной страницы.
