@@ -4,7 +4,7 @@
 
 <div class="columns is-multiline mt-4">
 <% @objects.each do |object| %>
-<div class="column is-4">
+<div class="column">
 <%= partial '_card', object: object, text_on_card: text_on_card %>
 </div>
 <% end %>

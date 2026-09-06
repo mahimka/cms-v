@@ -65,11 +65,12 @@
 <div class="content">
 <%= parse_erb_and_markdown @page.body %>
 
-<div class="columns is-multiline">
+<div class="grid">
 
 <% city = @page.uri %>  
 
 <%= partial '_card_manual',
+  div_class: 'cell',
   link: '#_beaches',
   title: count_profile_pages("#{city}/beaches", 'profile_beach.erb'),
   text:  label_by_lang('_beaches'),
@@ -77,6 +78,7 @@
  %>
 
 <%= partial '_card_manual',
+  div_class: 'cell',
   link: '#_parkings',
   title: count_profile_pages("#{city}/parkings", 'profile_parking.erb'),
   text:  label_by_lang('_parkings'),
@@ -84,6 +86,7 @@
  %>
 
  <%= partial '_card_manual',
+  div_class: 'cell',
   link: '#_parkings',
   title: count_profile_pages("#{city}/lodging", 'profile_hotel.erb'),
   text:  label_by_lang('_hotels'),
@@ -91,6 +94,7 @@
  %>
 
  <%= partial '_card_manual',
+  div_class: 'cell',
   link: '#_parkings',
   title: count_profile_pages("#{city}/lodging", 'profile_apartment.erb'),
   text:  label_by_lang('_apartments'),

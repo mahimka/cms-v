@@ -391,7 +391,7 @@ class App < Sinatra::Base
 
     return label_name unless label
 
-    "#{label.icon_svg} #{label.translation(lang)}"
+    "<span class='icon is-small'>#{label.icon_svg}</span> #{label.translation(lang)}"
   end
 
 
