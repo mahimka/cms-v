@@ -386,4 +386,14 @@ class App < Sinatra::Base
 
   end
 
+  def label_by_lang_with_icon(label_name, lang = @page&.lang)
+    label = Label.find_by(name: label_name)
+
+    return label_name unless label
+
+    "#{label.icon_svg} #{label.translation(lang)}"
+  end
+
+
+
 end

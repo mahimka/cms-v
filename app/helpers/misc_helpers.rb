@@ -184,6 +184,9 @@ module MiscHelpers
       label.translation(lang)
     end
 
+
+
+
     def label_icon(label_name, icon_column = 'icon_svg')
       label = Label.find_by(name: label_name)
 
