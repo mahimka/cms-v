@@ -11,9 +11,7 @@
 <% if link.starts_with? '#' %>
   <% href = "#{@page.uri}#{link}" %>
 <% else %>
-
-<% href = link[/href="([^"]+)"/, 1] %>
-
+  <% href = link[/href="([^"]+)"/, 1] %>
 <% end %>
 
 <div class="<%= div_class %>">

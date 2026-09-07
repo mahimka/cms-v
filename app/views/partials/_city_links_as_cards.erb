@@ -1,0 +1,120 @@
+
+<div class="columns is-multiline">
+
+
+<% link = link_to("#{city_page_uri}/eateries/restaurants") %>
+<% href = link[/href="([^"]+)"/, 1] %>
+<% unless href.nil? || href == '' %>
+	<div class="column">
+	  <a href="<%= href %>" class="box">
+	    <p class="title is-5 mb-2 mt-0">
+           <%= "#{label_by_lang_with_icon('_restaurants')} 
+           <span class='is-size-7 tag has-text-weight-light'>
+             #{count_profile_pages("#{city_page_uri}/eateries", view='profile_restaurant.erb')}
+           </span>" %>
+	    </p>
+        <%#= href %>
+	  </a>
+	</div>
+<% end %>
+
+<% link = link_to("#{city_page_uri}/parkings") %>
+<% href = link[/href="([^"]+)"/, 1] %>
+<% unless href.nil? || href == '' %>
+	<div class="column">
+	  <a href="<%= href %>" class="box">
+	    <p class="title is-5 mb-2 mt-0">
+           <%= "#{label_by_lang_with_icon('_parkings')} 
+           <span class='is-size-7 tag has-text-weight-light'>
+             #{count_profile_pages("#{city_page_uri}/parkings", view='profile_parking.erb')}
+           </span>" %>
+	    </p>
+        <%#= href %>
+	  </a>
+	</div>
+<% end %>
+
+<% link = link_to("#{city_page_uri}/beaches") %>
+<% href = link[/href="([^"]+)"/, 1] %>
+<% unless href.nil? || href == '' %>
+	<div class="column">
+	  <a href="<%= href %>" class="box">
+	    <p class="title is-5 mb-2 mt-0">
+           <%= "#{label_by_lang_with_icon('_beaches')} 
+           <span class='is-size-7 tag has-text-weight-light'>
+             #{count_profile_pages("#{city_page_uri}/beaches", view='profile_beach.erb')}
+           </span>" %>
+	    </p>
+	    <%#= href %>
+	  </a>
+	</div>
+<% end %>
+
+<% link = link_to("#{city_page_uri}/lodging/hotels") %>
+<% href = link[/href="([^"]+)"/, 1] %>
+<% unless href.nil? || href == '' %>
+	<div class="column">
+	  <a href="<%= href %>" class="box">
+	    <p class="title is-5 mb-2 mt-0">
+           <%= "#{label_by_lang_with_icon('_hotels')} 
+           <span class='is-size-7 tag has-text-weight-light'>
+             #{count_profile_pages("#{city_page_uri}/lodging", view='profile_hotel.erb')}
+           </span>" %>
+	    </p>
+	    <%#= href %>
+	  </a>
+	</div>
+<% end %>
+
+<% link = link_to("#{city_page_uri}/accommodations/hotels") %>
+<% href = link[/href="([^"]+)"/, 1] %>
+<% unless href.nil? || href == '' %>
+	<div class="column">
+	  <a href="<%= href %>" class="box">
+	    <p class="title is-5 mb-2 mt-0">
+           <%= "#{label_by_lang_with_icon('_hotels')} 
+           <span class='is-size-7 tag has-text-weight-light'>
+             #{count_profile_pages("#{city_page_uri}/accommodations", view='profile_hotel.erb')}
+           </span>" %>
+	    </p>
+	    <%#= href %>
+	  </a>
+	</div>
+<% end %>
+
+
+<% link = link_to("#{city_page_uri}/lodging/apartments") %>
+<% href = link[/href="([^"]+)"/, 1] %>
+<% unless href.nil? || href == '' %>
+	<div class="column">
+	  <a href="<%= href %>" class="box">
+	    <p class="title is-5 mb-2 mt-0">
+           <%= "#{label_by_lang_with_icon('_apartments')} 
+           <span class='is-size-7 tag has-text-weight-light'>
+             #{count_profile_pages("#{city_page_uri}//lodging", view='profile_apartment.erb')}
+           </span>" %>
+	    </p>
+		<%#= href %>
+	  </a>
+	</div>
+<% end %>
+
+<% link = link_to("#{city_page_uri}/accommodations/apartments") %>
+<% href = link[/href="([^"]+)"/, 1] %>
+<% unless href.nil? || href == '' %>
+	<div class="column">
+	  <a href="<%= href %>" class="box">
+	    <p class="title is-5 mb-2 mt-0">
+           <%= "#{label_by_lang_with_icon('_apartments')} 
+           <span class='is-size-7 tag has-text-weight-light'>
+             #{count_profile_pages("#{city_page_uri}//accommodations", view='profile_apartment.erb')}
+           </span>" %>
+	    </p>
+		<%#= href %>
+	  </a>
+	</div>
+<% end %>
+
+
+</div>
+

@@ -1,19 +1,134 @@
-<%= partial '_block_title_text_cards',
+<% content_for :head_extra do %>
+<% end %>
 
-  kicker: label_by_lang('_beaches'),
-  title: "Beaches in Izola",
-  anchor: "See all beaches",
-  link: link_to("/izola/beaches"),
-  cards_uris: ['/izola/beaches/svetilnik', '/izola/beaches/bele-skale', '/izola/parkings/lonka'],
-  text_on_card: 'sidebar_1',
+<% content_for :hero do %>
 
-  text: "V Izoli je sedem plaž, ki so si med seboj popolnoma različne. 
-         V mestu so na voljo tudi uradna pasja plaža, majhna betonska Delfin in plaža na obalni poti proti Kopru. 
-         "
- %>
+  <section class="hero is-medium" style="position: relative; overflow: hidden;">
+    <%= partial '_carousel' %>
+    <%= partial '_carousel_overlay' %>
+    <%#= partial '_carousel_div_hero' %>
+
+    <!-- Контент Hero поверх карусели -->
+    <div class="hero-body" style="position: relative; z-index: 2;">
+      <div class="container">
+
+        <h1 class="title is-2 has-text-white mb-1">
+          <%= @page.h1 %> 
+        </h1>
+
+        <% unless @page.subtitle.blank? %>
+          <p class='subtitle has-text-white mt-0' style="opacity: 0.82; max-width: 640px; ">
+            <%= @page.subtitle %>
+          </p>
+        <% end %>
+
+        <% unless @page.hero_1.blank? %>
+          <p class='is-6 subtitle has-text-white mt-0' style="opacity: 0.82; max-width: 640px; ">
+            <%= @page.hero_1 %>
+          </p>
+        <% end %>
+
+        <% unless @page.hero_2.blank? %>
+          <p class='is-6 subtitle has-text-white mt-0' style="opacity: 0.82; max-width: 640px; ">
+            <%= @page.hero_2 %>
+          </p>
+        <% end %>
+
+        <% if @page.hero_3.blank? %>
+        <% else %>
+          <div class="buttons">
+            <%= parse_erb_and_markdown @page.hero_3 %>
+          </div>
+          <%= partial('_share_buttons') %>
+        <% end %>
+
+      </div>
+    </div> 
+
+  </section>
+
+<% end %> 
+
+<% content_for :sidebar do %>
+  <%#= parse_erb_and_markdown @page.sidebar_1 %>
+<% end %> 
+
+<div class="content">
+  
+<%= parse_erb_and_markdown @page.body %>
+<%= parse_erb_and_markdown @page.block_1 %>
+<%= parse_erb_and_markdown @page.block_2 %>
+<%= parse_erb_and_markdown @page.block_3 %>
+<%= parse_erb_and_markdown @page.block_4 %>
+
+<% unless @page.faq.blank? %>
+
+  <h3 class="title is-3" id='_faq'>
+    <%= label_by_lang('_faq').capitalize %>
+  </h3>
+  <div class='notification'>
+  <%= parse_erb_and_markdown(@page.faq, options = {}) if @page.faq %>
+  </div>
+
+<% end %>
+
+<% unless @page.faq.blank? %>
+  <h2 class="title is-4" id='faq'>
+    <%#= label_by_lang('_faq').capitalize %>
+  </h2>
+  <%#= parse_erb_and_markdown @page.faq %>
+<% end %>
+
+<% content_for :schema_main_entity do %>
+<% end %>
+
+<% content_for :schema_webpage do %>
+<% end %>
+
+<% content_for :schema_breadcrumb do %>
+<% end %>
+
+<% content_for :schema_faq_page do %>
+<% end %>
 
 
 
+<div class="card mb-5">
+  <div class="card-content">
+    <div class="media">
+      <div class="media-content">
+        <p class="title is-4">🏝 Изола (Izola)</p>
+        <p class="subtitle is-6">Уютный рыбацкий городок с лучшими рыбными ресторанами и семейными пляжами.</p>
+      </div>
+    </div>
 
+    <div class="content">
+      Краткий вводный текст о городе на 2-3 предложения...
+    </div>
 
-  link: "/#{@page.lang}/izola/beaches",
+    <!-- Чипы категорий города -->
+    <div class="buttons tags are-medium">
+      <a href="/izola/beaches" class="button is-light is-link">🏖 Пляжи (7)</a>
+      <a href="/izola/parking" class="button is-light is-info">🅿️ Парковки</a>
+      <a href="/izola/restaurants" class="button is-light is-warning">🍽 Рестораны</a>
+      <a href="/izola/sights" class="button is-light is-primary">🏛 Места</a>
+      <a href="/izola/hotels" class="button is-light is-danger">🏨 Отели</a>
+    </div>
+  </div>
+</div>
+
+<article class="panel is-info mb-4">
+  <details>
+    <summary class="panel-heading" style="cursor: pointer;">
+      🏛 Пиран (Piran) — Нажмите, чтобы открыть
+    </summary>
+    <div class="panel-block is-active">
+      <div class="content p-3">
+        <p>Венецианская жемчужина Словении...</p>
+        <!-- Вложенные блоки -->
+        <h5 class="title is-5">🅿️ Парковки в Пиране</h5>
+        <p>Везд в старый город ограничен...</p>
+      </div>
+    </div>
+  </details>
+</article>
