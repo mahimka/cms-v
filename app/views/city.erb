@@ -65,66 +65,72 @@
 <div class="content">
 <%= parse_erb_and_markdown @page.body %>
 
-<div class="grid">
 
-<% city = @page.uri %>  
+<% if @page.block_1.blank? %>
 
-<%= partial '_card_manual',
-  div_class: 'cell',
-  link: '#_beaches',
-  title: count_profile_pages("#{city}/beaches", 'profile_beach.erb'),
-  text:  label_by_lang('_beaches'),
-  anchor: ''
- %>
+  <div class="grid">
 
-<%= partial '_card_manual',
-  div_class: 'cell',
-  link: '#_parkings',
-  title: count_profile_pages("#{city}/parkings", 'profile_parking.erb'),
-  text:  label_by_lang('_parkings'),
-  anchor: ''
- %>
+  <% city = @page.uri %>  
 
- <%= partial '_card_manual',
-  div_class: 'cell',
-  link: '#_parkings',
-  title: count_profile_pages("#{city}/lodging", 'profile_hotel.erb'),
-  text:  label_by_lang('_hotels'),
-  anchor: ''
- %>
+  <%= partial '_card_manual',
+    div_class: 'cell',
+    link: '#_beaches',
+    title: count_profile_pages("#{city}/beaches", 'profile_beach.erb'),
+    text:  label_by_lang('_beaches'),
+    anchor: ''
+   %>
 
- <%= partial '_card_manual',
-  div_class: 'cell',
-  link: '#_parkings',
-  title: count_profile_pages("#{city}/lodging", 'profile_apartment.erb'),
-  text:  label_by_lang('_apartments'),
-  anchor: ''
- %>
+  <%= partial '_card_manual',
+    div_class: 'cell',
+    link: '#_parkings',
+    title: count_profile_pages("#{city}/parkings", 'profile_parking.erb'),
+    text:  label_by_lang('_parkings'),
+    anchor: ''
+   %>
 
-</div>
+   <%= partial '_card_manual',
+    div_class: 'cell',
+    link: '#_parkings',
+    title: count_profile_pages("#{city}/lodging", 'profile_hotel.erb'),
+    text:  label_by_lang('_hotels'),
+    anchor: ''
+   %>
 
-<%= parse_erb_and_markdown @page.block_1 %>
+   <%= partial '_card_manual',
+    div_class: 'cell',
+    link: '#_parkings',
+    title: count_profile_pages("#{city}/lodging", 'profile_apartment.erb'),
+    text:  label_by_lang('_apartments'),
+    anchor: ''
+   %>
+
+  </div>
+
+<% else %>
+
+  <%= parse_erb_and_markdown @page.block_1 %>
+
+<% end %>
+
 <%= parse_erb_and_markdown @page.block_2 %>
 <%= parse_erb_and_markdown @page.block_3 %>
 <%= parse_erb_and_markdown @page.block_4 %>
 <%= parse_erb_and_markdown @page.block_5 %>
-<%= parse_erb_and_markdown @page.block_6 %>
 
-<%= partial '_block_title', kicker: label_by_lang('_slovenian_coast'), title: label_by_lang('_explore_nearby_places'), link: '' %>
- 
-<div class="columns is-multiline">
-   
-  <% city_pages = Page.where(lang: @page.lang, view: 'city.erb').each do |city_page| %>
-    <%= partial '_card_manual', link: link_to(city_page.uri), title: "#{city_page.anchor_1} → ", text: "#{city_page.subtitle}", anchor: '' %>
-  <% end %> 
+<% if @page.block_6.blank? %>
 
-  <%#= partial '_card_manual', link: link_to("/piran"), title: 'Piran→ ', text: "", anchor: '' %>
-  <%#= partial '_card_manual', link: link_to("/portoroz"), title: 'Portoroz → ', text: "", anchor: '' %>
-  <%#= partial '_card_manual', link: link_to("/ankaran"), title: 'Ankaran → ', text: "", anchor: '' %> 
-  <%#= partial '_card_manual', link: link_to("/strunjan"), title: 'Strunjan → ', text: "", anchor: '' %>
-</div>
+  <%= partial '_block_title', kicker: settings.site_name, title: label_by_lang('_explore_nearby_places'), link: '' %>
+  <div class="columns is-multiline">
+    <% city_pages = Page.where(lang: @page.lang, view: 'city.erb').each do |city_page| %>
+      <%= partial '_card_manual', link: link_to(city_page.uri), title: "#{city_page.anchor_1} → ", text: "#{city_page.subtitle}", anchor: '' %>
+    <% end %> 
+  </div>
 
+<% else %>
 
+   <%= parse_erb_and_markdown @page.block_6 %>
+
+<% end %>
 
 <% unless @page.faq.blank? %>
 
