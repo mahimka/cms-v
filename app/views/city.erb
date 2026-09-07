@@ -122,7 +122,7 @@
   <%= partial '_block_title', kicker: settings.site_name, title: label_by_lang('_explore_nearby_places'), link: '' %>
   <div class="columns is-multiline">
     <% city_pages = Page.where(lang: @page.lang, view: 'city.erb').each do |city_page| %>
-      <%= partial '_card_manual', link: link_to(city_page.uri), title: "#{city_page.anchor_1} → ", text: "#{city_page.subtitle}", anchor: '' %>
+      <%= partial '_card_manual', link: link_to(city_page.uri), title: "#{city_page.anchor_1} → ", text: "#{city_page.subtitle}", anchor: '', div_class: 'column is-3' %>
     <% end %> 
   </div>
 
