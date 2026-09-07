@@ -83,12 +83,12 @@
 <%#= parse_erb_and_markdown(@page.block_2)%>
 
 <% if @page.block_2.blank? && @objects %>
-  <div id="_comparison"></div>
+  <div id="_list"></div>
 
   <% if @objects.first&.schema&.name == 'Beach' %>
-    <h2 id="_list" class="title is-4"><%= label_by_lang('_beaches').capitalize %> : <%= label_by_lang('_all') %></h2>
+    <h2 id="_list" class="title is-4 mt-6"><%= label_by_lang('_beaches').capitalize %> : <%= label_by_lang('_all') %></h2>
   <% elsif @objects.first&.schema&.name == 'ParkingFacility' %>
-    <h2 id="_list" class="title is-4"><%= label_by_lang('_parkings').capitalize %> : <%= label_by_lang('_all') %></h2>
+    <h2 id="_list" class="title is-4 mt-6"><%= label_by_lang('_parkings').capitalize %> : <%= label_by_lang('_all') %></h2>
   <% end %>
 
   <div class="columns is-multiline">
@@ -106,7 +106,7 @@
 
 <% if @page.block_3.blank? && @objects %>
   <div id="_lodging"></div>
-  <h2 class="title is-4"><%= label_by_lang('_map').capitalize %> : <%= label_by_lang('_lodging') %></h2>
+  <h2 class="title is-4 mt-6"><%= label_by_lang('_map').capitalize %> : <%= label_by_lang('_lodging') %></h2>
   <%= partial '_map_stay22' %>
 <% else %>
   <%= parse_erb_and_markdown(@page.block_3, options = {}) %>
@@ -114,7 +114,7 @@
 
 <% if @page.block_4.blank? && @objects %>
   <div id="_map"></div>
-  <h2 class="title is-4"><%= label_by_lang('_map').capitalize %> : <%= @page.h1 %></h2>
+  <h2 class="title is-4 mt-6"><%= label_by_lang('_map').capitalize %> : <%= @page.h1 %></h2>
   <%= partial '_google_map_many_points' %>
 <% else %>
   <%= parse_erb_and_markdown(@page.block_4, options = {}) %>
