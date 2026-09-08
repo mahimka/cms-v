@@ -319,6 +319,8 @@ class App < Sinatra::Base
       parsed: false
     )
 
+    profile&.update!(scraped_at: snap_shot.created_at)
+
     puts "=========================================="
     puts "ПОЛУЧЕН ЗАПРОС ДЛЯ ПРОФИЛЯ"
     puts "URL: #{url}"
