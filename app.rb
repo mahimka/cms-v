@@ -283,9 +283,11 @@ class App < Sinatra::Base
 
   # Приём HTML со страниц профилей от Chrome-расширения (?parse_profile=true
   # в URL включает отправку на стороне расширения). title/h1 достаём сразу —
-  # они универсальны для любого сайта. Разбор labels (site-specific) сюда не
-  # входит — планируется через AI по cleaned html_content, а не парсерами
-  # под каждый сайт вручную.
+  # они универсальны для любого сайта. html_content сохраняется как есть,
+  # без очистки — нужен полный код страницы (включая script/JSON-LD), пока
+  # не готов свой парсер под каждый сайт. Когда парсер стабилизируется,
+  # html_content уже разобранных snap_shot'ов можно будет затирать отдельной
+  # задачей, чтобы не раздувать базу.
   post '/api/parse' do
     content_type :json
 
@@ -306,28 +308,11 @@ class App < Sinatra::Base
     h1              = doc.at_css('h1')&.text&.strip
     meta_description = doc.at_css('meta[name="description"]')&.[]('content')&.strip
 
-    # script/style/svg/comments — основной вес страницы (реклама, трекеры,
-    # иконки), но не несут ни текста, ни структуры, нужной для будущего
-    # разбора. meta убираем только теперь — meta_description уже извлечён выше.
-    doc.css('script, style, noscript, svg, link, meta, iframe, img').remove
-    doc.xpath('//comment()').remove
-
-    # Атрибуты вроде class/style/data-automation/aria-*/id/tabindex — это
-    # хэши CSS-сборки и служебная разметка (проверено на реальной странице
-    # TripAdvisor: ~55% веса страницы), не несут содержимого. href оставляем
-    # (ссылки на сайт заведения, соцсети и т.п. — единственный атрибут с
-    # содержательной информацией, остальное всё в тексте узлов).
-    doc.css('*').each do |el|
-      el.attributes.each_key { |name| el.remove_attribute(name) unless name == 'href' }
-    end
-
-    cleaned_html = doc.to_html
-
     profile = Profile.find_by(url: url)
 
     snap_shot = SnapShot.create!(
       profile_id: profile&.id,
-      html_content: cleaned_html,
+      html_content: html,
       title: title,
       h1: h1,
       meta_description: meta_description,
@@ -340,7 +325,7 @@ class App < Sinatra::Base
     puts "Profile: #{profile ? profile.id : 'не найден по url'}"
     puts "title: #{title}"
     puts "h1: #{h1}"
-    puts "Размер HTML: было #{html.length}, стало #{cleaned_html.length} символов"
+    puts "Размер HTML: #{html.length} символов"
     puts "=========================================="
 
     { status: 'ok', snap_shot_id: snap_shot.id, profile_id: profile&.id }.to_json
