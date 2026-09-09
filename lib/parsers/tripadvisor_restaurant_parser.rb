@@ -26,6 +26,14 @@ require 'json'
 #    листинге мог не заметить категорию, а тут она напрямую от TripAdvisor.
 #    Кухни/цена оттуда же идут доп. фоллбеком к JSON-LD/About-панели.
 #
+# 4. "Review Summary" — 4-6 круглых кнопок с иконкой и парой подписей
+#    (группа/значение, например Food/Fresh, Value/Reasonable) — есть только
+#    у 2% страниц (нужно много отзывов, чтобы TripAdvisor такое посчитал),
+#    но вычленяется без единой хешированной CSS-классы: это единственный
+#    <div role="button"> на странице ровно с одной svg и двумя короткими
+#    span. Пишется как markers.review_summary, значения вида
+#    "RS_Food_Fresh".
+#
 # Не реализовано (нет надёжного паттерна на реальных страницах): markers
 # great_for, dishes.
 class TripadvisorRestaurantParser
@@ -129,7 +137,28 @@ class TripadvisorRestaurantParser
 
     markers['michelin_guide'] = ['MICHELIN Guide'] if doc.text.include?('MICHELIN Guide')
 
+    review_summary = review_summary_markers(doc)
+    markers['review_summary'] = review_summary unless review_summary.empty?
+
     markers
+  end
+
+  # <div role="button"> с ровно одной svg-иконкой и двумя короткими span —
+  # первый span это группа (Food/Service/Value/Atmosphere/Location/Wait
+  # time), второй — значение (Fresh/Attentive/Reasonable/...). На реальных
+  # страницах это единственные role=button с такой формой (0 ложных
+  # срабатываний на 962 проверенных снапшотах), поэтому не нужно опираться
+  # на хешированные классы TripAdvisor.
+  def review_summary_markers(doc)
+    doc.css('div[role="button"]').filter_map do |btn|
+      spans = btn.css('span')
+      next if btn.css('svg').size != 1 || spans.size != 2
+
+      texts = spans.map { |s| s.text.strip }
+      next if texts.any?(&:empty?) || texts.any? { |t| t.split.size > 3 }
+
+      "RS_#{texts[0].gsub(/\s+/, '_')}_#{texts[1].gsub(/\s+/, '_')}"
+    end
   end
 
   def price_symbols(biz, about, ranking)
@@ -200,10 +229,17 @@ class TripadvisorRestaurantParser
     longitude = biz.dig('geo', 'longitude')
     details['longitude'] = longitude.to_s unless longitude.nil?
 
-    # href часто пуст — TripAdvisor резолвит реальный внешний URL через JS
-    # (клик), не отдавая его в статичной разметке.
-    website = doc.at_css('a[data-automation="restaurantsWebsiteButton"]')&.[]('href')
+    # Не завязываемся на data-automation="restaurantsWebsiteButton" — ищем
+    # любую <a> с <span>Website</span> внутри. href там часто пуст (на 962
+    # проверенных снапшотах — только у 6.4%): похоже, TripAdvisor
+    # подгружает реальный внешний URL отдельно и не всегда успевает попасть
+    # в HTML к моменту захвата страницы расширением.
+    website_link = doc.css('a').find { |a| a.css('span').any? { |sp| sp.text.strip == 'Website' } }
+    website = website_link && website_link['href']
     details['website'] = website if website && !website.empty?
+
+    email_link = doc.at_css('a[href^="mailto:"]')
+    details['email'] = email_link['href'].sub(/\Amailto:/, '') if email_link
 
     # PRICE-строка, которая НЕ похожа на $-категорию (например, "€10-20") —
     # то, что markers.price_range/categorize_price сознательно не трогает.
