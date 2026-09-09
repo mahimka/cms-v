@@ -220,6 +220,7 @@
     <tr>
       <td></td>
       <td>url</td>
+      <td>url</td>
       <td>p_type</td>
       <td>p_id</td>
       <td>status</td>
@@ -236,6 +237,7 @@
     <tr>
       <td><%= checkbox_in_place profile, :active %></td>
       <td><%= profile.url %></td>
+      <td><a href="<%= profile.url %>#profile" class='button is-small is-warning'>scrape</a></td>
       <td><%= profile.profileable_type %></td>
       <td><%= profile.profileable_id %></td>
       <td><%= profile.status %></td>
@@ -244,6 +246,11 @@
       <td><%#= input_in_place profile, :h1 %><%= profile.h1 %></td>
       <td><%#= input_in_place profile, :meta_description %><%= profile.meta_description&.length %></td>
 
+      <td>
+        <% if profile.snap_shots&.last&.id %>
+          <a href="/admin/snap_shots/<%= profile.snap_shots&.last&.id %>" class='button is-small'>shapshot</a>
+        <% end %>
+      </td>
       <td><a href="/admin/profiles/<%= profile.id %>/edit" class='button is-small'>edit</a></td>
 
 
