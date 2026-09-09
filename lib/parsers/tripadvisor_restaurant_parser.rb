@@ -1,5 +1,6 @@
 require 'nokogiri'
 require 'json'
+require_relative 'tripadvisor_shared'
 
 # Извлекает markers/details из HTML страницы ресторана на TripAdvisor без
 # AI. Публичный метод намеренно повторяет сигнатуру
@@ -37,6 +38,8 @@ require 'json'
 # Не реализовано (нет надёжного паттерна на реальных страницах): markers
 # great_for, dishes.
 class TripadvisorRestaurantParser
+  include TripadvisorPageHelpers
+
   ABOUT_LABELS = {
     'cuisines' => :cuisines,
     'meal types' => :meal_types,
@@ -55,8 +58,6 @@ class TripadvisorRestaurantParser
     'Sunday' => 'hours_sunday'
   }.freeze
 
-  COUNTRY_NAMES = { 'IT' => 'Italy' }.freeze
-
   def extract_profile_data(html, instructions: nil)
     doc = Nokogiri::HTML(html.to_s)
     biz = business_ld_json(doc)
@@ -70,21 +71,6 @@ class TripadvisorRestaurantParser
   end
 
   private
-
-  # Среди всех ld+json блоков ищем тот, что описывает само заведение (у
-  # TripAdvisor на странице ресторана их обычно 3: Organization, BreadcrumbList
-  # и сам FoodEstablishment — этот единственный содержит address).
-  def business_ld_json(doc)
-    doc.css('script[type="application/ld+json"]').each do |script|
-      data = begin
-        JSON.parse(script.text)
-      rescue JSON::ParserError
-        next
-      end
-      return data if data.is_a?(Hash) && data['address']
-    end
-    nil
-  end
 
   # Лейбл -> сосед-значение, одним проходом по всем div на странице.
   # "Лейбл" = div без вложенных тегов, чей текст совпадает с одним из
@@ -143,29 +129,9 @@ class TripadvisorRestaurantParser
     markers
   end
 
-  # <div role="button"> с ровно одной svg-иконкой и двумя короткими span —
-  # первый span это группа (Food/Service/Value/Atmosphere/Location/Wait
-  # time), второй — значение (Fresh/Attentive/Reasonable/...). На реальных
-  # страницах это единственные role=button с такой формой (0 ложных
-  # срабатываний на 962 проверенных снапшотах), поэтому не нужно опираться
-  # на хешированные классы TripAdvisor.
-  def review_summary_markers(doc)
-    doc.css('div[role="button"]').filter_map do |btn|
-      spans = btn.css('span')
-      next if btn.css('svg').size != 1 || spans.size != 2
-
-      texts = spans.map { |s| s.text.strip }
-      next if texts.any?(&:empty?) || texts.any? { |t| t.split.size > 3 }
-
-      "RS_#{texts[0].gsub(/\s+/, '_')}_#{texts[1].gsub(/\s+/, '_')}"
-    end
-  end
-
   def price_symbols(biz, about, ranking)
     (about[:price] && about[:price].text.strip) || (biz && biz['priceRange']) || ranking[:price_symbol]
   end
-
-  DOLLAR_RANGE = /\A\$+(\s*[-–]\s*\$+)?\z/
 
   # "#1 of 52 Coffee & Tea Spots in Trieste" — родительский <span> этой
   # ссылки идёт первым в строке ранжирования, следующий соседний <span>
@@ -198,13 +164,10 @@ class TripadvisorRestaurantParser
   end
 
   def categorize_price(symbols)
-    return nil unless symbols && symbols.match?(DOLLAR_RANGE)
-
-    runs = symbols.scan(/\$+/)
-    case runs.map(&:length).max
+    case dollar_tier(symbols)
     when 1 then 'Cheap Eats'
     when 2, 3 then 'Mid-range'
-    else 'Fine Dining'
+    when 4 then 'Fine Dining'
     end
   end
 
@@ -249,23 +212,6 @@ class TripadvisorRestaurantParser
     details.merge!(hours_by_day(biz['openingHoursSpecification']))
 
     details
-  end
-
-  def format_address(addr)
-    return nil unless addr
-
-    country = addr.dig('addressCountry', 'name')
-    country = COUNTRY_NAMES.fetch(country, country) if country
-
-    parts = [
-      addr['streetAddress'],
-      addr['addressLocality'],
-      [addr['postalCode'], addr['addressRegion']].compact.reject(&:empty?).join(' '),
-      country
-    ]
-
-    full = parts.compact.reject(&:empty?).join(', ')
-    full.empty? ? nil : full
   end
 
   # openingHoursSpecification может содержать несколько интервалов на один
