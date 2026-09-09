@@ -20,10 +20,14 @@ require 'json'
 #    хеши webpack-сборки TripAdvisor и могут смениться при редизайне, поэтому
 #    сопоставление идёт по ТЕКСТУ лейбла, а не по классу.
 #
+# 3. Строка ранжирования рядом с рейтингом ("#1 of 52 Coffee & Tea Spots in
+#    Trieste Dessert, Italian, $$ - $$$") — единственный надёжный источник
+#    markers.establishment_type (80.7% страниц): исходный тип из CSV при
+#    листинге мог не заметить категорию, а тут она напрямую от TripAdvisor.
+#    Кухни/цена оттуда же идут доп. фоллбеком к JSON-LD/About-панели.
+#
 # Не реализовано (нет надёжного паттерна на реальных страницах): markers
-# great_for, dishes, а также markers.establishment_type — последний уже
-# записан как Entity-теги при импорте из CSV (profiles.notes), дублировать
-# его через Marker не нужно.
+# great_for, dishes.
 class TripadvisorRestaurantParser
   ABOUT_LABELS = {
     'cuisines' => :cuisines,
@@ -49,9 +53,10 @@ class TripadvisorRestaurantParser
     doc = Nokogiri::HTML(html.to_s)
     biz = business_ld_json(doc)
     about = about_panel(doc)
+    ranking = ranking_line(doc)
 
     {
-      'markers' => extract_markers(doc, biz, about),
+      'markers' => extract_markers(doc, biz, about, ranking),
       'details' => extract_details(doc, biz, about)
     }
   end
@@ -99,11 +104,14 @@ class TripadvisorRestaurantParser
     texts.reject(&:empty?)
   end
 
-  def extract_markers(doc, biz, about)
+  def extract_markers(doc, biz, about, ranking)
     markers = {}
+
+    markers['establishment_type'] = [ranking[:category]] if ranking[:category]
 
     cuisines = Array(biz && biz['servesCuisine'])
     cuisines = chip_values(about[:cuisines]) if cuisines.empty?
+    cuisines = (cuisines + ranking[:cuisines]).uniq
     markers['cuisines'] = cuisines unless cuisines.empty?
 
     meal_types = chip_values(about[:meal_types])
@@ -116,7 +124,7 @@ class TripadvisorRestaurantParser
     features << 'Reservations' if biz && biz['acceptsReservations'] == true && !features.include?('Reservations')
     markers['features'] = features unless features.empty?
 
-    price_category = categorize_price(price_symbols(biz, about))
+    price_category = categorize_price(price_symbols(biz, about, ranking))
     markers['price_range'] = [price_category] if price_category
 
     markers['michelin_guide'] = ['MICHELIN Guide'] if doc.text.include?('MICHELIN Guide')
@@ -124,12 +132,41 @@ class TripadvisorRestaurantParser
     markers
   end
 
-  def price_symbols(biz, about)
-    about_text = about[:price] && about[:price].text.strip
-    about_text || (biz && biz['priceRange'])
+  def price_symbols(biz, about, ranking)
+    (about[:price] && about[:price].text.strip) || (biz && biz['priceRange']) || ranking[:price_symbol]
   end
 
   DOLLAR_RANGE = /\A\$+(\s*[-–]\s*\$+)?\z/
+
+  # "#1 of 52 Coffee & Tea Spots in Trieste" — родительский <span> этой
+  # ссылки идёт первым в строке ранжирования, следующий соседний <span>
+  # содержит кухни/цену той же строки ("Dessert, Italian, $$ - $$$"),
+  # каждая как отдельная <a><span>. Категория из этой строки — тип заведения
+  # от самого TripAdvisor, точнее, чем то, что могло быть замечено при
+  # первичном скрейпе листинга.
+  RANKING_RE = /\A#\d+\s+of\s+\d+\s+(.+?)\s+in\s+/
+
+  CATEGORY_NORMALIZE = {
+    'Restaurant' => 'Restaurants',
+    'Dessert Spot' => 'Dessert',
+    'Dessert Spots' => 'Dessert',
+    'Coffee & Tea Spot' => 'Coffee & Tea',
+    'Coffee & Tea Spots' => 'Coffee & Tea',
+    'Specialty Food Markets' => 'Specialty Food Market'
+  }.freeze
+
+  def ranking_line(doc)
+    link = doc.css('a').find { |el| el.text =~ RANKING_RE }
+    return { category: nil, cuisines: [], price_symbol: nil } unless link
+
+    raw_category = link.text.strip.match(RANKING_RE)[1]
+    category = CATEGORY_NORMALIZE.fetch(raw_category, raw_category)
+
+    extra = link.parent.next_element&.css('a span')&.map { |s| s.text.strip }&.reject(&:empty?) || []
+    price_symbol, cuisines = extra.partition { |t| t.match?(DOLLAR_RANGE) }
+
+    { category: category, cuisines: cuisines, price_symbol: price_symbol.first }
+  end
 
   def categorize_price(symbols)
     return nil unless symbols && symbols.match?(DOLLAR_RANGE)
