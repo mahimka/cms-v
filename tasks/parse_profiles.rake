@@ -178,4 +178,32 @@ namespace :snap_shots do
       end
     end
   end
+
+  desc "Разобрать SnapShot отелей tripadvisor.com своим Nokogiri-парсером, без AI (rake snap_shots:parse_tripadvisor_hotels [id=4] [limit=10])"
+  task :parse_tripadvisor_hotels do
+    parser = SnapShotParser.new(client: TripadvisorHotelParser.new)
+
+    site = Site.find_by!(domain: 'tripadvisor.com')
+    schema = Schema.find_by!(name: 'LodgingBusiness')
+    profile_ids = Profile.joins("INNER JOIN entities ON entities.id = profiles.profileable_id AND profiles.profileable_type = 'Entity'")
+                          .where(site_id: site.id, entities: { schema_id: schema.id })
+                          .pluck(:id)
+
+    scope = if ENV['id']
+              SnapShot.where(id: ENV['id'])
+            else
+              SnapShot.where(profile_id: profile_ids, parsed: [false, nil]).limit((ENV['limit'] || 10).to_i)
+            end
+
+    puts "Найдено #{scope.count} snap_shot(ов) для разбора"
+
+    scope.find_each do |snap_shot|
+      result = parser.parse!(snap_shot)
+      if result[:success]
+        puts "##{snap_shot.id}: OK markers=#{result[:markers].keys.join(',')} details=#{result[:details].keys.join(',')}"
+      else
+        puts "##{snap_shot.id}: FAIL — #{result[:error]}"
+      end
+    end
+  end
 end
