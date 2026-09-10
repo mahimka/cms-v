@@ -112,4 +112,63 @@ namespace :entities do
 
     puts "Готово: #{entities_touched} entity, всего добавлено/обновлено #{total_details} деталей"
   end
+
+  # address/latitude/longitude уходят в колонки Entity через :sync_address,
+  # hours_* — отдельным деревом Label через :sync_opening_hours (там же
+  # разбирается несколько интервалов в день). rating/review_count остаются
+  # только на Profile — это относится к конкретному сайту-источнику
+  # (TripAdvisor), а не к самому заведению, и у Entity нет для этого колонки.
+  SYNC_DETAILS_EXCLUDED_KEYS = %w[address latitude longitude rating review_count].freeze
+
+  desc "Записать остальные ключи profile.details (phone/website/email/star_rating/...) в Detail Entity — по одному Label на ключ (rake entities:sync_details)"
+  task :sync_details do
+    total_details = 0
+    entities_touched = 0
+    conflicts = []
+
+    Entity.find_each do |entity|
+      values_by_key = entity.profiles.each_with_object({}) do |profile, acc|
+        details = profile.details || {}
+
+        details.each do |key, value|
+          next if SYNC_DETAILS_EXCLUDED_KEYS.include?(key) || key.start_with?('hours_')
+          next if value.blank?
+
+          acc[key] ||= value
+        end
+      end
+
+      next if values_by_key.empty?
+
+      added = values_by_key.count do |key, value|
+        label = Label.find_or_create_by!(name: key)
+        detail = Detail.find_or_initialize_by(detailable: entity, label: label)
+
+        if detail.persisted?
+          if detail.value != value.to_s
+            conflicts << "#{entity.name} (##{entity.id}) / #{key}: entity=#{detail.value.inspect} profile=#{value.inspect}"
+          end
+          next false
+        end
+
+        detail.value = value.to_s
+        detail.save!
+        true
+      end
+
+      next if added.zero?
+
+      entities_touched += 1
+      total_details += added
+      puts "#{entity.name} (##{entity.id}): +#{added} detail(s)"
+    end
+
+    puts "Готово: #{entities_touched} entity, всего добавлено #{total_details} деталей"
+
+    unless conflicts.empty?
+      puts
+      puts "Конфликты (у entity уже есть значение для этого label, отличное от profile.details — не тронуты, разобрать вручную):"
+      conflicts.each { |c| puts "  #{c}" }
+    end
+  end
 end
