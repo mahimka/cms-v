@@ -27,4 +27,28 @@ namespace :snap_shots do
 
     puts "Готово: #{total} snap_shot(ов), суммарно сэкономлено #{saved_chars} символов"
   end
+
+  desc "Затереть html_content у уже разобранных (parsed=true) SnapShot — вся нужная информация уже перенесена в profile.details/markers/tags, хранить сырой HTML дальше незачем (rake snap_shots:clear_parsed_html)"
+  task :clear_parsed_html do
+    scope = SnapShot.where(parsed: true).where.not(html_content: [nil, ''])
+    total = scope.count
+    puts "Найдено #{total} разобранных snap_shot(ов) с непустым html_content"
+
+    freed_bytes = 0
+    scope.find_each do |snap_shot|
+      freed_bytes += snap_shot.html_content.to_s.bytesize
+      snap_shot.update_column(:html_content, nil)
+    end
+
+    puts "Готово: очищено #{total} snap_shot(ов), освобождено ~#{(freed_bytes / 1024.0 / 1024).round(1)} MB данных"
+    puts "Файл БД физически уменьшится только после VACUUM (rake snap_shots:vacuum_db или вручную)"
+  end
+
+  desc "VACUUM базы — физически сжимает файл main.db после удаления/затирания данных (rake snap_shots:vacuum_db)"
+  task :vacuum_db do
+    before = File.size(ActiveRecord::Base.connection_db_config.database)
+    ActiveRecord::Base.connection.execute('VACUUM')
+    after = File.size(ActiveRecord::Base.connection_db_config.database)
+    puts "Файл БД: #{(before / 1024.0 / 1024).round(1)} MB -> #{(after / 1024.0 / 1024).round(1)} MB"
+  end
 end
