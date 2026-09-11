@@ -49,7 +49,7 @@ module BookingComImport
 end
 
 namespace :import do
-  desc "Импорт Booking.com JSON из csv/*-booking.com.json как Profile; там, где однозначно, связывает с уже существующим Entity того же города (rake import:diversorio_booking)"
+  desc "Импорт Booking.com JSON из csv/*-booking.json и csv/*-booking.com.json как Profile; там, где однозначно, связывает с уже существующим Entity того же города (rake import:diversorio_booking)"
   task :diversorio_booking do
     site = Site.find_by!(domain: 'booking.com')
     lodging_schema = Schema.find_by!(name: 'LodgingBusiness')
@@ -59,7 +59,14 @@ namespace :import do
     linked = 0
     not_linked = 0
 
-    files = Dir.glob(File.expand_path('../csv/*-booking.com.json', __dir__)).sort
+    # Разные выгрузки называли файлы по-разному: "{town}-booking.com.json"
+    # (triestia.com, cms-diversorio) и "{town}-booking.json" (istriada.com) —
+    # формат содержимого одинаковый, ловим оба варианта, но не более широкий
+    # "*booking*.json", чтобы случайно не подхватить что-то постороннее.
+    files = (
+      Dir.glob(File.expand_path('../csv/*-booking.json', __dir__)) +
+      Dir.glob(File.expand_path('../csv/*-booking.com.json', __dir__))
+    ).uniq.sort
     files.each do |file|
       puts "=== #{File.basename(file)} ==="
       rows = JSON.parse(File.read(file))
