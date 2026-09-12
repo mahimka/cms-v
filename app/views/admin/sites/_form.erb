@@ -33,3 +33,24 @@
     <%= textarea(:site, :notes, content = "#{@site.notes}", options = {class: 'textarea is-success', rows: 3}) %>
   </div>
 </div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:site, :icon_svg, "icon_svg", options = {class: 'label'}) %>
+    <p class="help">сырой &lt;svg&gt;...&lt;/svg&gt; markup</p>
+  </div>
+
+  <div class="column is-9">
+    <div class="columns">
+      <div class="column">
+        <textarea name="site[icon_svg]" class="textarea is-success is-family-monospace" rows="4" placeholder="<svg ...>...</svg>"><%= fast_escape_html(@site.icon_svg) %></textarea>
+      </div>
+      <div class="column is-narrow">
+        <p class="help mb-1">preview</p>
+        <%= @site.icon_svg %>
+      </div>
+    </div>
+  </div>
+
+</div>

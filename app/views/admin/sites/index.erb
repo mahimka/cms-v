@@ -10,6 +10,7 @@
 
   <table class="table is-narrow is-size-7">
     <tr class="is-size-6 has-text-weight-semibold">
+      <td>icon</td>
       <td>name</td>
       <td>domain</td>
       <td>url</td>
@@ -19,6 +20,7 @@
 
     <% @sites.each do |site| %>
       <tr>
+        <td><span class="icon"><%= site.icon_svg %></span></td>
         <td><%= site.name %></td>
         <td><%= site.domain %></td>
         <td><%= site.url %></td>

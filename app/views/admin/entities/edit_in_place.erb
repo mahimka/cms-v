@@ -16,10 +16,22 @@
 
   <div class="columns">
     <div class="column is-2"><%= label(:entity, :schema_id, "schema", options = {class: 'label'}) %></div>
-    <div class="column is-9">
+    <div class="column is-8">
       <% schemas_for_select = Schema.active.order(:ancestry, :position, :name).to_h { |s| [s.id, ("— " * s.depth) + s.name] } %>
       <%= select_in_place(@entity, :schema_id, schemas_for_select) %>
     </div>
+
+    <div class="column is-1">
+      <a href="https://www.google.com/maps/search/?api=1&query=<%= @entity.name.gsub(" ", "+") %>+<%= @entity.tags_of_group("addressLocality").first.name %>" class="button is-small">google map </a>
+
+  
+        
+
+    </div>
+
+
+
+
   </div>
 
   <div class="columns">

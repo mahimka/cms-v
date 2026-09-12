@@ -2,10 +2,10 @@
   "manifest_version": 3,
   "name": "Diversorio Profile Parser",
   "version": "1.0",
-  "description": "Sends the current page's HTML to the Sinatra /api/parse endpoint when ?parse_profile=true is present in the URL.",
-  "permissions": [],
+  "description": "Sends the current page's HTML to the Sinatra /api/parse endpoint when the URL ends with #profile, #profile_html, #profile_local or #profile_local_html (or ?parse_profile=true).",
+  "permissions": ["webNavigation"],
   "host_permissions": [
-    "http://127.0.0.1:4567/*",
+    "http://127.0.0.1:9292/*",
     "https://diversorio.com/*"
   ],
   "background": {

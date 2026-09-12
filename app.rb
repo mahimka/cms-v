@@ -281,13 +281,38 @@ class App < Sinatra::Base
   end
 
 
-  # Приём HTML со страниц профилей от Chrome-расширения (?parse_profile=true
-  # в URL включает отправку на стороне расширения). title/h1 достаём сразу —
-  # они универсальны для любого сайта. html_content сохраняется как есть,
-  # без очистки — нужен полный код страницы (включая script/JSON-LD), пока
-  # не готов свой парсер под каждый сайт. Когда парсер стабилизируется,
-  # html_content уже разобранных snap_shot'ов можно будет затирать отдельной
-  # задачей, чтобы не раздувать базу.
+  # Матчинг Profile по URL, присланному расширением. Прямое совпадение
+  # работает для большинства сайтов, но для google.com Profile#url хранит
+  # короткую ссылку (https://maps.app.goo.gl/...), а расширение шлёт уже
+  # развёрнутый URL страницы — плюс Google Maps может переписать адресную
+  # строку через history.replaceState уже после того, как JS дорисует
+  # карточку, так что даже Profile#redirected_to (rake
+  # profiles:resolve_redirects) не гарантированно совпадёт побайтово.
+  # Единственное, что остаётся стабильным в любом варианте URL места на
+  # Google Maps — Place ID вида "0x<hex>:0x<hex>" из параметра data=, поэтому
+  # при промахе точного совпадения ищем профиль по нему.
+  GOOGLE_MAPS_CID_RE = /0x[0-9a-f]+:0x[0-9a-f]+/
+
+  def find_profile_for_parsed_url(url)
+    return nil if url.to_s.empty?
+
+    Profile.find_by(url: url) || Profile.find_by(redirected_to: url) || begin
+      cid = url[GOOGLE_MAPS_CID_RE]
+      cid && Profile.where('redirected_to LIKE ?', "%#{cid}%").first
+    end
+  end
+
+  # Приём HTML со страниц профилей от Chrome-расширения (#profile в URL
+  # включает отправку на стороне расширения, см.
+  # tools/chrome-profile-parser). title/h1 достаём сразу — они универсальны
+  # для любого сайта.
+  #
+  # Если для сайта профиля есть детерминированный (без AI) парсер в
+  # lib/parsers (SiteParserRegistry) — разбираем сразу же, синхронно, и
+  # html_content не сохраняем: он уже не нужен, данные ушли в
+  # profile.details/rating/review_count. Если парсера для сайта нет —
+  # старое поведение: html_content сохраняется как есть, snap_shot остаётся
+  # parsed: false и ждёт отдельного AI-разбора (rake snap_shots:parse).
   post '/api/parse' do
     content_type :json
 
@@ -297,8 +322,9 @@ class App < Sinatra::Base
     end
 
     data = JSON.parse(request.body.read) rescue {}
-    url  = data['url']
-    html = data['html']
+    url       = data['url']
+    html      = data['html']
+    keep_html = data['keep_html'] == true
 
     halt 400, { success: false, error: 'html is required' }.to_json if html.to_s.empty?
 
@@ -308,7 +334,7 @@ class App < Sinatra::Base
     h1              = doc.at_css('h1')&.text&.strip
     meta_description = doc.at_css('meta[name="description"]')&.[]('content')&.strip
 
-    profile = Profile.find_by(url: url)
+    profile = find_profile_for_parsed_url(url)
 
     snap_shot = SnapShot.create!(
       profile_id: profile&.id,
@@ -319,7 +345,23 @@ class App < Sinatra::Base
       parsed: false
     )
 
-    profile&.update!(scraped_at: snap_shot.created_at)
+    parser = profile && SiteParserRegistry.for(profile.site&.domain)
+    parse_result = parser && SnapShotParser.new(client: parser).parse!(snap_shot)
+
+    if parse_result
+      # html_content больше не нужен — то немногое, что было нужно
+      # (rating/review_count/price), уже извлечено выше в profile.details.
+      # Не затираем, если попросили явно (#profile_html на стороне
+      # расширения, keep_html: true) или включён общий отладочный флаг
+      # settings.keep_snap_shot_html_for_debugging (config/config.yml) —
+      # на время обкатки парсеров под новые сайты нужны реальные образцы.
+      keep_html_for_debugging = settings.respond_to?(:keep_snap_shot_html_for_debugging) && settings.keep_snap_shot_html_for_debugging
+      if parse_result[:success] && !keep_html && !keep_html_for_debugging
+        snap_shot.update_column(:html_content, nil)
+      end
+    else
+      profile&.update!(scraped_at: snap_shot.created_at)
+    end
 
     puts "=========================================="
     puts "ПОЛУЧЕН ЗАПРОС ДЛЯ ПРОФИЛЯ"
@@ -328,9 +370,10 @@ class App < Sinatra::Base
     puts "title: #{title}"
     puts "h1: #{h1}"
     puts "Размер HTML: #{html.length} символов"
+    puts "Синхронный парсер: #{parse_result ? parse_result.inspect : 'нет для этого сайта'}"
     puts "=========================================="
 
-    { status: 'ok', snap_shot_id: snap_shot.id, profile_id: profile&.id }.to_json
+    { status: 'ok', snap_shot_id: snap_shot.id, profile_id: profile&.id, parsed: parse_result&.dig(:success) }.to_json
   end
 
   def link_on_page(label, options={})

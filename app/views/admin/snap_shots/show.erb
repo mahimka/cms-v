@@ -1,22 +1,28 @@
+<% profile = @snap_shot.profile %>
+<% if profile %>
 <h1 class='title is-4'>Profile</h1>
 <table class='table is-size-7'>
 	<tr>
 		<td>url</td>
-		<td><a href="<%= @snap_shot.profile.url %>"><%= @snap_shot.profile.url %></a></td>
+		<td><a href="<%= profile.url %>"><%= profile.url %></a></td>
 	</tr>
 	<tr>
 		<td>scraped_at</td>
-		<td><%= @snap_shot.profile.active %> - <%= @snap_shot.profile.status %> - <%= @snap_shot.profile.scraped_at %> </td>
+		<td><%= profile.active %> - <%= profile.status %> - <%= profile.scraped_at %> </td>
 	</tr>
 	<tr>
 		<td>profileable_type</td>
-		<td><%= @snap_shot.profile.profileable_type %> - <%= @snap_shot.profile.profileable_id ? "<a href='/admin/#{@snap_shot.profile.profileable_type.parameterize.pluralize}/#{@snap_shot.profile.profileable_id}'>SHOW</a>" : 'NO PRODCT' %></td>
+		<td><%= profile.profileable_type %> - <%= profile.profileable_id ? "<a href='/admin/#{profile.profileable_type.parameterize.pluralize}/#{profile.profileable_id}'>SHOW</a>" : 'NO PRODCT' %></td>
 	</tr>
 	<tr>
 		<td>redirected_to</td>
-		<td><%= @snap_shot.profile.redirected_to %></td>
+		<td><%= profile.redirected_to %></td>
 	</tr>
 </table>
+<% else %>
+<h1 class='title is-4'>Profile</h1>
+<p>Профиль удалён (profile_id: <%= @snap_shot.profile_id %>)</p>
+<% end %>
 
 <h1 class='title is-4'>SnapShot</h1>
 <table class='table is-size-7'>
@@ -40,7 +46,7 @@
 	</tr>
 	<tr>
 		<td>html_content</td>
-		<td><%= @snap_shot.html_content.length %></td>
+		<td><%= @snap_shot.html_content&.length %></td>
 	</tr>
 	<tr>
 		<td>param_1</td>
