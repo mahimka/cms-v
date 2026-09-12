@@ -18,7 +18,7 @@ namespace :download do
   end
 
   task :db do
-    desc "Downloads main.db from remote/db and unzips to local/db"
+    desc "Downloads main.db from remote/db via rsync"
 
     puts ''
     puts "Snapshotting on remote (rake db:snapshot) ...............".white.on_green
@@ -27,58 +27,21 @@ namespace :download do
     # ловил гонку и скачивал битый файл (database disk image is
     # malformed). db:snapshot делает атомарный VACUUM INTO — безопасно
     # при работающем сервере, см. tasks/db_snapshot.rake.
-    @commands << "cd #{@app_name} && bundle exec rake db:snapshot"
-    @commands << "zip #{@app_name}/db/main_db.zip #{@app_name}/db/main_snapshot.db -j"
-    @commands << "rm -f #{@app_name}/db/main_snapshot.db"
+    # RACK_ENV=production обязателен: без него APP_ENV в Rakefile падает
+    # на "development" и требует config/deploy.rb, которого на сервере
+    # нет (не деплоится специально, чтобы не хранить пароль на сервере).
+    @commands << "cd #{@app_name} && RACK_ENV=production bundle exec rake db:snapshot"
     run_ssh_commands @commands
+    @commands = []
 
     puts "Downloading ...........".white.on_green
-
-    Net::SFTP.start(@domain, @user, :password => @password) do |sftp|
-      result = sftp.download!("/home/deploy/#{@app_name}/db/main_db.zip", "./db/main_db.zip", :progress => CustomHandler.new, :read_size => 64000)
-      # puts "result:  " + result.to_s
-    end
-
-    puts ""
-    puts "Unzipping ...............".white.on_green
-    puts ""
-    system "unzip -o -j db/main_db.zip -d db"
+    system "rsync -avz --progress #{@user}@#{@domain}:#{@deploy_to}/db/main_snapshot.db db/main.db"
 
     puts ""
     puts "Removing on remote ..........".white.on_green
-    @commands = []  
-    @commands << "rm -f #{@app_name}/db/main_db.zip"
+    @commands << "rm -f #{@app_name}/db/main_snapshot.db"
     run_ssh_commands @commands
-
-    puts ""
-    puts "Removing on local ...............".white.on_green
-    puts ""
-    system "rm -f db/main_db.zip"
+    @commands = []
   end
 
-end
-
-# для отобрпжения прогресса закачки
-class CustomHandler
-  def on_open(downloader, file)
-    puts "  --> starting download: #{file.remote} -> #{file.local} (#{file.size} bytes)".white.on_green
-  end
-
-  def on_get(downloader, file, offset, data)
-    puts "      writing #{data.length} bytes to #{file.local} starting at #{offset}"
-  end
-
-  def on_close(downloader, file)
-    puts ""
-    puts "  --> finished with #{file.remote}".white.on_green
-    puts ""
-  end
-
-  def on_mkdir(downloader, path)
-    puts "creating directory #{path}"
-  end
-
-  def on_finish(downloader)
-    puts "  --> all done!".white.on_green
-  end
 end
