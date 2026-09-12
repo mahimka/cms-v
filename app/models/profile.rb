@@ -20,6 +20,14 @@ class Profile < ActiveRecord::Base
   validates :site_id, :url, presence: true
   # validates :name, uniqueness: true
 
+  # Профили google.com хранят короткую ссылку (https://maps.app.goo.gl/...),
+  # которую сам браузер разворачивает в другой URL при переходе — расширение
+  # tools/chrome-profile-parser шлёт на /api/parse именно развёрнутый адрес,
+  # так что без redirected_to Profile.find_by(url:) никогда не совпадёт (см.
+  # find_profile_for_parsed_url в app.rb). Резолвим сразу при создании и при
+  # каждом изменении url, чтобы не приходилось вручную гонять
+  # rake profiles:resolve_redirects после каждого нового профиля.
+  after_save :resolve_google_maps_redirect, if: -> { site&.domain == 'google.com' && previous_changes.key?('url') }
 
   # Opt-in attributes
   def self.ransackable_attributes(auth_object = nil)
@@ -47,6 +55,14 @@ class Profile < ActiveRecord::Base
   #   ["profileable_type"] # or non-polymorphic associations like ["user"]
   # end
 
+  private
+
+  def resolve_google_maps_redirect
+    final_url = RedirectResolver.resolve_final_url(url)
+    return if final_url.nil? || final_url == url
+
+    update_columns(redirected: true, redirected_to: final_url)
+  end
 
 end
 
