@@ -40,8 +40,8 @@
           minQuality: settings.photo_upload['min_quality']
         }.to_json %>;
       </script>
-      <script src="/javascripts/vendor/exif.js"></script>
-      <script src="/javascripts/photo-upload.js"></script>
+      <script src="<%= asset_path('/javascripts/vendor/exif.js') %>"></script>
+      <script src="<%= asset_path('/javascripts/photo-upload.js') %>"></script>
     <% end %>
 
     <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
