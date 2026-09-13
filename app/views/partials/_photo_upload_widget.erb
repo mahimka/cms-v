@@ -1,0 +1,38 @@
+<% if current_user %>
+  <div class="navbar-item" style="position: relative;">
+    <button type="button" id="photo-upload-toggle" class="button is-small is-light">+ Добавить фото</button>
+
+    <div id="photo-upload-widget" class="is-hidden" style="position: absolute; top: 100%; left: 0; z-index: 100; background: #fff; border: 1px solid #dbdbdb; border-radius: 4px; padding: 0.75rem; width: 260px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+      <form id="photo-upload-form">
+        <input type="hidden" name="imageable_type" value="<%= @page.source_page.pageable_type %>">
+        <input type="hidden" name="imageable_id" value="<%= @page.source_page.pageable_id %>">
+
+        <div class="file is-small mb-2">
+          <label class="file-label">
+            <input class="file-input" type="file" accept="image/*" capture="environment" id="photo-upload-input">
+            <span class="file-cta">
+              <span class="file-label">Сделать фото…</span>
+            </span>
+          </label>
+        </div>
+
+        <img id="photo-upload-preview" class="is-hidden mb-2" style="max-width: 220px; display: block;">
+
+        <p id="photo-upload-status" class="help mb-2"></p>
+
+        <button type="submit" id="photo-upload-submit" class="button is-small is-link" disabled>Отправить фото на сервер</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    window.PHOTO_UPLOAD_CONFIG = <%= {
+      maxWidth: settings.photo_upload['max_width'],
+      targetMaxBytes: settings.photo_upload['target_max_kb'] * 1024,
+      startQuality: settings.photo_upload['start_quality'],
+      minQuality: settings.photo_upload['min_quality']
+    }.to_json %>;
+  </script>
+  <script src="<%= asset_path('/javascripts/vendor/exif.js') %>"></script>
+  <script src="<%= asset_path('/javascripts/photo-upload.js') %>"></script>
+<% end %>
