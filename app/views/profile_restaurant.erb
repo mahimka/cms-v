@@ -179,23 +179,28 @@
 <article class="message is-primary">
 
   <div class="message-body">
-    
-      <table class="table is-fullwidth">
-        <% @page.source_page.pageable.profiles.active.each do |profile| %>
-          <% unless profile.rating.blank? %>
-            <tr>
-             <td><span class="icon"><%= profile.site.icon_svg %></span></td>
-             <td> <%= profile.site.name %></td>
-             <td><%= profile.rating %></td><td><%= star_rating(profile.rating) %></td>
-             <td>(<%= profile.review_count %> reviews)</td>
-            </tr>
-          <% end %>
-        <% end %>
-      </table>
 
-      <p><%= label_by_lang('_know_review').capitalize %> <a href=''><%= label_by_lang('_offer_us_review').capitalize %></a>
+  <% @page.source_page.pageable.profiles.active.each do |profile| %>
+    <% unless profile.rating.blank? %>
+
+
+      <a href="<%= profile.url %>" target="_blank" rel="noopener noreferrer" class="box grid mb-1 "  style="text-decoration: none;">
+           <div class="cell">
+             <span class="icon mr-2" style="display: inline-block; vertical-align: middle;"><%= profile.site.icon_svg %></span><%= profile.site.name %>
+           </div>
+           <div class="cell"><span class="icon mr-2"><%= profile.rating %></span> 
+             <span><%= star_rating(profile.rating) %></span> 
+            </div>
+           <div class="cell"><%= profile.review_count %> <%= label_by_lang("_reviews") %></div>
+           <div class="cell"><span class="tag"><%= profile.updated_at.strftime("%d %b %Y") %></span> </div>
+      </a>
+        
+    <% end %>
+  <% end %>
+
     
   </div>
+      <p class="mt-3"><%= label_by_lang('_know_review').capitalize %> <a href=''><%= label_by_lang('_offer_us_review').capitalize %></a>
 
 </article>
 
@@ -388,74 +393,7 @@
 
 
 
-<!-- Блок: Mnenja na drugih platformah -->
-<section class="reviews-platforms" style="margin: 40px 0; font-family: system-ui, -apple-system, sans-serif;">
-  <h2 style="font-size: 1.5rem; margin-bottom: 20px; color: #222;">Mnenja na drugih platformah</h2>
 
-  <div style="display: grid; gap: 12px;">
 
-    <!-- Google -->
-    <a href="https://www.google.com/maps/search/?api=1&query=Gostilnica+Gu%C5%A1t+Izola" 
-       target="_blank" rel="noopener noreferrer"
-       style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; text-decoration: none; color: inherit; transition: all 0.2s;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <%= Site.find_by(domain: 'google.com')&.icon_svg %>
-        <span style="font-weight: 600;">Google</span>
-      </div>
-      <div style="text-align: right;">
-        <div style="font-weight: 700; color: #1a73e8;">4.4 ★</div>
-        <div style="font-size: 0.85rem; color: #666;">2700+ ocen</div>
-      </div>
-    </a>
 
-    <!-- TripAdvisor -->
-    <a href="https://www.tripadvisor.com/Restaurant_Review-g608962-d1168064-Reviews-Gostilnica_Pizzeria_Gust-Izola_Slovenian_Istria_Slovenian_Littoral_Region.html" 
-       target="_blank" rel="noopener noreferrer"
-       style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; text-decoration: none; color: inherit; transition: all 0.2s;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <%= Site.find_by(domain: 'tripadvisor.com')&.icon_svg %>
-        <span style="font-weight: 600;">TripAdvisor</span>
-      </div>
-      <div style="text-align: right;">
-        <div style="font-weight: 700; color: #00aa6c;">4.1 ★</div>
-        <div style="font-size: 0.85rem; color: #666;">584 ocen</div>
-      </div>
-    </a>
 
-    <!-- Facebook -->
-    <a href="https://www.facebook.com/gostilnica.gust" 
-       target="_blank" rel="noopener noreferrer"
-       style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; text-decoration: none; color: inherit; transition: all 0.2s;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <%= Site.find_by(domain: 'facebook.com')&.icon_svg %>
-        <span style="font-weight: 600;">Facebook</span>
-      </div>
-      <div style="text-align: right;">
-        <div style="font-weight: 700; color: #1877f2;">4.2 ★</div>
-        <div style="font-size: 0.85rem; color: #666;">616 ocen · 84% priporoča</div>
-      </div>
-    </a>
-
-    <!-- Dobre Gostilne -->
-    <a href="https://dobregostilne.si/sl/gostilnica-gust-izola" 
-       target="_blank" rel="noopener noreferrer"
-       style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; text-decoration: none; color: inherit; transition: all 0.2s;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <%= Site.find_by(domain: 'dobregostilne.si')&.icon_svg %>
-        <span style="font-weight: 600;">Dobre Gostilne</span>
-      </div>
-      <div style="text-align: right;">
-        <div style="font-weight: 700; color: #d97706;">4.3–4.4 ★</div>
-        <div style="font-size: 0.85rem; color: #666;">Lokalna ocena</div>
-      </div>
-    </a>
-
-  </div>
-
-  <p style="margin-top: 18px; font-size: 0.9rem; color: #666;">
-    Poznate še kakšno recenzijo? 
-    <a href="mailto:info@diversorio.com?subject=Nova%20povezava%20za%20Gostilna%20Gušt" style="color: #1a73e8; text-decoration: underline;">
-      Pošljite nam povezavo
-    </a>
-  </p>
-</section>
