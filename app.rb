@@ -308,7 +308,7 @@ class App < Sinatra::Base
       cid && Profile.where('redirected_to LIKE ?', "%#{cid}%").first
     end || begin
       base_path = url.sub(BOOKING_LOCALE_SUFFIX_RE, '')
-      base_path != url && Profile.where('url LIKE ?', "#{base_path}.%").first
+      base_path != url ? Profile.where('url LIKE ?', "#{base_path}.%").first : nil
     end
   end
 
