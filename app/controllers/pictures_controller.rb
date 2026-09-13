@@ -138,6 +138,17 @@ class PicturesController < App
     target && target.start_with?('/admin/') ? target : fallback
   end
 
+  # Язык, на котором заполняется само поле alt (а не translations{}) —
+  # config/languages.yml -> alt_language. Отдельный от home_language,
+  # потому что редактор картинок может печатать alt не на языке сайта
+  # (например alt_language: en, а home_language сайта — sl). Фолбэк на
+  # home_language — чтобы не падать на проектах, где alt_language ещё не
+  # завели (settings не определяет метод вообще для отсутствующего ключа
+  # YAML, поэтому respond_to? обязателен, не просто settings.alt_language).
+  def alt_language
+    (settings.respond_to?(:alt_language) ? settings.alt_language : settings.home_language).to_s
+  end
+
   # Как TaggableTranslationsBackfiller (app/models/taggable_translations_backfiller.rb),
   # но для одной записи и по кнопке: заполняет только пустые языки,
   # никогда не перезаписывает то, что уже введено вручную.
@@ -145,13 +156,13 @@ class PicturesController < App
     gemini = GeminiClient.new(api_key: settings.gemini_api_key)
     translations = (picture.translations || {}).dup
     errors = {}
-    target_langs = settings.languages.keys.map(&:to_s) - [settings.home_language.to_s]
+    target_langs = settings.languages.keys.map(&:to_s) - [alt_language]
 
     target_langs.each do |lang|
       next if translations[lang].present?
 
       begin
-        translations[lang] = gemini.translate(picture.alt, from: settings.home_language, to: lang)
+        translations[lang] = gemini.translate(picture.alt, from: alt_language, to: lang)
       rescue StandardError => e
         errors[lang] = e.message
       end
