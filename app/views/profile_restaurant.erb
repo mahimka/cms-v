@@ -122,7 +122,7 @@
 
   <% unless @page.pageable.tags_of_group('price_range').active.blank? %>
     <tr>
-      <td nowrap><%= label_by_lang('_how_expensive').capitalize %></td>
+      <td nowrap><%= label_by_lang('_price_range').capitalize %></td>
       <td><%= @page.pageable.tags_of_group('price_range').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
     </tr>
   <% end %>

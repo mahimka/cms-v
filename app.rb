@@ -361,6 +361,13 @@ class App < Sinatra::Base
       end
     else
       profile&.update!(scraped_at: snap_shot.created_at)
+
+      # Сайты без полного детерминированного парсера, но с отдельным лёгким
+      # для регулярной сверки rating/review_count (сейчас — TripAdvisor).
+      # Не через SiteParserRegistry/SnapShotParser: snap_shot.parsed и
+      # html_content не трогаем, чтобы не мешать тяжёлому offline-разбору
+      # (rake snap_shots:parse_tripadvisor_restaurants/_hotels).
+      rating_check = profile && RatingCheckRegistry.apply(profile, html)
     end
 
     puts "=========================================="
@@ -371,6 +378,7 @@ class App < Sinatra::Base
     puts "h1: #{h1}"
     puts "Размер HTML: #{html.length} символов"
     puts "Синхронный парсер: #{parse_result ? parse_result.inspect : 'нет для этого сайта'}"
+    puts "Сверка rating/review_count: #{rating_check ? rating_check.inspect : 'нет для этого сайта'}" if defined?(rating_check)
     puts "=========================================="
 
     { status: 'ok', snap_shot_id: snap_shot.id, profile_id: profile&.id, parsed: parse_result&.dig(:success) }.to_json
