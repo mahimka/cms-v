@@ -33,14 +33,15 @@
 
 
           <div class="tags mt-3  is-light">
-            <% @page.source_page.tags.where(name: ['dddddddddddddd', 'ddddddddddddddd', 'dddddddddddddddd', 'ddddddddddddddddd']).each do |tag| %>
-              <span class="tag"><%#= tag.icon_svg %><%= tag.localized_name(@page.lang) %></span>
-            <% end %>
-          </div>
+
+            <%= @page.pageable.tags_of_group('cuisines').active.map{|tag| "<span class='tag ml-1 is-info is-light'>#{tag.translation(@page.lang).downcase}</span>"}.join %>
+           </div>
 
           <div class="buttons">
             <%= @page.hero_3 %>
 
+            <%= link_on_page('_rating') %>
+            <%= link_on_page('_contact') %>
             <%= link_on_page('_gallery') %>
             <%= link_on_page('_what_is_near') %>
             <%= link_on_page('_faq') %>
@@ -160,7 +161,7 @@
 
 
 
-<h2 class="title is-4"><%= label_by_lang('_contact_and_information').capitalize %> </h2>
+<h2 class="title is-4" id="_contact"><%= label_by_lang('_contact_and_information').capitalize %> </h2>
   <%= partial '_sidebar_address' %>
   <%= partial '_sidebar_links' %> 
 
@@ -172,7 +173,7 @@
   <% end %>
 <%= parse_erb_and_markdown(@page.body, options = {}) if @page.body %>
 
-<h2 class="title is-4"><%= label_by_lang('_opinions_on_sites').capitalize %> <!--Mnenja na drugih platformah--></h2>
+<h2 class="title is-4" id="_rating"><%= label_by_lang('_opinions_on_sites').capitalize %> <!--Mnenja na drugih platformah--></h2>
 
 <!--<p>Preberite mnenja in preverite ocene na na spletu.-->
 
