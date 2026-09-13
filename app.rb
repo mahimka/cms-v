@@ -293,12 +293,22 @@ class App < Sinatra::Base
   # при промахе точного совпадения ищем профиль по нему.
   GOOGLE_MAPS_CID_RE = /0x[0-9a-f]+:0x[0-9a-f]+/
 
+  # booking.com рендерит один и тот же отель под разным языковым суффиксом
+  # (.en-gb.html, .ru.html, ...) в зависимости от локали браузера — у
+  # Profile#url сохранён только один вариант локали, так что точное
+  # совпадение промахивается на любой другой. Стабильна только часть URL
+  # до суффикса (".xx.html"/".xx-yy.html").
+  BOOKING_LOCALE_SUFFIX_RE = /\.[a-z]{2}(-[a-z]{2})?\.html\z/i
+
   def find_profile_for_parsed_url(url)
     return nil if url.to_s.empty?
 
     Profile.find_by(url: url) || Profile.find_by(redirected_to: url) || begin
       cid = url[GOOGLE_MAPS_CID_RE]
       cid && Profile.where('redirected_to LIKE ?', "%#{cid}%").first
+    end || begin
+      base_path = url.sub(BOOKING_LOCALE_SUFFIX_RE, '')
+      base_path != url && Profile.where('url LIKE ?', "#{base_path}.%").first
     end
   end
 
