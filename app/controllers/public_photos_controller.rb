@@ -12,8 +12,9 @@ class PublicPhotosController < App
 
     imageable_type = params[:picture][:imageable_type]
     imageable_id   = params[:picture][:imageable_id]
-    imageable = PicturesController::IMAGEABLE_TYPES.include?(imageable_type) &&
-                imageable_type.safe_constantize&.find_by(id: imageable_id)
+    imageable = if PicturesController::IMAGEABLE_TYPES.include?(imageable_type)
+                  imageable_type.safe_constantize&.find_by(id: imageable_id)
+                end
 
     # Имя файла — из названия объекта, к которому привязывается фото (а не
     # случайное "photo.jpg" от клиента); совпадение имени сам разрулит
