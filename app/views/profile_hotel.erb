@@ -41,16 +41,16 @@
             <% lang = @page.lang %>
             <% lang = 'en-gb' if lang == 'en' %> 
             <% if @page.pageable['booking_slug'] && !@page.pageable['booking_slug'].blank? %>
-               <a href="https://www.kqzyfj.com/click-<%= settings.booking_com_pid %>-<%= settings.booking_com_link_id %>?url=https%3A%2F%2Fwww.booking.com%2Fhotel%2Fsi%2F<%= @page_details['booking_slug'] %>.<%= lang %>.html&sid=<%= @page.url %>" class="button is-big is-success"><%= label_by_lang('_сheck_availability') %></a>
+               <a href="<%= booking_affiliate_url("https://www.booking.com/hotel/si/#{@page_details['booking_slug']}.#{lang}.html", sid: @page.url) %>" class="button is-big is-success"><%= label_by_lang('_сheck_availability') %></a>
             <% else %>
-              
+
               <% if @page.uri.start_with?(/\A\/[a-zA-Z]{2}\//) %>
                 <% town = @page.uri.split('/')[2] %>
               <% else %>
                 <% town = @page.uri.split('/')[1] %>
               <% end %>
 
-               <a href="https://www.kqzyfj.com/click-<%= settings.booking_com_pid %>-<%= settings.booking_com_link_id %>?url=https%3A%2F%2Fwww.booking.com%2Fsearchresults.sl.html%3Fss%3D<%= town %>&sid=<%= @page.uri %>" class="button is-big is-info"><%= label_by_lang('_сheck_availability') %></a>
+               <a href="<%= booking_affiliate_url("https://www.booking.com/searchresults.sl.html?ss=#{town}", sid: @page.uri) %>" class="button is-big is-info"><%= label_by_lang('_сheck_availability') %></a>
             <% end %>
           </div>
 

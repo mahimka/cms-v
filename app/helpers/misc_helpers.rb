@@ -382,6 +382,20 @@ module MiscHelpers
     text.gsub(/<%.*?%>/, "").gsub('>', "").gsub(/\s{2,}/, " ")
   end
 
+  # Оборачивает прямой booking.com URL в партнёрскую ссылку kqzyfj.com,
+  # если для проекта в config.yml настроены booking_com_pid/booking_com_link_id
+  # (сейчас — только diversorio.com). Без них settings.booking_com_pid не
+  # определён вообще (а не nil — sinatra/config_file не создаёт метод для
+  # отсутствующего ключа YAML), поэтому respond_to? обязателен; когда ключей
+  # нет, отдаём прямую ссылку на booking.com без партнёрской обёртки, чтобы
+  # кнопка продолжала работать и не приписывала букинги к чужому аккаунту.
+  def booking_affiliate_url(direct_url, sid: nil)
+    return direct_url unless settings.respond_to?(:booking_com_pid) && settings.respond_to?(:booking_com_link_id)
+
+    url = "https://www.kqzyfj.com/click-#{settings.booking_com_pid}-#{settings.booking_com_link_id}?url=#{Rack::Utils.escape(direct_url)}"
+    sid ? "#{url}&sid=#{Rack::Utils.escape(sid)}" : url
+  end
+
 
 
 
