@@ -76,8 +76,73 @@
     <%= input(:tag, :short, options = {class: 'input is-success', value: @tag.short, placeholder: "enter tag short"}) %>
   </div>
 
-</div>  
+</div>
 
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :short_2, "short_2", options = {class: 'label'}) %>
+    <% if @tag.table == "ads" %>
+      <p class="help">из ads — редактируется только через перепривязку table_id</p>
+    <% end %>
+  </div>
+
+  <div class="column is-9">
+    <% if @tag.table == "ads" %>
+      <%= @tag.short_2 %>
+    <% else %>
+      <%= input(:tag, :short_2, options = {class: 'input is-success', value: @tag.short_2, placeholder: "enter tag short_2"}) %>
+    <% end %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :slug, "slug", options = {class: 'label'}) %>
+    <% if @tag.table == "ads" %>
+      <p class="help">из ads — редактируется только через перепривязку table_id</p>
+    <% end %>
+  </div>
+
+  <div class="column is-9">
+    <% if @tag.table == "ads" %>
+      <%= @tag.slug %>
+    <% else %>
+      <%= input(:tag, :slug, options = {class: 'input is-success', value: @tag.slug, placeholder: "enter tag slug"}) %>
+    <% end %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :table, "table", options = {class: 'label'}) %>
+    <p class="help">имя таблицы, на запись которой ссылается table_id (сейчас только "ads")</p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:tag, :table, options = {class: 'input is-success', value: @tag.table, placeholder: "enter table"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:tag, :table_id, "table_id", options = {class: 'label'}) %>
+    <% if @tag.table == "ads" %>
+      <p class="help"><a href="/admin/ads/<%= @tag.table_id %>">открыть ad #<%= @tag.table_id %></a></p>
+    <% end %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:tag, :table_id, options = {class: 'input is-success', value: @tag.table_id, placeholder: "enter table_id"}) %>
+  </div>
+
+</div>
 
 <div class="columns">
 
