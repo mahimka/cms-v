@@ -4,94 +4,9 @@
 
 <div class="content m-3">
 
-<form method="GET" action="/admin/ads">
+  <h1 class="title is-size-4">Countries (<%= @ads.size %>)</h1>
+  <p class="help mb-3">клик по имени — раскрыть дочерние ad (ADM1/ADM2/города)</p>
 
-  <div class="columns">
-    <div class="column is-2">
-      <tag class="tag is-size-7">name_cont</tag>
-      <%= input(:q, :name_cont, options = {class: 'input is-small', value: @q.name_cont, placeholder: ""}) %>
-    </div>
-    <div class="column is-2">
-      <tag class="tag is-size-7">feature_code_eq</tag>
-      <%= input(:q, :feature_code_eq, options = {class: 'input is-small', value: @q.feature_code_eq, placeholder: ""}) %>
-    </div>
-    <div class="column is-2">
-      <tag class="tag is-size-7">country_code_eq</tag>
-      <%= input(:q, :country_code_eq, options = {class: 'input is-small', value: @q.country_code_eq, placeholder: ""}) %>
-    </div>
-  </div>
-
-  <div class="columns">
-    <div class="column is-1">
-      <input type="submit" value="Filter" class="button is-warning">
-    </div>
-    <div class="column is-11">
-      Found/Total: <%= @ads_found %> / <%= Ad.all.size %>
-    </div>
-  </div>
-
-</form>
-
-<div class="content">
-
-  <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
-    <div class="column is-12">
-      <%= paginate @ads unless @ads.blank? %>
-    </div>
-  </div>
-
-  <table class="table is-narrow is-size-7">
-    <tr class="is-size-6 has-text-weight-semibold">
-      <td>active</td>
-      <td>name</td>
-      <td>slug</td>
-      <td>feature_code</td>
-      <td>country_code</td>
-      <td>population</td>
-      <td title="сколько тегов ссылается на этот ad через table/table_id">tags</td>
-      <td></td>
-    </tr>
-
-  <%# a.root? — корректно понимает формат ancestry "/" для root-узлов (Ancestry.default_ancestry_format = :materialized_path2 в app.rb).
-      a.parent.nil? добавлен на случай истинного "осиротевшего" потомка (после удаления родителя) — тогда сам a становится своей группой, а не крашит страницу %>
-  <% grouped_ads = @ads.group_by { |a| (a.root? || a.parent.nil?) ? a : a.parent } %>
-  <% grouped_ads.sort_by { |group, _| group.name.to_s }.each do |group, ads_in_group| %>
-
-    <tr class="has-background-light">
-      <td><%= checkbox_in_place(group, :active) %></td>
-      <td class="has-text-weight-semibold"><%= group.name %></td>
-      <td><%= group.slug %></td>
-      <td><%= group.feature_code %></td>
-      <td><%= group.country_code %></td>
-      <td><%= group.population %></td>
-      <td><%= group.tags.size %></td>
-      <td>
-        <a href="/admin/ads/<%= group.id %>" class="button is-small">show</a>
-        <a href="/admin/ads/<%= group.id %>/edit" class="button is-small">edit</a>
-        <a href="/admin/ads/new?parent_id=<%= group.id %>" class="button is-small is-info">+ child</a>
-      </td>
-    </tr>
-
-    <% (ads_in_group - [group]).sort_by { |a| a.name.to_s }.each do |ad| %>
-      <tr>
-        <td><%= checkbox_in_place(ad, :active) %></td>
-        <td class="pl-5"><%= ad.name %></td>
-        <td><%= ad.slug %></td>
-        <td><%= ad.feature_code %></td>
-        <td><%= ad.country_code %></td>
-        <td><%= ad.population %></td>
-        <td><%= ad.tags.size %></td>
-        <td>
-          <a href="/admin/ads/<%= ad.id %>" class="button is-small">show</a>
-          <a href="/admin/ads/<%= ad.id %>/edit" class="button is-small">edit</a>
-        </td>
-      </tr>
-    <% end %>
-
-  <% end %>
-
-  </table>
-
-</div>
+  <%= erb :'/ads/_table', views: settings.views_admin, locals: { ads: @ads } %>
 
 </div>

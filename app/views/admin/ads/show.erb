@@ -1,8 +1,19 @@
-<h1 class='title is-4'><%= ("— " * @ad.depth) + @ad.name %></h1>
+<% if @ad.ancestors.any? %>
+  <p>
+    <a href="/admin/ads">Countries</a> /
+    <% @ad.ancestors.each do |a| %>
+      <a href="/admin/ads/<%= a.id %>"><%= a.name %> <span class="tag is-light is-small"><%= a.feature_code %></span></a> /
+    <% end %>
+  </p>
+<% else %>
+  <p><a href="/admin/ads">Countries</a></p>
+<% end %>
+
+<h1 class="title is-size-4"><%= @ad.name %> <span class="tag is-light"><%= @ad.feature_code %></span></h1>
 
 <a href="/admin/ads/<%= @ad.id %>/edit" class="button is-small">edit</a>
 
-<table class='table is-size-7'>
+<table class="table is-size-7">
   <tr>
     <td>id (geonameid)</td>
     <td><%= @ad.id %></td>
@@ -10,10 +21,6 @@
   <tr>
     <td>slug</td>
     <td><%= @ad.slug %></td>
-  </tr>
-  <tr>
-    <td>feature_code</td>
-    <td><%= @ad.feature_code %></td>
   </tr>
   <tr>
     <td>country_code / admin1_code / admin2_code</td>
@@ -28,8 +35,12 @@
     <td><%= @ad.latitude %>, <%= @ad.longitude %></td>
   </tr>
   <tr>
-    <td>parent</td>
-    <td><%= @ad.parent&.name %></td>
+    <td>timezone</td>
+    <td><%= @ad.timezone %></td>
+  </tr>
+  <tr>
+    <td>active</td>
+    <td><%= checkbox_in_place(@ad, :active) %></td>
   </tr>
 </table>
 
@@ -40,9 +51,7 @@
   <% end %>
 </ul>
 
-<h2 class='title is-4 mt-4'>children</h2>
-<ul>
-  <% @ad.children.each do |child| %>
-    <li><a href="/admin/ads/<%= child.id %>"><%= child.name %></a>
-  <% end %>
-</ul>
+<h2 class="title is-size-5 mt-5">Children (<%= @ad.children.size %>)</h2>
+<p class="help mb-3">клик по имени — раскрыть следующий уровень</p>
+
+<%= erb :'/ads/_table', views: settings.views_admin, locals: { ads: @ad.children.order(:feature_code, :name) } %>

@@ -2,10 +2,11 @@ class AdsController < App
 
   namespace '/admin' do
 
+    # верхний уровень — только страны (Ad.roots и без того почти всегда
+    # страны, но фильтр по feature_code защищает от "осиротевшего" root
+    # не-страны, если у него потерялся ancestry до настоящей страны).
     get '/ads' do
-      @q = Ad.ransack(params[:q])
-      @ads_found = @q.result(distinct: true).size
-      @ads       = @q.result(distinct: true).order(:ancestry, :name).page(params[:page]).per(500)
+      @ads = Ad.roots.where(feature_code: Ad::COUNTRY_FEATURE_CODES).order(:name)
 
       erb :"/ads/index", layout: :"/layout/wide", views: settings.views_admin
     end
