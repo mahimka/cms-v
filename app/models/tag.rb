@@ -29,7 +29,7 @@ class Tag < ActiveRecord::Base
   validates :name, uniqueness: true
   validates :slug, uniqueness: true, allow_nil: true
 
-  GEONAMES_SYNCED_FIELDS = %w[name slug].freeze
+  GEONAMES_SYNCED_FIELDS = %w[name slug short_2].freeze
 
   # table == "ads" — данные тега пришли из Ad (см. Ad#tags) и дальше
   # должны обновляться только через перепривязку к ads, а не руками в
