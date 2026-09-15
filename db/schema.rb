@@ -10,7 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_15_120000) do
+ActiveRecord::Schema.define(version: 2026_09_15_130000) do
+
+  create_table "ads", force: :cascade do |t|
+    t.string "ancestry"
+    t.string "name"
+    t.string "slug"
+    t.string "feature_code"
+    t.string "country_code"
+    t.string "admin1_code"
+    t.string "admin2_code"
+    t.integer "population"
+    t.float "latitude"
+    t.float "longitude"
+    t.string "timezone"
+    t.boolean "active", default: true
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["ancestry"], name: "index_ads_on_ancestry"
+    t.index ["feature_code"], name: "index_ads_on_feature_code"
+    t.index ["slug"], name: "index_ads_on_slug", unique: true
+  end
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"

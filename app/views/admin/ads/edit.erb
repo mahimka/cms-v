@@ -1,0 +1,26 @@
+<%= erb :'/layout/_flash', views: settings.views_admin %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @ad.name %></h1>
+
+  <form method="POST" action="/admin/ads/<%= @ad.id %>">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <%= erb :'/ads/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Update Ad" class="button is-link is-warning">
+      </div>
+      <div class="control">
+        <a href="/admin/ads/<%= @ad.id %>" class="button">Show</a>
+      </div>
+      <div class="control">
+        <a href="/admin/ads/new?parent_id=<%= @ad.id %>" class="button is-info">+ child ad</a>
+      </div>
+    </div>
+
+  </form>
+
+</div>

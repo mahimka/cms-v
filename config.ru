@@ -18,6 +18,7 @@ use MarkersController
 use TagsController
 use SchemasController
 use LabelsController
+use AdsController
 use LinksController
 use DetailsController
 use PicturesController
@@ -36,11 +37,9 @@ use RoutesLast
 use RoutesHistory
 
 # use GeonamesController
-# use AdsController
 
 # use ProfilesController
 # use TagsController
-# use AdsController
 
 # use ProjectMethods
 # use RssRoutesController

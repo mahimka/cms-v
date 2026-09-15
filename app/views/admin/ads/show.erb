@@ -1,0 +1,48 @@
+<h1 class='title is-4'><%= ("— " * @ad.depth) + @ad.name %></h1>
+
+<a href="/admin/ads/<%= @ad.id %>/edit" class="button is-small">edit</a>
+
+<table class='table is-size-7'>
+  <tr>
+    <td>id (geonameid)</td>
+    <td><%= @ad.id %></td>
+  </tr>
+  <tr>
+    <td>slug</td>
+    <td><%= @ad.slug %></td>
+  </tr>
+  <tr>
+    <td>feature_code</td>
+    <td><%= @ad.feature_code %></td>
+  </tr>
+  <tr>
+    <td>country_code / admin1_code / admin2_code</td>
+    <td><%= @ad.country_code %> / <%= @ad.admin1_code %> / <%= @ad.admin2_code %></td>
+  </tr>
+  <tr>
+    <td>population</td>
+    <td><%= @ad.population %></td>
+  </tr>
+  <tr>
+    <td>latitude / longitude</td>
+    <td><%= @ad.latitude %>, <%= @ad.longitude %></td>
+  </tr>
+  <tr>
+    <td>parent</td>
+    <td><%= @ad.parent&.name %></td>
+  </tr>
+</table>
+
+<h2 class='title is-4 mt-4'>tags linked to this ad</h2>
+<ul>
+  <% @ad.tags.each do |tag| %>
+    <li><a href="/admin/tags/<%= tag.id %>"><%= tag.name %></a>
+  <% end %>
+</ul>
+
+<h2 class='title is-4 mt-4'>children</h2>
+<ul>
+  <% @ad.children.each do |child| %>
+    <li><a href="/admin/ads/<%= child.id %>"><%= child.name %></a>
+  <% end %>
+</ul>
