@@ -27,6 +27,7 @@ class Tag < ActiveRecord::Base
 
   validates_presence_of :name #, :position
   validates :name, uniqueness: true
+  validates :slug, uniqueness: true, allow_nil: true
 
   # Перевод name на язык страницы. Переводы вносятся вручную в админке
   # (translations — hash locale => строка), при отсутствии — фолбэк на name.

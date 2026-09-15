@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_12_150000) do
+ActiveRecord::Schema.define(version: 2026_09_15_120000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -321,8 +321,11 @@ ActiveRecord::Schema.define(version: 2026_09_12_150000) do
     t.text "translations"
     t.boolean "fixed", default: false
     t.text "icon_svg"
-    t.index ["name"], name: "index_tags_on_name", unique: true
+    t.string "slug"
+    t.string "table"
+    t.integer "table_id"
     t.index ["parent_id"], name: "index_tags_on_parent_id"
+    t.index ["slug"], name: "index_tags_on_slug", unique: true
   end
 
   create_table "users", force: :cascade do |t|
