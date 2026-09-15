@@ -42,6 +42,19 @@
 <div class="columns">
 
   <div class="column is-2">
+    <%= label(:ad, :short, "short", options = {class: 'label'}) %>
+    <p class="help">короткое/общее имя ("Egypt"), если отличается от официального name; отсюда берётся slug</p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:ad, :short, options = {class: 'input is-success', value: @ad.short, placeholder: "leave empty to use name"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
     <%= label(:ad, :slug, "slug", options = {class: 'label'}) %>
     <p class="help">общий для всех проектов — не менять после публикации</p>
   </div>

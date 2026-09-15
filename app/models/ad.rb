@@ -20,11 +20,17 @@ class Ad < ActiveRecord::Base
   before_destroy :prevent_destroy_if_tags_linked
 
   def self.ransackable_attributes(auth_object = nil)
-    ["active", "id", "name", "slug", "feature_code", "country_code", "admin1_code", "admin2_code", "population", "ancestry", "created_at", "updated_at"]
+    ["active", "id", "name", "short", "slug", "feature_code", "country_code", "admin1_code", "admin2_code", "population", "ancestry", "created_at", "updated_at"]
   end
 
   def self.ransackable_associations(auth_object = nil)
     ["parent", "children"]
+  end
+
+  # Короткое имя для отображения/ссылок ("Egypt"), если задано —
+  # иначе полное официальное name ("Arab Republic of Egypt").
+  def display_name
+    short.presence || name
   end
 
   # Теги, привязанные к этому ad через общее поле table/table_id (не

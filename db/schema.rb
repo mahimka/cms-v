@@ -10,12 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_15_130000) do
+ActiveRecord::Schema.define(version: 2026_09_15_140000) do
 
   create_table "ads", force: :cascade do |t|
     t.string "ancestry"
     t.string "name"
     t.string "slug"
+    t.string "short"
     t.string "feature_code"
     t.string "country_code"
     t.string "admin1_code"

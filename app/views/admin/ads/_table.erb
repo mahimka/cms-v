@@ -6,6 +6,7 @@
     <td>adm1</td>
     <td>adm2</td>
     <td>slug</td>
+    <td title="короткое имя, если задано ('Egypt') — иначе совпадает с name">short</td>
     <td>name</td>
     <td title="потомки по уровням: ADM1 / ADM2 / города (feature_code начинается с PPL)">descendants</td>
     <td>population</td>
@@ -21,7 +22,8 @@
       <td nowrap><span class="tag is-warning is-small"><%= ad.admin1_code %></span></td>
       <td nowrap><span class="tag is-warning is-small"><%= ad.admin2_code %></span></td>
       <td nowrap><%= ad.slug %></td>
-      <td nowrap><a href="/admin/ads/<%= ad.id %>"><%= ad.name %></a></td>
+      <td nowrap><a href="/admin/ads/<%= ad.id %>"><%= ad.display_name %></a></td>
+      <td nowrap><%= ad.name %></td>
       <td nowrap>
         <% descendant_codes = ad.descendants.pluck(:feature_code) %>
         <div class="tags has-addons is-family-monospace mb-0">

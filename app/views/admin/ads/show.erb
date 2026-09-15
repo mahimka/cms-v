@@ -2,14 +2,15 @@
   <p>
     <a href="/admin/ads">Countries</a> /
     <% @ad.ancestors.each do |a| %>
-      <a href="/admin/ads/<%= a.id %>"><%= a.name %> <span class="tag is-light is-small"><%= a.feature_code %></span></a> /
+      <a href="/admin/ads/<%= a.id %>"><%= a.display_name %> <span class="tag is-light is-small"><%= a.feature_code %></span></a> /
     <% end %>
   </p>
 <% else %>
   <p><a href="/admin/ads">Countries</a></p>
 <% end %>
 
-<h1 class="title is-size-4"><%= @ad.name %> <span class="tag is-light"><%= @ad.feature_code %></span></h1>
+<h1 class="title is-size-4"><%= @ad.display_name %> <span class="tag is-light"><%= @ad.feature_code %></span></h1>
+<p class="subtitle is-size-7"><%= @ad.name %></p>
 
 <a href="/admin/ads/<%= @ad.id %>/edit" class="button is-small">edit</a>
 
@@ -17,6 +18,10 @@
   <tr>
     <td>id (geonameid)</td>
     <td><%= @ad.id %></td>
+  </tr>
+  <tr>
+    <td>short</td>
+    <td><%= @ad.short %></td>
   </tr>
   <tr>
     <td>slug</td>
