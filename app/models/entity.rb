@@ -53,7 +53,7 @@ class Entity < ActiveRecord::Base
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    %w[id active name parent_id address latitude longitude schema_id created_at updated_at]
+    %w[id active name short parent_id address latitude longitude plus_code schema_id created_at updated_at]
   end
 
   def self.ransackable_associations(auth_object = nil)

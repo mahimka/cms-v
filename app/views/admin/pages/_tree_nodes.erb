@@ -7,6 +7,10 @@
     class="page-tree-node"
     data-page-id="<%= page.id %>"
   >
+    <% if @tree_rows[:nested] %>
+      <span class="page-tree-nested-arrow" title="Вложенная страница">↳</span>
+    <% end %>
+
     <div class="page-tree-row">
       <% if has_children %>
         <button

@@ -24,7 +24,13 @@
           <div class="control">
             <button type="submit" class="button is-small is-info">save</button>
           </div>
+
+
         </form>
+
+          <div class="column">
+            <a href="" class="button is-small is-success">go</a>
+          </div>
 
         <form method="POST" action="/admin/links/<%= link.id %>" class="column is-1" onsubmit="return confirm('Delete this link?')">
           <input type="hidden" name="_method" value="DELETE">

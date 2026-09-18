@@ -1,5 +1,6 @@
 <table class="table is-size-7 is-bordered is-narrow">
   <tr class="has-text-weight-semibold">
+    <!--<td>page</td>-->
     <td>active</td>
     <td>fc</td>
     <td>cc</td>
@@ -16,6 +17,19 @@
 
   <% ads.each do |ad| %>
     <tr>
+
+<!--
+      <td>
+        <%# if ad.page&.published? %>
+          <a href='<%#= ad.page.uri %>'>uri</a>
+        <%# elsif ad.page.present? %>
+        <%# else %>
+          <a href="/admin/pages/new?pageable_type=Ad&pageable_id=<%#= ad.id %>&slug=<%#= ad.slug %>&title=<%#= ad.name %>" class='button is-small is-warning'>+</a>
+        <%# end %>
+      </td> 
+-->
+
+      </td>
       <td><%= checkbox_in_place(ad, :active) %></td>
       <td nowrap><span class="tag is-danger is-small"><%= ad.feature_code %></span></td>
       <td nowrap><span class="tag is-success is-small"><%= ad.country_code %></span></td>

@@ -1,0 +1,133 @@
+<p>
+  <a class="button is-warning" href="/admin/page_templates/new">Add Page Template</a>
+</p>
+
+<div class="content m-3">
+
+<form method="GET" action="/admin/page_templates">
+
+  <div class="columns">
+    <div class="column is-2">
+      <tag class="tag is-size-7">template_type_eq</tag>
+      <%= select(:q, :template_type_eq, {"": ""}.merge(PageTemplate::TEMPLATE_TYPES.index_by(&:itself)), options = {class: 'select input is-small', value: @q.template_type_eq}) %>
+    </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">pageable_type_eq</tag>
+      <%= select(:q, :pageable_type_eq, {"": ""}.merge(PageTemplate::PAGEABLE_TYPES.index_by(&:itself)), options = {class: 'select input is-small', value: @q.pageable_type_eq}) %>
+    </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">slug_cont</tag>
+      <%= input(:q, :slug_cont, options = {class: 'input is-small', value: @q.slug_cont, placeholder: ""}) %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-1">
+      <input type="submit" value="Filter" class="button is-warning">
+    </div>
+    <div class="column is-11">
+      Found/Total: <%= @page_templates_found %> / <%= PageTemplate.all.size %>
+    </div>
+  </div>
+
+</form>
+
+<div class="content">
+
+  <div class="columns is-mobile is-variable is-1 mt-0 mb-0">
+    <div class="column is-12">
+      <%= paginate @page_templates unless @page_templates.blank? %>
+    </div>
+  </div>
+
+  <table class="table is-fullwidth is-size-7">
+    <tr class="is-size-6 has-text-weight-semibold">
+      <td title="признак самого template — для массовой генерации по нескольким template'ам">a</td>
+      <td>type</td>
+      <td>pageA</td>
+      <td>ln</td>
+      <td>p_page</td>
+      <td>slug</td>
+      <td></td>
+      <td>r|p</td>
+      <td title="сколько страниц уже сгенерировано по этому template">n</td>
+      <td>title</td>
+      <td>h1</td>
+      <td>subtitle</td>
+      <td>anchor_1</td>
+      <td>anchor_2</td>
+      <td>anchor_3</td>
+      <td>view</td>
+      <td>layout</td>
+    </tr>
+
+    <% @page_templates.each do |page_template| %>
+      <% depth = @page_template_depths[page_template.id] || 0 %>
+      <tr>
+        <td><%= checkbox_in_place page_template, :active %> <%#= page_template.active ? "✓" : "—" %></td>
+        <td><%= page_template.template_type %></td>
+        <td><%= page_template.pageable_type %></td>
+        <td><%= page_template.lang %></td>
+        <td><%= page_template.parent_page&.uri %></td>
+        <td class="is-flex">
+          <% if depth > 0 %>
+            <span class="has-text-grey pr-2 pt-2" style="padding-left: <%= depth * 1.25 %>em;">↳</span>
+          <% end %>
+          <!--<a href="/admin/page_templates/<%= page_template.id %>/edit"><%= page_template.slug %></a>-->
+          <%= input_in_place page_template, :slug %>
+          <% if page_template.parent_template_id.present? %>
+            <span class="tag is-small is-light mt-1" title="Вложенный template — facet-страницы создаются под каждой страницей родителя">
+              #<%= page_template.parent_template_id %>
+            </span>
+          <% end %>
+        </td>
+        <td>
+          <a href="/admin/page_templates/<%= page_template.id %>/edit" class="button is-small">edit</a>
+          <a href="/admin/page_templates/new?copy_from=<%= page_template.id %>" class="button is-small"
+             title="Создать новый template, предзаполненный данными этого">copy</a>
+          <% if page_template.template_type == "List" %>
+            <a href="/admin/page_templates/new?parent_template_id=<%= page_template.id %>" class="button is-small is-link is-light"
+               title="Создать вложенный template — facet-страницы под каждой страницей этого template'а">+nes</a>
+          <% end %>
+
+          <% if %w[Profile List].include?(page_template.template_type) %>
+            <form method="POST" action="/admin/page_templates/<%= page_template.id %>/generate" style="display:inline;"
+                  onsubmit="return confirm('Найти объекты <%= page_template.pageable_type %> по template_conditions и создать недостающие страницы? Уже существующие не трогает.')">
+              <input type="hidden" name="redirect_to" value="<%= request.fullpath %>">
+              <button type="submit" class="button is-small is-link is-light">gen</button>
+            </form>
+            <form method="POST" action="/admin/page_templates/<%= page_template.id %>/generate" style="display:inline;"
+                  onsubmit="return confirm('ВНИМАНИЕ: обновит ВСЕ поля у УЖЕ СУЩЕСТВУЮЩИХ страниц, сгенерированных этим template — ручные правки будут перезаписаны. Продолжить?')">
+              <input type="hidden" name="redirect_to" value="<%= request.fullpath %>">
+              <input type="hidden" name="force" value="true">
+              <button type="submit" class="button is-small is-warning is-light">force</button>
+            </form>
+          <% end %>
+        </td>
+        <td>
+          <%= checkbox_in_place page_template, :page_ready %> | <%= checkbox_in_place page_template, :page_published %>
+          <%#= page_template.page_ready ? "✓" : "—" %>  <%#= page_template.page_published ? "✓" : "—" %>
+        </td>
+        <td>          
+           <a href="/admin/pages?<%= Rack::Utils.build_nested_query("q" => { "template_id_eq" => page_template.id }) %>" title="Страницы, сгенерированные этим template'ом #<%= page_template.id %>"><%= page_template.pages.size %></a>
+        </td>
+        <td><%= input_in_place page_template, :title %></td>
+        <td><%= input_in_place page_template, :h1 %></td>
+        <td><%= input_in_place page_template, :subtitle %></td>
+        <td><%= input_in_place page_template, :anchor_1 %></td>
+        <td><%= input_in_place page_template, :anchor_2 %></td>
+        <td><%= input_in_place page_template, :anchor_3 %></td>
+
+        <% values = (Dir.glob("**", base: settings.views_project) + Dir.glob("**", base: settings.views))
+                    .delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.uniq.sort.unshift("") %>
+        <td width=170><%= select_in_place(page_template, :view, values, class: 'input is-success is-small mt-1') %></td>
+
+        <td><%= page_template.layout %></td>
+      </tr>
+    <% end %>
+
+  </table>
+
+</div>
+
+</div>

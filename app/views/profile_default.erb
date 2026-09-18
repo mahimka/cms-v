@@ -14,7 +14,7 @@
         <div class="column is-5">
      
           <h1 class="title title_hero"><%= @page.h1 %></h1>
-          <span class='subtitle '><%= @page.subtitle %></span>
+          <p class='subtitle mt-3'><%= @page.subtitle %></p>
           
           <!--
           <strong class="is-size-6" style="color:#2c6fad;">€<%= "#{@page_details['price_low_season_next_h']}" %></strong>  
@@ -23,18 +23,22 @@
           <span class="is-size-7 has-text-grey">/ <%= label_by_lang('season_high') %></span> 
           -->
 
+          <!-- 
           <p class="subtitle is-6  mb-5 mt-5" style="opacity: 0.92; max-width: 640px; line-height: 1.7;">
-            <%= @page.hero_1 %>
           </p>
+          -->
 
-          <div class="tags mb-5">
+          <% unless @page.hero_1.blank? %>
+            <%= @page.hero_1 %>
+          <% end %>
+
+          <% unless @page.hero_2.blank? %>
             <%= @page.hero_2 %>
-          </div>
+          <% end %>
 
 
-          <div class="tags mt-3  is-light">
-
-            <%= @page.pageable.tags_of_group('cuisines').active.map{|tag| "<span class='tag ml-1 is-info is-light'>#{tag.translation(@page.lang).downcase}</span>"}.join %>
+          <div class="tags mt-4 is-light">
+            <%#= @page.pageable.tags_of_group('Lessons').active.map{|tag| "<span class='tag ml-1 is-info is-light'>#{tag.translation(@page.lang).downcase}</span>"}.join %>
            </div>
 
           <div class="buttons">
@@ -42,9 +46,41 @@
 
             <%= link_on_page('_rating') %>
             <%= link_on_page('_contact') %>
-            <%= link_on_page('_gallery') %>
+            <%= link_on_page('_gallery') unless @page.pageable.pictures.size == 0 %>
             <%= link_on_page('_what_is_near') %>
-            <%= link_on_page('_faq') %>
+            <%= link_on_page('_faq') unless @page.faq.blank? %>
+          </div>
+
+          <!-- Оптимизированная группа кнопок навигации -->
+          <div class="field has-addons mt-5 mb-3">
+            <!-- Google Maps (Primary Action) -->
+            <p class="control is-expanded">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=<%= @page.pageable.latitude %>,<%= @page.pageable.longitude %>"
+                 target="_blank" 
+                 rel="noopener" 
+                 class="button is-primary is-medium is-fullwidth has-text-weight-bold">
+                <!-- MapPin -->
+                <span class="icon mr-1">
+                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <span>Google Maps</span>
+              </a>
+            </p>
+
+            <!-- Waze -->
+            <p class="control">
+              <a href="https://waze.com/ul?ll=<%= @page.pageable.latitude %>,<%= @page.pageable.longitude %>&navigate=yes" 
+                 target="_blank" 
+                 rel="noopener" 
+                 class="button is-info is-medium" 
+                 title="Odpri v Waze">
+                <!-- Navigation -->
+                <span class="icon mr-1">
+                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                </span>
+                <span>Waze</span>
+              </a>
+            </p>
           </div>
 
           <%= partial('_share_buttons') %>
@@ -75,103 +111,45 @@
 
   </div>
 
-  <div class="container mt-0 pt-0 content pl-0 pr-0">
-    <%= partial '_google_map_one_point', views: settings.views, locals: {map_icon: 'parking'}  %>
-  </div>
-
-  <%= partial '_sidebar_address' %>
-  <%= partial '_sidebar_links' %>
+  <%#= partial '_sidebar_address' %>
+  <%#= partial '_sidebar_links' %>
   <%#= partial '_tags_div' %>
 <% end %> 
 
-<table class="table">
-  <% unless @page.pageable.tags_of_group('cuisines').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_cuisine').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('cuisines').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-  <% unless @page.pageable.tags_of_group('drinks').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_drinks').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('drinks').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-  <% unless @page.pageable.tags_of_group('good_for').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_good_for').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('good_for').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-  <% unless @page.pageable.tags_of_group('meal_type').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_meal_type').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('meal_type').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-  <% unless @page.pageable.tags_of_group('payment_options').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_pay_with').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('payment_options').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-  <% unless @page.pageable.tags_of_group('price_range').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_price_range').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('price_range').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-  <% unless @page.pageable.tags_of_group('restrictions').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_restrictions').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('restrictions').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-  <% unless @page.pageable.tags_of_group('restaurant_features').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_amenities').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('restaurant_features').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-  <% unless @page.pageable.tags_of_group('_dietary_options').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_special_diet').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('special_diet').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-  <% unless @page.pageable.tags_of_group('dishes').active.blank? %>
-    <tr>
-      <td nowrap><%= label_by_lang('_dishes').capitalize %></td>
-      <td><%= @page.pageable.tags_of_group('dishes').active.map{|tag| "<span class='tag ml-1'>#{tag.translation(@page.lang).downcase}</span>"}.join %></td>
-    </tr>
-  <% end %>
-
-</table>
-
-
-
-
+<%= parse_erb_and_markdown(@page.body, options = {}) if @page.body %>
+<%= parse_erb_and_markdown(@page.block_1, options = {}) if @page.block_1 %>
 
 <h2 class="title is-4" id="_contact"><%= label_by_lang('_contact_and_information').capitalize %> </h2>
-  <%= partial '_sidebar_address' %>
-  <%= partial '_sidebar_links' %> 
 
-<h3 class="title is-5"><%= label_by_lang('_opening_hours').capitalize %></h3>
-  <% unless partial('_opening_hours').blank? %>
-    <%= partial '_opening_hours' %> 
-  <% else %>
-    <%= label_by_lang('_no_info').capitalize %> 
-  <% end %>
-<%= parse_erb_and_markdown(@page.body, options = {}) if @page.body %>
+<div class="container mt-0 pt-0 content pl-0 pr-0">
+  <%= partial '_google_map_one_point', views: settings.views, locals: {map_icon: 'parking'}  %>
+</div>
+
+<div class="columns">
+  <div class="column">
+    <%= partial '_address' %>
+  </div>
+</div>
+
+<div class="columns">
+  <div class="column">    
+    <%= partial '_contacts_ul' %>
+  </div>
+
+  <div class="column">
+    <%= partial '_links_ul' %> 
+  </div>
+</div>
+
+<% unless partial('_opening_hours').blank? %>
+  <h3 class="title is-5"><%= label_by_lang('_opening_hours').capitalize %></h3>
+    <% unless partial('_opening_hours').blank? %>
+      <%= partial '_opening_hours' %> 
+    <% else %>
+      <%= label_by_lang('_no_info').capitalize %> 
+    <% end %>
+<% end %>
+
 
 <h2 class="title is-4" id="_rating"><%= label_by_lang('_opinions_on_sites').capitalize %> <!--Mnenja na drugih platformah--></h2>
 
@@ -181,29 +159,29 @@
 
   <div class="message-body">
 
-    <% @page.source_page.pageable.profiles.active.each do |profile| %>
-      <% unless profile.rating.blank? %>
+  <% @page.source_page.pageable.profiles.active.each do |profile| %>
+    <% unless profile.rating.blank? %>
 
 
-        <a href="<%= profile.url %>" target="_blank" rel="noopener noreferrer" class="box grid mb-1 "  style="text-decoration: none;">
-             <div class="cell">
-               <span class="icon mr-2" style="display: inline-block; vertical-align: middle;"><%= profile.site.icon_svg %></span><%= profile.site.name %>
-             </div>
-             <div class="cell"><span class="icon mr-2"><%= profile.rating %></span> 
-               <span><%= star_rating(profile.rating) %></span> 
-              </div>
-             <div class="cell"><%= profile.review_count %> <%= label_by_lang("_reviews") %></div>
-             <div class="cell"><span class="tag"><%= profile.updated_at.strftime("%d %b %Y") %></span> </div>
-        </a>
-          
-      <% end %>
+      <a href="<%= profile.url %>" target="_blank" rel="noopener noreferrer" class="box grid mb-1 "  style="text-decoration: none;">
+           <div class="cell">
+             <span class="icon mr-2" style="display: inline-block; vertical-align: middle;"><%= profile.site.icon_svg %></span><%= profile.site.name %>
+           </div>
+           <div class="cell"><span class="icon mr-2"><%= profile.rating %></span> 
+             <span><%= star_rating(profile.rating) %></span> 
+            </div>
+           <div class="cell"><%= profile.review_count %> <%= label_by_lang("_reviews") %></div>
+           <div class="cell"><span class="tag"><%= profile.updated_at.strftime("%d %b %Y") %></span> </div>
+      </a>
+        
     <% end %>
-      
+  <% end %>
+    
   </div>
+
   <p class="mt-3"><%= label_by_lang('_know_review').capitalize %> <a href=''><%= label_by_lang('_offer_us_review').capitalize %></a>
 
 </article>
-
 
 <% unless @page.faq.blank? %>
   <h3 class="title is-4" id='faq'>
@@ -212,8 +190,10 @@
   <%= parse_erb_and_markdown(@page.faq, options = {}) %>
 <% end %>
 
-<h3 class="title is-4" id="gallery"><%= label_by_lang('gallery').capitalize %></h3>
-<%= partial '_gallery_page_id', views: settings.views %>
+<% unless @page.pageable.pictures.size == 0 %>
+  <h3 class="title is-4" id="gallery"><%= label_by_lang('gallery').capitalize %></h3>
+  <%= partial '_gallery_page_id', views: settings.views %>
+<% end %>
   
 <% content_for :footer do %>
   <%#= partial 'pages_by_tag', locals: {lang: @page.lang, item: @page.item, tag_name: 'Apartment'} %>

@@ -288,6 +288,16 @@ class PagesController < App
       page_params, conditions_error = normalize_page_conditions(params[:page])
 
       if conditions_error.nil? && @page.update(page_params)
+        # Страница сгенерирована по template — поля, которые реально
+        # поменялись в этом сохранении, защищаем от PageTemplateGenerator
+        # (force: true). Само сохранение генератором идёт другим путём
+        # (PageTemplateGenerator#ensure_page, не этот patch), так что
+        # свои же записи это в "отредактированные" не помечает.
+        if @page.template_id.present?
+          changed_fields = @page.saved_changes.keys & Page::PROTECTABLE_FIELDS
+          @page.mark_edited_fields!(changed_fields) if changed_fields.any?
+        end
+
         if request.xhr?
           headers "X-Page-Id" => @page.id.to_s
           status 200
@@ -352,6 +362,20 @@ class PagesController < App
       results.map { |r| { lang: r.lang, ok: r.success?, error: r.error } }.to_json
     end
 
+
+    # Снять защиту с одного поля (edited_columns) — "открепить" ручную
+    # правку конкретного поля конкретной страницы, чтобы следующий
+    # force refresh снова мог его перезаписать. См. Page#edited_field?.
+    # GET, не POST — вызывается голым $.ajax из page_field_lock (см.
+    # in_place_editing_helpers.rb, тот же приём, что у checkbox_in_place/
+    # delete_in_place), а не формой: вложенная <form> внутри большой
+    # формы редактирования страницы — невалидный HTML, браузер обрывает
+    # ей внешнюю форму раньше времени (см. историю с PageTemplate).
+    get '/pages/:id/unlock_field' do
+      page = Page.find(params[:id])
+      page.unmark_edited_field!(params[:field])
+      "unlocked"
+    end
 
     get '/pages/:id/edit/form' do
       @page = Page.find(params[:id])
@@ -850,20 +874,24 @@ class PagesController < App
 
   # Модели, для которых допустимо создавать detail-страницу через
   # /pages/new?pageable_type=...&pageable_id=... (see PAGEABLE concern).
-  PAGEABLE_TYPES = %w[Entity Item Event].freeze
+  PAGEABLE_TYPES = %w[Entity Item Event Ad].freeze
 
   # Предзаполняет новую master-страницу данными сущности, для которой она
-  # создаётся: title/h1 — entity.name, slug — транслитерированное имя,
-  # layout/view — "default", pageable_type/pageable_id — сама сущность.
+  # создаётся: title/h1/slug — из pageable.display_name, если такой метод
+  # есть (Ad — короткое имя типа "Egypt" вместо официального name), иначе
+  # из pageable.name, layout/view — "default", pageable_type/pageable_id —
+  # сама сущность.
   def assign_pageable_defaults(page, pageable_type, pageable_id)
     return unless PAGEABLE_TYPES.include?(pageable_type)
 
     pageable = pageable_type.constantize.find_by(id: pageable_id)
     return unless pageable
 
-    page.title         = pageable.name
-    page.h1            = pageable.name
-    page.slug          = SlugGenerator.call(pageable.name)
+    display_name = pageable.respond_to?(:display_name) ? pageable.display_name : pageable.name
+
+    page.title         = display_name
+    page.h1            = display_name
+    page.slug          = SlugGenerator.call(display_name)
     page.layout        = "default"
     page.view          = "default"
     page.pageable_type = pageable_type

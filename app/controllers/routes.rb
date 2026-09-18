@@ -34,8 +34,10 @@ class Routes < App
        entity = @page.pageable
 
        if entity
-         @page_details = entity.details || {}
-         @page_links   = entity.links.each_with_object({}) { |link, h| h[link.label&.name] = link.url }
+         # не у всех pageable-типов есть details/links (например у Ad их
+         # нет) — вместо краша просто пусто.
+         @page_details = entity.respond_to?(:details) ? (entity.details || {}) : {}
+         @page_links   = entity.respond_to?(:links) ? entity.links.each_with_object({}) { |link, h| h[link.label&.name] = link.url } : {}
          @page_tags    = entity.tags.active.each_with_object({}) { |tag, h| h[tag.name] = tag.translation(@page.lang) }
 
          if entity.latitude && entity.longitude

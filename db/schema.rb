@@ -10,13 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_15_140000) do
+ActiveRecord::Schema.define(version: 2026_09_18_100000) do
 
   create_table "ads", force: :cascade do |t|
     t.string "ancestry"
     t.string "name"
     t.string "slug"
-    t.string "short"
     t.string "feature_code"
     t.string "country_code"
     t.string "admin1_code"
@@ -28,6 +27,7 @@ ActiveRecord::Schema.define(version: 2026_09_15_140000) do
     t.boolean "active", default: true
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "short"
     t.index ["ancestry"], name: "index_ads_on_ancestry"
     t.index ["feature_code"], name: "index_ads_on_feature_code"
     t.index ["slug"], name: "index_ads_on_slug", unique: true
@@ -56,6 +56,8 @@ ActiveRecord::Schema.define(version: 2026_09_15_140000) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "schema_id"
+    t.string "plus_code"
+    t.string "short"
     t.index ["name"], name: "index_entities_on_name"
     t.index ["schema_id"], name: "index_entities_on_schema_id"
   end
@@ -151,6 +153,50 @@ ActiveRecord::Schema.define(version: 2026_09_15_140000) do
     t.index ["tag_id"], name: "index_markers_on_tag_id"
   end
 
+  create_table "page_templates", force: :cascade do |t|
+    t.boolean "page_ready", default: false
+    t.boolean "page_published", default: false
+    t.string "template_type"
+    t.string "pageable_type"
+    t.text "template_conditions"
+    t.string "parent_page_id"
+    t.string "slug"
+    t.text "conditions"
+    t.string "lang", null: false
+    t.string "view"
+    t.string "layout"
+    t.string "title"
+    t.string "h1"
+    t.string "subtitle"
+    t.text "meta_description"
+    t.text "body"
+    t.text "faq"
+    t.text "schema"
+    t.string "anchor_1"
+    t.string "anchor_2"
+    t.string "anchor_3"
+    t.text "hero_1"
+    t.text "hero_2"
+    t.text "hero_3"
+    t.text "sidebar_1"
+    t.text "sidebar_2"
+    t.text "sidebar_3"
+    t.text "footer_1"
+    t.text "footer_2"
+    t.text "footer_3"
+    t.text "block_1"
+    t.text "block_2"
+    t.text "block_3"
+    t.text "block_4"
+    t.text "block_5"
+    t.text "block_6"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "schema_id"
+    t.integer "parent_template_id"
+    t.boolean "active", default: false
+  end
+
   create_table "pages", force: :cascade do |t|
     t.boolean "ready", default: false
     t.boolean "published", default: false
@@ -193,6 +239,9 @@ ActiveRecord::Schema.define(version: 2026_09_15_140000) do
     t.text "conditions"
     t.text "block_5"
     t.text "block_6"
+    t.integer "template_id"
+    t.text "edited_columns"
+    t.integer "list_tag_id"
     t.index ["ancestry"], name: "index_pages_on_ancestry"
     t.index ["master_id", "lang"], name: "index_pages_on_master_and_lang", unique: true, where: "master_id IS NOT NULL"
     t.index ["master_id"], name: "index_pages_on_master_id"

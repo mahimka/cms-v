@@ -1,10 +1,12 @@
 # "ad.rb" сортируется раньше "concerns/" (require_all грузит app/**/*.rb
 # одним проходом по алфавиту, без повторных попыток) — без явного
-# require здесь PreventDestroyWithChildren ещё не будет определён.
+# require здесь эти concern'ы ещё не будут определены.
 require_relative "concerns/prevent_destroy_with_children"
+require_relative "concerns/pageable"
 
 class Ad < ActiveRecord::Base
   include PreventDestroyWithChildren
+  include Pageable
 
   has_ancestry
 

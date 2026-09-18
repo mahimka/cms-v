@@ -25,10 +25,13 @@
             <button type="submit" class="button is-small is-info">save</button>
           </div>
           <div class="control">
-            <a href='<%= profile.url %>#profile' class='button is-small' target='_blank'>#profile</a>
+            <a href='<%= profile.url %>' class='button is-small is-success ml-1' target='_blank'>go</a>
           </div>
           <div class="control">
-            <a href='<%= profile.url %>#profile_html' class='button is-small' target='_blank'>#profile_html</a>
+            <a href='<%= profile.url %>#profile' class='button is-small is-warning ml-1' target='_blank'>#profile</a>
+          </div>
+          <div class="control">
+            <a href='<%= profile.url %>#profile_html' class='button is-small is-warning ml-1' target='_blank'>#profile_html</a>
           </div>
    
         </form>
@@ -45,7 +48,13 @@
         <div class="column is-2 my-0 py-0">
         </div>
         <div class="column is-1 my-0 py-0 is-size-7">
-           <%= profile.scraped_at %>
+           <%= profile.rating %>
+        </div>
+        <div class="column is-1 my-0 py-0 is-size-7">
+           <%= profile.review_count %>
+        </div>
+        <div class="column is-5 my-0 py-0 is-size-7">
+           <%= profile.scraped_at&.strftime('%b %d, %Y') %>
         </div>
        </div>
     <% end %>

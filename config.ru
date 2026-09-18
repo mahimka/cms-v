@@ -25,6 +25,7 @@ use PicturesController
 use ItemsController
 use EntitiesController
 use EventsController
+use PageTemplatesController
 use PagesController
 use HistoriesController
 use SessionsController

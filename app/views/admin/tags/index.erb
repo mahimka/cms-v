@@ -99,11 +99,16 @@
   <table class="table is-narrow is-size-7 ">
     <tr class="is-size-6 has-text-weight-semibold">
       <td></td>
-      <td>active</td>
-      <td title="запрещает менять name — на него ссылается List conditions (tags)">fixed 🔒</td>
-      <td>position</td>
+      <td>ae</td>
+      <td title="запрещает менять name — на него ссылается List conditions (tags)">f 🔒</td>
+      <td>pos</td>
       <td>icon</td>
+      <td>slug</td>
       <td>name</td>
+      <td>short</td>
+      <td>short_2</td>
+      <td>table</td>
+      <td>table_id</td>
       <td title="сколько объектов помечено этим тегом">used</td>
       <td>admin_notes</td>
       <td></td>
@@ -121,7 +126,13 @@
       <td><%= checkbox_in_place(group, :fixed) %></td>
       <td><%= group.position %></td>
       <td><span class="icon"><%= group.icon_svg %></span></td>
+      <td><%= group.slug %></td>
       <td class="has-text-weight-semibold"><%= group.name %></td>
+
+      <td><%= group.short %></td>
+      <td><%= group.short_2 %></td>
+      <td><%= group.table %></td>
+      <td><%= group.table_id %></td>
       <td><%= @tagging_counts_by_tag[group.id] || 0 %></td>
       <td><%= group.admin_notes %></td>
       <td>
@@ -151,15 +162,59 @@
         <td><%= checkbox_in_place(tag, :fixed) %></td>
         <td width=15><%= tag.position %><%#= input_in_place(tag, :position) %></td>
         <td><span class="icon"><%= tag.icon_svg %></span></td>
+        
         <td class="">
-
-          <% unless tag.fixed %>
-            <%= input_in_place(tag, :name) %><%#= tag.name %>
+          <% if tag.table == "ads" %>
+            <%= tag.slug %> <span class="tag is-info is-light is-small" title="данные из ads — редактируется только через перепривязку table_id"><a href="/admin/ads/<%= tag.table_id %>">ads 🔗</a></span>
+          <% elsif tag.fixed %>
+            <%= tag.slug %>
           <% else %>
-            <%= tag.name %>
-          <% end %>  
-
+            <%= input_in_place(tag, :slug) %><%#= tag.name %>
+          <% end %>
         </td>
+
+        <td class="">
+          <% if tag.table == "ads" %>
+            <%= tag.name %>
+          <% elsif tag.fixed %>
+            <%= tag.name %>
+          <% else %>
+            <%= input_in_place(tag, :name) %><%#= tag.name %>
+          <% end %>
+        </td>
+        
+        <td class="">
+          <% unless tag.fixed %>
+            <%= input_in_place(tag, :short, style: "width:100px") %><%#= tag.name %>
+          <% else %>
+            <%= tag.short %>
+          <% end %>
+        </td>
+        
+        <td class="">
+          <% if tag.table == "ads" || tag.fixed %>
+            <%= tag.short_2 %>
+          <% else %>
+            <%= input_in_place(tag, :short_2, style: "width:50px") %><%#= tag.name %>
+          <% end %>
+        </td>
+        
+        <td class="">
+          <% unless tag.fixed %>
+            <%= input_in_place(tag, :table, style: "width:100px") %><%#= tag.name %>
+          <% else %>
+            <%= tag.table %>
+          <% end %> 
+        </td>
+        
+        <td class="">
+          <% unless tag.fixed %>
+            <%= input_in_place(tag, :table_id, style: "width:40px") %><%#= tag.name %>
+          <% else %>
+            <%= tag.table_id %>
+          <% end %>                                 
+        </td>
+
         <td><%= @tagging_counts_by_tag[tag.id] || 0 %></td>
         <td><%= input_in_place(tag, :admin_notes) %></td>
         <td>

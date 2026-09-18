@@ -1,0 +1,26 @@
+<%
+  # Ссылки на дочерние страницы текущей (или переданной через page:)
+  # страницы, отфильтрованные по группе тегов group: (например "Lessons")
+  # — то есть только те facet-страницы этой страны/региона/... (page.
+  # children), чьи conditions["tags"] содержат slug тега из этой группы.
+  # Смотрим именно в conditions, а не просто в page.slug — так надёжнее,
+  # если у какой-то страницы slug и conditions разошлись (ручная правка).
+  #
+  # page = page || @page — работает и без локальной переменной page.
+  page = page || @page
+  group_tag = group.present? ? Tag.find_by(name: group) : nil
+  facet_slugs = group_tag ? group_tag.children.pluck(:slug) : []
+
+  children_pages = page.children.where(published: true).select do |child_page|
+    condition_tags = Array(child_page.conditions&.dig("tags"))
+    (condition_tags & facet_slugs).any?
+  end.sort_by { |p| p.h1.to_s }
+%>
+
+<% if children_pages.any? %>
+  <div class="tags">
+    <% children_pages.each do |child_page| %>
+      <a href="<%= child_page.uri %>" class="tag is-light is-medium" title="<%= child_page.anchor_2 %>"><%= child_page.h1.presence || child_page.title %></a>
+    <% end %>
+  </div>
+<% end %>

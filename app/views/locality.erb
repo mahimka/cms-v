@@ -1,0 +1,66 @@
+<% content_for :head_extra do %>
+<% end %>
+
+<% content_for :hero do %>
+  <section class="hero is-medium" style="position: relative; overflow: hidden;">
+    <%= partial '_carousel' %>
+    <%= partial '_carousel_overlay' %>
+    <%#= partial '_carousel_div_hero' %>
+  </section>
+<% end %>
+
+<% content_for :sidebar do %>
+<% end %> <!-- end of content_for :sidebar -->
+
+<%= parse_erb_and_markdown @page.body if @page.body %>
+
+<% if @page.block_1.blank? %>
+  <% if @objects %>
+    <div class="columns is-multiline">
+      <% @objects.each do |object| %>
+        <div class="column is-4">
+          <%= partial '_card', object: object, anchor: "#{object.short || object.name}" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% else %>
+  <%= parse_erb_and_markdown @page.block_1 if @page.block_5 %>
+<% end %>
+
+<% if @page.block_5.blank? %>
+  <h2 class="title has-text-weight-medium"><%#= @page.anchor_2 %> by Region</h2>
+  
+<% else %>
+  <%= parse_erb_and_markdown @page.block_5 if @page.block_5 %>
+<% end %>
+  
+<% if @page.block_6.blank? %>
+  <h2 class="title has-text-weight-medium">more options in <%= @page.anchor_1 %></h2>
+
+  <% Tag.where(parent_id: [nil, 0]).each do |t_g| %>
+
+    <% unless partial('_page_children_links_by_group', group: t_g.name).blank? %>
+      <h3 class="title is-size-5 is-family-monospace"><%= t_g.name %></h3>
+      <%= partial '_page_children_links_by_group', group: t_g.name %>
+    <% end %>
+
+  <% end %>
+
+<% else %>
+  <%= parse_erb_and_markdown @page.block_6 if @page.block_6 %>
+<% end %>
+
+<%#= partial '_map_stay22' %>
+
+<% content_for :schema_main_entity do %>
+<% end %>
+
+<% content_for :schema_webpage do %>
+<% end %>
+
+<% content_for :schema_breadcrumb do %>
+<% end %>
+
+<% content_for :schema_faq_page do %>
+<% end %>

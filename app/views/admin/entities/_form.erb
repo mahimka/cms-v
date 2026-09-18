@@ -13,6 +13,18 @@
 <div class="columns">
 
   <div class="column is-2">
+    <%= label(:entity, :short, "short", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:entity, :short, options = {class: 'input is-success', value: @entity.short, placeholder: "enter short name"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
     <%= label(:entity, :schema_id, "schema", options = {class: 'label'}) %>
   </div>
 
@@ -68,6 +80,19 @@
 
   <div class="column is-9">
     <%= input(:entity, :longitude, options = {class: 'input is-success', value: @entity.longitude, placeholder: "enter longitude"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:entity, :plus_code, "Plus Code", options = {class: 'label'}) %>
+    <p class="help">Open Location Code, напр. "8FVC9G8F+5V"</p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:entity, :plus_code, options = {class: 'input is-success', value: @entity.plus_code, placeholder: "enter plus code"}) %>
   </div>
 
 </div>
