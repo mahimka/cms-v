@@ -213,21 +213,6 @@
     <h6 class="title is-size-6 mt-2">Found/Total: <%= @entities_found.size %> / <%= Entity.all.size %></h6>
   </div>
 
-  <div class="column">
-    <span class="is-size-7 has-text-grey mr-2">create lists:</span>
-    <% PageCascade.all_configs.each do |name, cfg| %>
-      <% schema_label = Array(cfg['trigger_schemas']).join(', ') %>
-      <form method="POST" action="/admin/entities/page_cascades/<%= name %>/run" style="display:inline;"
-            onsubmit="return confirm('Пройти по всем активным entities с опубликованной страницей (схема: <%= schema_label %>) и создать недостающие hub/facet-страницы? Уже существующие страницы не трогает.')">
-        <button type="submit" class="button is-small is-link is-light">[<%= schema_label %>]</button>
-      </form>
-      <form method="POST" action="/admin/entities/page_cascades/<%= name %>/run" style="display:inline;">
-        <input type="hidden" name="force" value="true">
-        <button type="submit" class="button is-small is-warning is-light"
-                onclick="return confirm('ВНИМАНИЕ: обновит ВСЕ поля (title/h1/subtitle/anchor/view/layout) у УЖЕ СУЩЕСТВУЮЩИХ hub/facet-страниц (схема: <%= schema_label %>) по текущему config.yml — ручные правки на этих страницах будут перезаписаны. Продолжить?')">force refresh [<%= schema_label %>]</button>
-      </form>
-    <% end %>
-  </div>
 </div>
 
 <hr class="my-0">

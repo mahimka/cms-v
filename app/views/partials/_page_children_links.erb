@@ -1,9 +1,9 @@
 <%
   # Ссылки на дочерние страницы текущей (или переданной через page:)
-  # страницы — для hub-страниц каскада (/egypt) это facet-страницы
-  # (/egypt/advanced-kite-lessons, /egypt/bar-restaurant, ...), см.
-  # PageCascade. page = page || @page — работает и без локальной
-  # переменной page (не передали — берём @page).
+  # страницы — для hub-страниц (/egypt) это facet-страницы
+  # (/egypt/advanced-kite-lessons, /egypt/bar-restaurant, ...).
+  # page = page || @page — работает и без локальной переменной page
+  # (не передали — берём @page).
   page = page || @page
   children_pages = page.children.where(published: true).order(:h1)
 %>

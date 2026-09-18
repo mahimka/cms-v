@@ -18,21 +18,6 @@ class EntitiesController < App
 
     end
 
-    # "create lists" на /admin/entities — ручной запуск page_cascades[name]
-    # по всем подходящим entity разом (см. PageCascade.run_all). Каскад
-    # больше не запускается автоматически при сохранении/тегировании.
-    #
-    # force=true (отдельная кнопка "force refresh") — дополнительно
-    # обновляет ВСЕ поля уже существующих страниц по текущему config.yml.
-    # По умолчанию (без force) существующие страницы не трогает — их
-    # часто правят руками, обычный прогон не должен затирать эти правки.
-    post '/entities/page_cascades/:name/run' do
-      force = params[:force] == "true"
-      result = PageCascade.run_all(params[:name], force: force)
-      flash[:notice] = "#{params[:name]}: обработано #{result[:entities]} entities, создано #{result[:pages_created]}, обновлено #{result[:pages_updated]} страниц"
-      redirect '/admin/entities'
-    end
-
     get '/entities/new' do
 
       @entity = Entity.new

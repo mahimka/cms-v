@@ -62,8 +62,7 @@
 # — schema_id, если задан).
 #
 # force: false (по умолчанию) — существующие страницы не трогает (часто
-# правятся руками). force: true — обновляет все поля по текущему
-# template (тот же принцип, что у PageCascade).
+# правятся руками). force: true — обновляет все поля по текущему template.
 class PageTemplateGenerator
   def self.run(page_template, force: false)
     new(page_template).run(force: force)
@@ -163,9 +162,9 @@ class PageTemplateGenerator
 
   # Page#calculated_uri отдаёт "/" для ЛЮБОЙ страницы без родителя —
   # если parent_page не выбран, страницы бы схлопнулись в один uri.
-  # Фолбэк — корень сайта на языке template (см. тот же приём в
-  # PageCascade). Не используется, когда template вложен (#nested?) —
-  # там у каждой группы свой parent, см. #list_targets.
+  # Фолбэк — корень сайта на языке template. Не используется, когда
+  # template вложен (#nested?) — там у каждой группы свой parent, см.
+  # #list_targets.
   def parent_page
     @page_template.parent_page || Page.masters.roots.find_by!(lang: @page_template.lang)
   end
