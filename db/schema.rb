@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_18_100000) do
+ActiveRecord::Schema.define(version: 2026_09_19_090000) do
 
   create_table "ads", force: :cascade do |t|
     t.string "ancestry"
@@ -136,6 +136,19 @@ ActiveRecord::Schema.define(version: 2026_09_18_100000) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["label_id"], name: "index_links_on_label_id"
     t.index ["linkable_type", "linkable_id"], name: "index_links_on_linkable_type_and_linkable_id"
+  end
+
+  create_table "lost_urls", force: :cascade do |t|
+    t.string "path", null: false
+    t.string "referrer"
+    t.string "ip"
+    t.integer "hits_count", default: 1, null: false
+    t.datetime "first_seen_at", null: false
+    t.datetime "last_seen_at", null: false
+    t.boolean "reviewed", default: false, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["path"], name: "index_lost_urls_on_path", unique: true
   end
 
   create_table "markers", force: :cascade do |t|

@@ -28,6 +28,7 @@ use EventsController
 use PageTemplatesController
 use PagesController
 use HistoriesController
+use LostUrlsController
 use SessionsController
 use UsersController
 use PublicPhotosController
@@ -36,6 +37,7 @@ use RoutesFirst
 use Routes
 use RoutesLast
 use RoutesHistory
+use RoutesLost
 
 # use GeonamesController
 
