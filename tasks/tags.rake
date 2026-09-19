@@ -30,16 +30,20 @@ namespace :tags do
     connect_external_db!(ENV['db_path'])
     dry_run = ENV['dry_run'] == 'true'
 
+    # Не у всех источников совпадает набор колонок (например, старые
+    # дореформенные схемы вроде old_*.com/tags не знают short_2/icon_svg
+    # и хранят активность как listed+ready, а не active) — берём то, что
+    # есть, без ошибки на отсутствующих колонках.
     source = SourceTag.all.map do |t|
       {
         'id' => t.id,
         'name' => t.name,
         'parent_id' => t.parent_id,
-        'position' => t.position,
-        'short' => t.short,
-        'short_2' => t.short_2,
-        'active' => t.active,
-        'icon_svg' => t.icon_svg
+        'position' => t.respond_to?(:position) ? t.position : nil,
+        'short' => t.respond_to?(:short) ? t.short : nil,
+        'short_2' => t.respond_to?(:short_2) ? t.short_2 : nil,
+        'active' => t.respond_to?(:active) ? t.active : (t.respond_to?(:listed) && t.respond_to?(:ready) ? (t.listed && t.ready) : nil),
+        'icon_svg' => t.respond_to?(:icon_svg) ? t.icon_svg : nil
       }
     end
     roots, children = source.partition { |t| t['parent_id'].nil? }
