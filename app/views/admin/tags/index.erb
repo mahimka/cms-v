@@ -10,6 +10,11 @@
     <input type="file" name="import_file" accept="application/json" required>
     <button type="submit" class="button is-link" title="файл, выгруженный кнопкой export у группы — ищет по name, существующие обновляет, новые создаёт">Import group</button>
   </form>
+  <% if request.path_info == '/admin/tags/address' %>
+    <a class="button is-info is-light" href="/admin/tags">&larr; All other tags</a>
+  <% else %>
+    <a class="button is-info is-light" href="/admin/tags/address">addressCountry / addressRegion / addressLocality / adm_2 &rarr;</a>
+  <% end %>
 </p>
 
 <style>
@@ -80,7 +85,7 @@
       <input type="submit" value="Filter" class="button is-warning">
     </div>
     <div class="column is-11">
-      Found/Total: <%= @tags_found %> / <%= SnapShot.all.size %> |
+      Found/Total: <%= @tags_found %> / <%= @tags_total %> |
       <%#= @tags.map{|tag| tag.response}.uniq.join(', ') %> |
       <%#= @tags.map{|tag| tag.parsed_at}.uniq.join(', ') %> 
     </div>

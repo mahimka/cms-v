@@ -7,26 +7,33 @@ class TagsController < App
   # переносил переводы и иконки, а не только базовые поля.
   TAG_IMPORT_FIELDS = %w[active short short_2 admin_notes fixed position translations icon_svg].freeze
 
+  # Гео-группы (geo:tag_from_ads) — на порядок больше тегов, чем все
+  # остальные группы вместе (2800+ ads-тегов против ~120 topical), из-за
+  # них /admin/tags тормозит. Обрабатываем их отдельно, на /admin/tags/address.
+  ADDRESS_GROUP_NAMES = %w[addressCountry addressLocality addressRegion adm_2].freeze
+
   namespace '/admin' do
 
-    get '/tags' do 
+    get '/tags' do
+      address_group_ids = Tag.where(name: ADDRESS_GROUP_NAMES).pluck(:id)
+      # where.not(parent_id: ids) в SQL молча выкидывает и все строки с
+      # parent_id IS NULL (NULL NOT IN (...) -> NULL, не true) — это
+      # выкинуло бы вообще все root-теги, не только гео. Поэтому считаем
+      # список исключаемых id явно (4 группы + их дети) и режем по id.
+      excluded_ids = address_group_ids | Tag.where(parent_id: address_group_ids).pluck(:id)
+      base_scope = Tag.where.not(id: excluded_ids)
 
-      @q = Tag.ransack(params[:q])
-      @tags_found = @q.result(distinct: true).size # for index.rb
-      # per(5000): группировка на странице собирается из @tags целиком (см.
-      # index.erb) — если родитель и дети разъедутся по разным страницам
-      # пагинации (легко происходит для новых групп с большим id, т.к.
-      # сортировка по parent_id — числовая, не по смыслу), группа рисуется
-      # "пустой". Тегов сильно меньше 5000, так что пагинация тут по факту
-      # не нужна — просто держим всё на одной странице.
-      @tags       = @q.result(distinct: true).includes(:parent).order(:parent_id, :position, :name).page(params[:page]).per(5000)
+      render_tags_index(base_scope)
+    end
 
-      # Один запрос на всю страницу вместо tag.usage_count на каждую строку.
-      @tagging_counts_by_tag = Tagging.group(:tag_id).count
+    # Только addressCountry/addressLocality/addressRegion/adm_2 — вынесено
+    # из /admin/tags как раз чтобы её не тормозить (см. ADDRESS_GROUP_NAMES).
+    get '/tags/address' do
+      address_group_ids = Tag.where(name: ADDRESS_GROUP_NAMES).pluck(:id)
+      base_scope = Tag.where(id: address_group_ids).or(Tag.where(parent_id: address_group_ids))
 
-      erb :"/tags/index", layout: :"/layout/wide", views: settings.views_admin
-
-    end  
+      render_tags_index(base_scope)
+    end
 
     # Поиск тегов по имени для JS-автокомплита (см. markers/index.erb —
     # привязка Marker к Tag). До /tags/:id, иначе "search" перехватится
@@ -254,6 +261,28 @@ class TagsController < App
 
     end
 
+  end
+
+  private
+
+  # Общий рендер для /tags и /tags/address — тот же index.erb, разница
+  # только в стартовом scope (см. вызовы выше).
+  def render_tags_index(scope)
+    @tags_total = scope.count # без учёта фильтра формы — для "Found/Total"
+    @q = scope.ransack(params[:q])
+    @tags_found = @q.result(distinct: true).size # for index.rb
+    # per(5000): группировка на странице собирается из @tags целиком (см.
+    # index.erb) — если родитель и дети разъедутся по разным страницам
+    # пагинации (легко происходит для новых групп с большим id, т.к.
+    # сортировка по parent_id — числовая, не по смыслу), группа рисуется
+    # "пустой". Тегов сильно меньше 5000, так что пагинация тут по факту
+    # не нужна — просто держим всё на одной странице.
+    @tags = @q.result(distinct: true).includes(:parent).order(:parent_id, :position, :name).page(params[:page]).per(5000)
+
+    # Один запрос на всю страницу вместо tag.usage_count на каждую строку.
+    @tagging_counts_by_tag = Tagging.group(:tag_id).count
+
+    erb :"/tags/index", layout: :"/layout/wide", views: settings.views_admin
   end
 
 end
