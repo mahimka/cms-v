@@ -18,6 +18,18 @@
 #             старым serialize :details). Значение — как есть, без
 #             экранирования (details хранит простой текст, не html).
 #
+#   [addressCountry]          — то же, что ["addressCountry"]
+#   [addressCountry.short]    — то же, что ["addressCountry", col: "short"]
+#           короткий синтаксис без кавычек — только имя группы и,
+#           опционально, через точку col (см. TAG_FIELDS ниже). Группа —
+#           всё до ПОСЛЕДНЕЙ точки (пробелы в имени не мешают:
+#           [Yoga Group.slug] это группа "Yoga Group", col "slug"). Если
+#           нужны limit/delimiter/before/after/before_tag/after_tag/
+#           if_empty — используйте полный синтаксис в кавычках ниже.
+#           На link:/profile: короткий синтаксис НЕ распространяется —
+#           у них в идентификаторе уже бывает точка ("google.com"),
+#           [profile:google.com] было бы неоднозначно.
+#
 #   ["addressCountry"]
 #   ["addressCountry", col: "name", limit: 1, delimiter: ", ",
 #     before: "", after: "", before_tag: "", after_tag: "", if_empty: ""]
@@ -70,6 +82,11 @@ class TemplateFieldRenderer
   TAG_BLOCK_RE = /\[([^\[\]]*)\]/m.freeze
   TAG_GROUP_RE = /\A\s*"((?:[^"\\]|\\.)*)"\s*(?:,\s*(.*))?\z/m.freeze
   OPTION_RE = /(\w+)\s*:\s*(?:"((?:[^"\\]|\\.)*)"|(-?\d+))\s*,?/.freeze
+  # Короткий синтаксис [group] / [group.col] — без кавычек, без опций.
+  # ":" запрещён в имени группы нарочно — link:/profile: идентификаторы
+  # сюда не должны попадать (см. class-comment), у них остаётся только
+  # полный синтаксис в кавычках.
+  BAREWORD_TAG_RE = /\A\s*([^:"\[\]]+?)(?:\.(\w+))?\s*\z/m.freeze
   TAG_FIELDS = %w[name slug short short_2 id].freeze
   LINK_FIELDS = %w[url].freeze
   PROFILE_FIELDS = %w[rating review_count url title h1 meta_description].freeze
@@ -231,14 +248,26 @@ class TemplateFieldRenderer
   end
 
   # ["group", key: "value", key: 123, ...] -> {group:, key: "value"|"123"}
+  # group.col / group -> {group:, col: "col"} / {group:} — короткий
+  # синтаксис, только когда полный (в кавычках) не подошёл.
   def self.parse_tag_block(content)
     match = TAG_GROUP_RE.match(content)
-    return nil unless match
-
-    options = { group: unescape(match[1]) }
-    match[2].to_s.scan(OPTION_RE) do |key, str_val, num_val|
-      options[key.to_sym] = str_val.nil? ? num_val : unescape(str_val)
+    if match
+      options = { group: unescape(match[1]) }
+      match[2].to_s.scan(OPTION_RE) do |key, str_val, num_val|
+        options[key.to_sym] = str_val.nil? ? num_val : unescape(str_val)
+      end
+      return options
     end
+
+    bareword = BAREWORD_TAG_RE.match(content)
+    return nil unless bareword
+
+    group = bareword[1].strip
+    return nil if group.blank?
+
+    options = { group: group }
+    options[:col] = bareword[2] if bareword[2]
     options
   end
 

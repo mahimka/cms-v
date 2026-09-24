@@ -1,0 +1,32 @@
+<%
+  # Ссылки на ВСЕ опубликованные дочерние страницы страницы url — со
+  # счётчиком объектов, тем же визуальным стилем, что и остальные списки
+  # ссылок (см. _page_link_with_count). В отличие от
+  # _page_children_links_by_group (фильтр по группе тегов) — отдаёт ВСЕХ
+  # детей без разбора; удобно для произвольных hub-страниц вроде
+  # /yoga-styles, а не только гео-иерархии.
+  #
+  # url — обязательный local (uri страницы, например "/yoga-styles"),
+  # lang — язык текущей страницы; сейчас не используется, задел под
+  # мультиязычность (когда появятся переводы — здесь нужно будет
+  # находить перевод url под этот lang, а не только master), anchor —
+  # имя поля/метода Page для текста ссылки (по умолчанию 'anchor_1', с
+  # фолбэком на h1/title — см. _page_link_with_count).
+  anchor ||= 'anchor_1'
+
+  base_page = Page.find_by(uri: url)
+
+  children_pages = base_page ?
+    base_page.children.where(published: true).to_a
+      .sort_by { |p| p.public_send(anchor).presence || p.h1.presence || p.title.to_s } : []
+
+  counts = Page.batch_list_objects_counts(children_pages)
+%>
+
+<% if children_pages.any? %>
+  <div class="field is-grouped is-grouped-multiline">
+    <% children_pages.each do |child_page| %>
+      <%= partial '_page_link_with_count', target: child_page, label: child_page.public_send(anchor).presence || child_page.h1.presence || child_page.title, count: counts[child_page.id] %>
+    <% end %>
+  </div>
+<% end %>

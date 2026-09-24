@@ -6,8 +6,11 @@
     страниц создано по этому template: <strong><%= @page_template.pages.size %></strong>
     <% if @page_template.pages.any? %>
       (published: <%= @page_template.pages.where(published: true).size %>,
-      не published: <%= @page_template.pages.where(published: false).size %>)
+      не published: <%= @page_template.pages.where(published: false).size %>,
+      ready: <%= @page_template.pages.where(ready: true).size %>,
+      не ready: <%= @page_template.pages.where(ready: false).size %>)
     <% end %>
+    <a href="/admin/pages?q[template_id_eq]=<%= @page_template.id %>" class="button is-small is-light" target="_blank">Pages &rarr;</a>
   </p>
 
   <h1 class="title"><%= @page_template.title.presence || "Page Template ##{@page_template.id}" %></h1>

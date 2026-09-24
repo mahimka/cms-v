@@ -5,7 +5,7 @@
 <%#= @page_details %>
 
 <% content_for :hero do %>
-<section class="hero is-small has-background-primary-95 has-text-primary-95-invert mt-0 pb-0">
+<section class="hero is-small has-background-grey-lighter has-text-primary-95-invert mt-0 pb-0">
   <div class="hero-body">
     <div class="container">
 
@@ -13,7 +13,7 @@
 
         <div class="column is-5">
      
-          <h1 class="title title_hero"><%= @page.h1 %></h1>
+          <h1 class="title is-size-2 has-text-grey-dark"><%= @page.h1 %></h1>
           <p class='subtitle mt-3'><%= @page.subtitle %></p>
           
           <!--
@@ -51,37 +51,48 @@
             <%= link_on_page('_faq') unless @page.faq.blank? %>
           </div>
 
-          <!-- Оптимизированная группа кнопок навигации -->
-          <div class="field has-addons mt-5 mb-3">
-            <!-- Google Maps (Primary Action) -->
-            <p class="control is-expanded">
-              <a href="https://www.google.com/maps/dir/?api=1&destination=<%= @page.pageable.latitude %>,<%= @page.pageable.longitude %>"
-                 target="_blank" 
-                 rel="noopener" 
-                 class="button is-primary is-medium is-fullwidth has-text-weight-bold">
-                <!-- MapPin -->
-                <span class="icon mr-1">
-                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                </span>
-                <span>Google Maps</span>
-              </a>
-            </p>
+          <% if @page.pageable.latitude.present? && @page.pageable.longitude.present? %>
+            <% @destination = "#{@page.pageable.latitude},#{@page.pageable.longitude}" %>
+          <% else %>
+            <% @destination = @page.pageable.address.presence || "" %>
+          <% end %>
 
-            <!-- Waze -->
-            <p class="control">
-              <a href="https://waze.com/ul?ll=<%= @page.pageable.latitude %>,<%= @page.pageable.longitude %>&navigate=yes" 
-                 target="_blank" 
-                 rel="noopener" 
-                 class="button is-info is-medium" 
-                 title="Odpri v Waze">
-                <!-- Navigation -->
-                <span class="icon mr-1">
-                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-                </span>
-                <span>Waze</span>
-              </a>
-            </p>
-          </div>
+          <% if @destination.present? %>
+            <!-- Оптимизированная группа кнопок навигации -->
+            <div class="field has-addons mt-5 mb-3">
+              <!-- Google Maps (Primary Action) -->
+              <p class="control is-expanded">
+                <a href="https://www.google.com/maps/dir/?api=1&destination=<%= Rack::Utils.escape(@destination) %>"
+                   target="_blank" 
+                   rel="noopener" 
+                   class="button is-primary is-medium is-fullwidth has-text-weight-bold">
+                  <!-- MapPin -->
+                  <span class="icon mr-1">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </span>
+                  <span>Google Maps</span>
+                </a>
+              </p>
+
+              <!-- Waze -->
+              <p class="control">
+                <a href="https://waze.com/ul?ll=<%= @page.pageable.latitude %>,<%= @page.pageable.longitude %>&navigate=yes" 
+                   target="_blank" 
+                   rel="noopener" 
+                   class="button is-info is-medium" 
+                   title="Odpri v Waze">
+                  <!-- Navigation -->
+                  <span class="icon mr-1">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                  </span>
+                  <span>Waze</span>
+                </a>
+              </p>
+            </div>
+
+          <% end %>
+
+
 
           <%= partial('_share_buttons') %>
 
@@ -121,9 +132,11 @@
 
 <h2 class="title is-4" id="_contact"><%= label_by_lang('_contact_and_information').capitalize %> </h2>
 
-<div class="container mt-0 pt-0 content pl-0 pr-0">
-  <%= partial '_google_map_one_point', views: settings.views, locals: {map_icon: 'parking'}  %>
-</div>
+<% if @page.pageable.latitude.present? && @page.pageable.longitude.present? %>
+  <div class="container mt-0 pt-0 content pl-0 pr-0">
+    <%= partial '_google_map_one_point', views: settings.views, locals: {map_icon: 'parking'}  %>
+  </div>
+<% end %>
 
 <div class="columns">
   <div class="column">

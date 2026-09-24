@@ -18,7 +18,6 @@ use MarkersController
 use TagsController
 use SchemasController
 use LabelsController
-use AdsController
 use LinksController
 use DetailsController
 use PicturesController

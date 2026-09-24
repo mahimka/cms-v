@@ -21,7 +21,7 @@
 <% elsif target_page&.pageable&.schema&.name == 'ParkingFacility' %>
   <%= partial '_card_parking', page: target_page, picture: picture, object: object %>
 <% elsif target_page.pageable.schema.name == 'LocalBusiness' %>
-  <%= partial '_card_local_business', page: target_page, picture: picture, object: , anchor: anchor %>
+  <%= partial '_card_local_business', page: target_page, picture: picture, object: object, anchor: (defined?(anchor) ? anchor : nil) %>
 <%# elsif target_page.pageable.schema.name == 'Parking' %>
   <%#= partial '_card_parking', page: target_page, picture: picture %>
 <%# elsif target_page.pageable.schema.name == 'Parking' %>

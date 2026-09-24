@@ -1,0 +1,7 @@
+<%
+  # Тонкая обёртка над обобщённым _tag_group_links — оставлена как
+  # отдельное имя, потому что уже вставлена прямо в текст Page#1.body
+  # (см. секцию "Browse yoga by location", и обсуждение производительности
+  # /philippines, откуда и появился батчинг счётчиков в _tag_group_links).
+%>
+<%= partial '_tag_group_links', group: 'addressCountry' %>

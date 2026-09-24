@@ -10,6 +10,22 @@ class LinksController < App
       @links_found = @q.result(distinct: true).size
       @links       = @q.result(distinct: true).order(created_at: :desc).page(params[:page]).per(100)
 
+      # Отчёт для секции статусов — по всей таблице, не по текущему
+      # фильтру ransack (иначе цифры "сколько всего не проверено" скачут
+      # вместе с фильтром и вводят в заблуждение).
+      @checked_stats = {
+        total:      Link.count,
+        checked:    Link.where.not(checked_at: nil).count,
+        unchecked:  Link.where(checked_at: nil).count,
+        active:     Link.where(active: true).count,
+        inactive:   Link.where(active: false).count,
+        redirected: Link.where(redirected: true).count,
+        stale:      Link.where("checked_at IS NULL OR checked_at < ?", 15.days.ago).count,
+      }
+      @checked_by_label = Link.joins(:label)
+                               .group("labels.name")
+                               .select("labels.name AS label_name, COUNT(*) AS total, SUM(CASE WHEN links.checked_at IS NOT NULL THEN 1 ELSE 0 END) AS checked, SUM(CASE WHEN links.active = 0 THEN 1 ELSE 0 END) AS inactive")
+
       erb :"/links/index", layout: :"/layout/wide", views: settings.views_admin
 
     end
@@ -55,6 +71,17 @@ class LinksController < App
         flash.now[:errors] = @link.errors.full_messages
         erb :"/links/edit", layout: :"/layout/wide", views: settings.views_admin
       end
+    end
+
+    # Ручная проверка одной ссылки — см. lib/link_checker.rb. Всегда
+    # проверяет конкретно эту ссылку, даже если она сейчас active:false —
+    # это явный клик по конкретной записи, а не плановая выборка
+    # (в отличие от tasks/links.rake, который мёртвые по умолчанию пропускает).
+    post '/links/:id/check' do
+      @link = Link.find(params[:id])
+      @link.check!
+      halt 200, "ok" if request.xhr?
+      redirect redirect_target_or("/admin/links/#{@link.id}")
     end
 
     delete '/links/:id' do

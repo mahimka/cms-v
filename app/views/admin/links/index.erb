@@ -2,6 +2,31 @@
 
 <div class="content m-3">
 
+  <div class="box">
+    <p class="has-text-weight-semibold mb-2">статус проверки ссылок</p>
+    <div class="columns is-mobile is-size-7">
+      <div class="column">всего<br><span class="is-size-5"><%= @checked_stats[:total] %></span></div>
+      <div class="column">проверено<br><span class="is-size-5"><%= @checked_stats[:checked] %></span></div>
+      <div class="column">не проверено<br><span class="is-size-5"><%= @checked_stats[:unchecked] %></span></div>
+      <div class="column has-text-success">active<br><span class="is-size-5"><%= @checked_stats[:active] %></span></div>
+      <div class="column has-text-danger">inactive<br><span class="is-size-5"><%= @checked_stats[:inactive] %></span></div>
+      <div class="column">redirected<br><span class="is-size-5"><%= @checked_stats[:redirected] %></span></div>
+      <div class="column">старше 15 дней / не проверено<br><span class="is-size-5"><%= @checked_stats[:stale] %></span></div>
+    </div>
+
+    <table class="table is-narrow is-size-7 mt-2">
+      <tr class="has-text-weight-semibold"><td>label</td><td>всего</td><td>проверено</td><td>inactive</td></tr>
+      <% @checked_by_label.each do |row| %>
+        <tr>
+          <td><%= row.label_name %></td>
+          <td><%= row.total %></td>
+          <td><%= row.checked %></td>
+          <td><%= row.inactive %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+
 <form method="GET" action="/admin/links">
 
   <div class="columns">
@@ -17,6 +42,22 @@
     <div class="column is-2">
       <tag class="tag is-size-7">label_name_cont</tag>
       <%= input(:q, :label_name_cont, options = {class: 'input is-small', value: @q.label_name_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">response_cont</tag>
+      <%= input(:q, :response_cont, options = {class: 'input is-small', value: @q.response_cont, placeholder: ""}) %>
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[active_true]" value='1' <%= @q.active_true ? "checked" : "" %>>
+      active: true
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[active_false]" value='1' <%= @q.active_false ? "checked" : "" %>>
+      active: false
+    </div>
+    <div class="column is-1">
+      <input type="checkbox" name="q[redirected_true]" value='1' <%= @q.redirected_true ? "checked" : "" %>>
+      redirected: true
     </div>
   </div>
 
@@ -47,6 +88,7 @@
       <td>url</td>
       <td>ready</td>
       <td>published</td>
+      <td>checked_at</td>
       <td>response</td>
       <td></td>
     </tr>
@@ -68,10 +110,20 @@
       <td><a href="<%= link.url %>" target="_blank"><%= link.url %></a></td>
       <td><%= link.ready %></td>
       <td><%= link.published %></td>
-      <td><%= link.response %></td>
+      <td><%= link.checked_at&.strftime("%d %b %Y %H:%M") %></td>
+      <td>
+        <%= link.response %>
+        <% if link.redirected? && link.redirected_to.present? %>
+          → <a href="<%= link.redirected_to %>" target="_blank"><%= link.redirected_to %></a>
+        <% end %>
+      </td>
       <td>
         <a href="/admin/links/<%= link.id %>" class="button is-small">show</a>
         <a href="/admin/links/<%= link.id %>/edit" class="button is-small">edit</a>
+        <form method="POST" action="/admin/links/<%= link.id %>/check" style="display:inline">
+          <input type="hidden" name="redirect_to" value="/admin/links">
+          <button type="submit" class="button is-small is-link">check</button>
+        </form>
       </td>
     </tr>
 

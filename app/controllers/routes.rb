@@ -24,8 +24,43 @@ class Routes < App
 
        @page = Page.published.where(uri: uri).first
 
+       # ?page=N из query — запоминаем ДО того, как ветка ниже сама
+       # положит туда номер страницы, разобранный из /N в uri (иначе
+       # редирект старой схемы ниже примет свою же подстановку за
+       # старую ссылку и зациклит /argentina/2 обратно в редирект на
+       # /argentina/2).
+       query_page = params[:page]
+
+       # Пагинация списковых страниц — /argentina/2 вместо /argentina?page=2
+       # (см. PaginateHelpers#paginate base_path:). Отдельного роута для
+       # этого нет: /N мог бы быть и legit uri существующей страницы, так
+       # что пробуем ТОЛЬКО когда буквального совпадения не нашлось, и
+       # только если урезанный uri — действительно списковая страница
+       # (effective_conditions present) — иначе /some-profile-page/2 не
+       # должен тихо открывать страницу без /2 под чужим URL.
+       if @page.nil? && uri =~ %r{\A(.+)/(\d+)\z}
+         base_uri, page_num = $1, $2
+         candidate = Page.published.where(uri: base_uri).first
+         if candidate && candidate.effective_conditions.present?
+           @page = candidate
+           params[:page] = page_num
+         end
+       end
+
        # halt 404, "Not Found\n" unless @page
        pass unless @page
+
+       # Старая схема пагинации — ?page=N в query, отдельно от uri (это
+       # именно тот случай, когда @page нашёлся буквальным совпадением
+       # uri, а не через /N-ветку выше: там path уже канонический). 301
+       # на новую /N-схему — чтобы старые проиндексированные/сохранённые
+       # ?page=2-ссылки не оставались рабочим, но дублирующим по контенту
+       # альтернативным URL той же страницы.
+       if query_page.present? && @page.effective_conditions.present?
+         page_num = [query_page.to_i, 1].max
+         canonical_uri = page_num > 1 ? "#{@page.uri}/#{page_num}" : @page.uri
+         redirect canonical_uri, 301
+       end
 
        # В старом проекте это собиралось из @base_page (мастер-страница
        # группы) — details/links/tags профильной страницы теперь живут

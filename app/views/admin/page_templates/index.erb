@@ -51,12 +51,13 @@
       <td></td>
       <td>r|p</td>
       <td title="сколько страниц уже сгенерировано по этому template">n</td>
+      <td>condition</td>
       <td>title</td>
       <td>h1</td>
       <td>subtitle</td>
       <td>anchor_1</td>
       <td>anchor_2</td>
-      <td>anchor_3</td>
+      <!--<td>anchor_3</td>-->
       <td>view</td>
       <td>layout</td>
     </tr>
@@ -82,25 +83,25 @@
           <% end %>
         </td>
         <td>
-          <a href="/admin/page_templates/<%= page_template.id %>/edit" class="button is-small">edit</a>
+          <a href="/admin/page_templates/<%= page_template.id %>/edit" class="button is-small">e</a>
           <a href="/admin/page_templates/new?copy_from=<%= page_template.id %>" class="button is-small"
-             title="Создать новый template, предзаполненный данными этого">copy</a>
+             title="Создать новый template, предзаполненный данными этого">c</a>
           <% if page_template.template_type == "List" %>
             <a href="/admin/page_templates/new?parent_template_id=<%= page_template.id %>" class="button is-small is-link is-light"
-               title="Создать вложенный template — facet-страницы под каждой страницей этого template'а">+nes</a>
+               title="Создать вложенный template — facet-страницы под каждой страницей этого template'а">+n</a>
           <% end %>
 
           <% if %w[Profile List].include?(page_template.template_type) %>
             <form method="POST" action="/admin/page_templates/<%= page_template.id %>/generate" style="display:inline;"
                   onsubmit="return confirm('Найти объекты <%= page_template.pageable_type %> по template_conditions и создать недостающие страницы? Уже существующие не трогает.')">
               <input type="hidden" name="redirect_to" value="<%= request.fullpath %>">
-              <button type="submit" class="button is-small is-link is-light">gen</button>
+              <button type="submit" class="button is-small is-link is-light">g</button>
             </form>
             <form method="POST" action="/admin/page_templates/<%= page_template.id %>/generate" style="display:inline;"
                   onsubmit="return confirm('ВНИМАНИЕ: обновит ВСЕ поля у УЖЕ СУЩЕСТВУЮЩИХ страниц, сгенерированных этим template — ручные правки будут перезаписаны. Продолжить?')">
               <input type="hidden" name="redirect_to" value="<%= request.fullpath %>">
               <input type="hidden" name="force" value="true">
-              <button type="submit" class="button is-small is-warning is-light">force</button>
+              <button type="submit" class="button is-small is-warning is-light">f</button>
             </form>
           <% end %>
         </td>
@@ -111,12 +112,13 @@
         <td>          
            <a href="/admin/pages?<%= Rack::Utils.build_nested_query("q" => { "template_id_eq" => page_template.id }) %>" title="Страницы, сгенерированные этим template'ом #<%= page_template.id %>"><%= page_template.pages.size %></a>
         </td>
+        <td><%= input_in_place page_template, :conditions %></td>
         <td><%= input_in_place page_template, :title %></td>
         <td><%= input_in_place page_template, :h1 %></td>
         <td><%= input_in_place page_template, :subtitle %></td>
         <td><%= input_in_place page_template, :anchor_1 %></td>
         <td><%= input_in_place page_template, :anchor_2 %></td>
-        <td><%= input_in_place page_template, :anchor_3 %></td>
+        <!--<td><%= input_in_place page_template, :anchor_3 %></td>-->
 
         <% values = (Dir.glob("**", base: settings.views_project) + Dir.glob("**", base: settings.views))
                     .delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.uniq.sort.unshift("") %>

@@ -1,0 +1,69 @@
+<%= erb :'/layout/_flash', views: settings.views_admin %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @item.name %></h1>
+
+  <p class="subtitle is-6">
+    Всё сохраняется сразу по месту, без кнопки Update.
+    <a href="/admin/items/<%= @item.id %>/edit">обычная форма</a> ·
+    <a href="/admin/items">все items</a>
+  </p>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:item, :name, "name", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@item, :name) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:item, :schema_id, "schema", options = {class: 'label'}) %></div>
+    <div class="column is-9">
+      <% schemas_for_select = Schema.active.order(:ancestry, :position, :name).to_h { |s| [s.id, ("— " * s.depth) + s.name] } %>
+      <%= select_in_place(@item, :schema_id, schemas_for_select) %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:item, :ean, "ean", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@item, :ean) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:item, :active, "active", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@item, :active) %></div>
+  </div>
+
+  <hr>
+
+  <div id="item-details-fields">
+    <%= erb :'/items/_details_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <div id="item-links-fields">
+    <%= erb :'/items/_links_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <div id="item-profiles-fields">
+    <%= erb :'/items/_profiles_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <div id="item-tags-fields">
+    <%= erb :'/items/_tags_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <%= erb :'/items/_pictures_fields', views: settings.views_admin %>
+
+</div>
+
+<script src="/javascripts/item-edit-in-place.js"></script>
+<script>
+  initItemEditInPlace(<%= @item.id %>);
+</script>

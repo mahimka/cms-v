@@ -874,13 +874,12 @@ class PagesController < App
 
   # Модели, для которых допустимо создавать detail-страницу через
   # /pages/new?pageable_type=...&pageable_id=... (see PAGEABLE concern).
-  PAGEABLE_TYPES = %w[Entity Item Event Ad].freeze
+  PAGEABLE_TYPES = %w[Entity Item Event].freeze
 
   # Предзаполняет новую master-страницу данными сущности, для которой она
   # создаётся: title/h1/slug — из pageable.display_name, если такой метод
-  # есть (Ad — короткое имя типа "Egypt" вместо официального name), иначе
-  # из pageable.name, layout/view — "default", pageable_type/pageable_id —
-  # сама сущность.
+  # есть, иначе из pageable.name, layout/view — "default",
+  # pageable_type/pageable_id — сама сущность.
   def assign_pageable_defaults(page, pageable_type, pageable_id)
     return unless PAGEABLE_TYPES.include?(pageable_type)
 

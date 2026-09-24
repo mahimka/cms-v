@@ -7,20 +7,25 @@
   # если у какой-то страницы slug и conditions разошлись (ручная правка).
   #
   # page = page || @page — работает и без локальной переменной page.
+  # anchor — имя поля/метода Page для текста ссылки (по умолчанию 'h1';
+  # например 'anchor_1' — короткое имя без повтора родителя).
   page = page || @page
+  anchor = anchor || 'h1'
   group_tag = group.present? ? Tag.find_by(name: group) : nil
   facet_slugs = group_tag ? group_tag.children.pluck(:slug) : []
 
   children_pages = page.children.where(published: true).select do |child_page|
     condition_tags = Array(child_page.conditions&.dig("tags"))
     (condition_tags & facet_slugs).any?
-  end.sort_by { |p| p.h1.to_s }
+  end.sort_by { |p| p.public_send(anchor).presence || p.h1.to_s }
+
+  counts = Page.batch_list_objects_counts(children_pages)
 %>
 
 <% if children_pages.any? %>
-  <div class="tags">
+  <div class="field is-grouped is-grouped-multiline">
     <% children_pages.each do |child_page| %>
-      <a href="<%= child_page.uri %>" class="tag is-light is-medium" title="<%= child_page.anchor_2 %>"><%= child_page.h1.presence || child_page.title %></a>
+      <%= partial '_page_link_with_count', target: child_page, label: child_page.public_send(anchor).presence || child_page.h1.presence || child_page.title, title: child_page.anchor_2, count: counts[child_page.id] %>
     <% end %>
   </div>
 <% end %>

@@ -71,6 +71,11 @@ class Page < ActiveRecord::Base
   # page_template_id, по явной просьбе при её добавлении.
   belongs_to :template, class_name: "PageTemplate", optional: true
 
+  # Geoname — отдельная БД (db/geonames.db, см. GeonamesRecord в app.rb).
+  # Заполнен только у гео-страниц (country/region/locality/adm_2) — см.
+  # rake pages:backfill_geonames_id.
+  belongs_to :geoname, foreign_key: :geonames_id, optional: true
+
   has_many :translations,
            class_name: "Page",
            foreign_key: :master_id,
@@ -189,6 +194,13 @@ class Page < ActiveRecord::Base
   # объектов через ListQuery.
   def list_objects
     ListQuery.new(effective_conditions).objects
+  end
+
+  # {page.id => list_objects.count}, одним набором запросов на весь
+  # список pages вместо одного per-page (см. ListQuery.batch_counts_for) —
+  # для списков ссылок-сиблингов со счётчиком (_page_link_with_count).
+  def self.batch_list_objects_counts(pages)
+    ListQuery.batch_counts_for(pages)
   end
 
   # pageable_type — MASTER_ONLY_FIELDS (пустой у переводов), а pageable_id

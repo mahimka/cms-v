@@ -21,10 +21,17 @@
       <br><%= @page.pageable.address %>
     </p>
     
+    <% if @page.pageable.latitude.present? && @page.pageable.longitude.present? %>
+      <% @destination = "#{@page.pageable.latitude},#{@page.pageable.longitude}" %>
+    <% else %>
+      <% @destination = @page.pageable.address.presence || "" %>
+    <% end %>
 
-    <a href='http://maps.google.com/?saddr=My+Location&daddr=<%= @page.pageable&.latitude %>,<%= @page.pageable&.longitude %>' target='_blank' class='button is-success is-medium'>
-      <%= label_by_lang('_how_to_get_there').capitalize %>?
-    </a>
+    <% if @destination.present? %>
+      <a href='http://maps.google.com/?saddr=My+Location&daddr=<%= @destination %>' target='_blank' class='button is-success is-medium'>
+        <%= label_by_lang('_how_to_get_there').capitalize %>?
+      </a>
+    <% end %>
 
     <!--
     <br>

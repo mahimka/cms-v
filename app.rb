@@ -16,6 +16,16 @@ class GscRecord < ActiveRecord::Base
   establish_connection({ adapter: 'sqlite3', database: 'db/gsc.db' })
 end
 
+# Полная локальная копия geonames.org (db/geonames.db, ~160k строк) —
+# отдельная БД, отдельное подключение (тот же приём, что у GscRecord
+# выше). pages.geonames_id / tags.geonames_id (см. миграции
+# add_geonames_id_to_pages/tags) — это geonames.geonames.id ИЗ ЭТОЙ базы,
+# не наш auto-increment (в отличие от старой ads, которую снесли).
+class GeonamesRecord < ActiveRecord::Base
+  self.abstract_class = true
+  establish_connection({ adapter: 'sqlite3', database: 'db/geonames.db' })
+end
+
 
 
 class App < Sinatra::Base    

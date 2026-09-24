@@ -12,15 +12,21 @@ class TagsController < App
   # них /admin/tags тормозит. Обрабатываем их отдельно, на /admin/tags/address.
   ADDRESS_GROUP_NAMES = %w[addressCountry addressLocality addressRegion adm_2].freeze
 
+  # Unsorted — свалка сырых markers-тегов с yogafinder.com (4000+ штук
+  # после слияний, было больше 5000), тот же принцип, что и с гео-
+  # группами: отдельная страница, чтобы не тормозить /admin/tags.
+  UNSORTED_GROUP_NAMES = %w[Unsorted].freeze
+
   namespace '/admin' do
 
     get '/tags' do
-      address_group_ids = Tag.where(name: ADDRESS_GROUP_NAMES).pluck(:id)
+      excluded_group_names = ADDRESS_GROUP_NAMES + UNSORTED_GROUP_NAMES
+      excluded_group_ids = Tag.where(name: excluded_group_names).pluck(:id)
       # where.not(parent_id: ids) в SQL молча выкидывает и все строки с
       # parent_id IS NULL (NULL NOT IN (...) -> NULL, не true) — это
-      # выкинуло бы вообще все root-теги, не только гео. Поэтому считаем
-      # список исключаемых id явно (4 группы + их дети) и режем по id.
-      excluded_ids = address_group_ids | Tag.where(parent_id: address_group_ids).pluck(:id)
+      # выкинуло бы вообще все root-теги, не только гео/unsorted. Поэтому
+      # считаем список исключаемых id явно (группы + их дети) и режем по id.
+      excluded_ids = excluded_group_ids | Tag.where(parent_id: excluded_group_ids).pluck(:id)
       base_scope = Tag.where.not(id: excluded_ids)
 
       render_tags_index(base_scope)
@@ -35,6 +41,16 @@ class TagsController < App
       render_tags_index(base_scope)
     end
 
+    # Только Unsorted — вынесено из /admin/tags тем же приёмом, что и
+    # /tags/address (см. UNSORTED_GROUP_NAMES). До /tags/:id, иначе
+    # "unsorted" перехватится как :id.
+    get '/tags/unsorted' do
+      unsorted_group_ids = Tag.where(name: UNSORTED_GROUP_NAMES).pluck(:id)
+      base_scope = Tag.where(id: unsorted_group_ids).or(Tag.where(parent_id: unsorted_group_ids))
+
+      render_tags_index(base_scope)
+    end
+
     # Поиск тегов по имени для JS-автокомплита (см. markers/index.erb —
     # привязка Marker к Tag). До /tags/:id, иначе "search" перехватится
     # как :id.
@@ -45,7 +61,26 @@ class TagsController < App
       halt 200, [].to_json if query.length < 2
 
       escaped = query.gsub(/[%_]/) { |c| "\\#{c}" }
-      tags = Tag.includes(:parent).where("name LIKE ? ESCAPE '\\'", "%#{escaped}%").order(:name).limit(20)
+      scope = Tag.includes(:parent).where("name LIKE ? ESCAPE '\\'", "%#{escaped}%")
+
+      # exclude_group — вызывающая сторона просит вообще не предлагать
+      # теги этой группы (см. tag-merge.js: сливать Unsorted-тег в другой
+      # Unsorted-тег бессмысленно — весь смысл merge из Unsorted в том,
+      # чтобы разложить его по нормальным категориям). Без параметра
+      # (например marker-tag-picker на /admin/markers) — старое
+      # поведение: Unsorted не убираем, просто оттесняем в конец (её
+      # результаты не мусор, просто обычно не то, что ищут первым делом).
+      if params[:exclude_group].present?
+        excluded_group_ids = Tag.where(name: params[:exclude_group]).pluck(:id)
+        scope = scope.where.not(parent_id: excluded_group_ids)
+      end
+
+      # Берём с запасом (100), а не сразу LIMIT 20 — иначе можно набрать
+      # 20 unsorted-тегов и не увидеть более релевантные из других групп,
+      # которые просто позже по алфавиту.
+      candidates = scope.order(:name).limit(100)
+      others, unsorted = candidates.partition { |t| t.parent&.name != 'Unsorted' }
+      tags = (others + unsorted).first(20)
 
       tags.map { |t| { id: t.id, name: t.name, parent: t.parent&.name, usage_count: t.usage_count } }.to_json
     end

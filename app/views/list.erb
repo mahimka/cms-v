@@ -12,27 +12,11 @@
 <% content_for :sidebar do %>
 <% end %> <!-- end of content_for :sidebar -->
 
-<% list_item = '_card' %>
-
 <%= parse_erb_and_markdown @page.body if @page.body %>
 
-<% if @objects %>
+<%= partial '_list_paginated' %>
 
-  <div class="columns is-multiline">
-    <% @objects.each do |object| %>
-      <div class="column is-4">
-        <%= partial list_item, object: object %>
-      </div>
-    <% end %>
-  </div>
-
-<% end %>
-
-<%= partial '_map_stay22' %>
-
-<p class="is-size-7">
-  * - <%= label_by_lang('distance_explanation') %><br>
-</p>
+<%# partial '_map_stay22' %>
 
 <% content_for :schema_main_entity do %>
 <% end %>

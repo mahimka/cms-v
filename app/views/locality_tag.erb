@@ -1,53 +1,8 @@
 <% content_for :head_extra do %>
 <% end %>
 
-
 <% content_for :hero do %>
-
-  <section class="hero is-medium" style="position: relative; overflow: hidden;">
-    <%= partial '_carousel' %>
-    <%= partial '_carousel_overlay' %>
-    <%#= partial '_carousel_div_hero' %>
-
-    <!-- Контент Hero поверх карусели -->
-    <div class="hero-body" style="position: relative; z-index: 2;">
-      <div class="container">
-
-        <h1 class="title is-2 has-text-white mb-1">
-          <%= @page.h1 %> 
-        </h1>
-
-        <% unless @page.subtitle.blank? %>
-          <p class='subtitle has-text-white mt-0' style="opacity: 0.82; max-width: 640px; ">
-            <%= @page.subtitle %>
-          </p>
-        <% end %>
-
-        <% unless @page.hero_1.blank? %>
-          <p class='is-6 subtitle has-text-white mt-0' style="opacity: 0.82; max-width: 640px; ">
-            <%= @page.hero_1 %>
-          </p>
-        <% end %>
-
-        <% unless @page.hero_2.blank? %>
-          <p class='is-6 subtitle has-text-white mt-0' style="opacity: 0.82; max-width: 640px; ">
-            <%= @page.hero_2 %>
-          </p>
-        <% end %>
-
-        <% if @page.hero_3.blank? %>
-        <% else %>
-          <div class="buttons">
-            <%= parse_erb_and_markdown @page.hero_3 %>
-          </div>
-          <%= partial('_share_buttons') %>
-        <% end %>
-
-      </div>
-    </div> 
-
-  </section>
-
+  <%= partial "_hero_wild" %>
 <% end %> 
 
 <% content_for :sidebar do %>
@@ -56,20 +11,19 @@
 <%= parse_erb_and_markdown @page.body if @page.body %>
 
 <% if @page.block_1.blank? %>
-  <% if @objects %>
-    <div class="columns is-multiline">
-      <% @objects.each do |object| %>
-        <div class="column is-4">
-          <%= partial '_card', object: object, anchor: "#{object.short || object.name}" %>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
+  <%= partial '_list_paginated' %>
 <% else %>
   <%= parse_erb_and_markdown @page.block_1 if @page.block_5 %>
 <% end %>
 
 <%#= partial '_map_stay22' %>
+
+<% if @page.block_5.blank? %>
+  <h2 class="title has-text-weight-medium">more <%= @page.list_tag&.parent&.name %> in <%= @page.parent&.anchor_1 %></h2>
+  <%= partial '_facet_sibling_links', anchor: 'anchor_1' %>
+<% else %>
+  <%= parse_erb_and_markdown @page.block_5 if @page.block_5 %>
+<% end %>
 
 <!--
 <% if @page.block_2.blank? %>

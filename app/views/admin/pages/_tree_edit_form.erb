@@ -51,7 +51,9 @@
             <a href='/admin/<%= @page.pageable_type.pluralize.parameterize %>/<%= @page.pageable_id %>/edit'><span class="tag is-light"><%= @page.pageable_type %> : <%= @page.pageable_id %></span></a>
           <% end %>
 
-
+          <% if @page.template_id %>
+            template: <a href='/admin/page_templates/<%= @page.template_id %>/edit'><span class="tag is-light"><%= @page.template_id %>: <%= @page.template.slug %></span></a>
+          <% end %>
 
 
 

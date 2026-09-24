@@ -121,14 +121,61 @@ class PageTemplateGenerator
   # (статичный parent_page + вся matching_objects, как раньше). С ним —
   # по элементу на КАЖДУЮ уже сгенерированную страницу родительского
   # template'а (см. class-comment).
+  #
+  # Раньше здесь был N+1: parent.list_objects на каждую родительскую
+  # страницу — свежий TagExpression + published-подзапрос ПО ОДНОМУ
+  # родителю (на addressLocality с 2000+ страниц это тысячи запросов,
+  # каждый по вложенным IN(...) — минуты вместо секунд). У всех
+  # родителей, чьи effective_conditions["tags"] это просто имя ОДНОГО
+  # тега (весь текущий набор template'ов — 2/3/4 с пустым
+  # template_conditions, other case не встречается) — считаем
+  # object_id -> parent_tag_id ОДНИМ запросом на всех сразу. Родителей
+  # со составным AST (в теории — многоуровневая вложенность с
+  # доп.фильтром) — по старой, гарантированно корректной, но медленной
+  # схеме (их в реальных данных сейчас нет).
   def list_targets
     return [[parent_page, matching_objects]] unless nested?
 
-    own_ids = matching_objects.select(:id)
+    klass = @page_template.pageable_type.to_s.constantize
+    parent_pages = Page.where(template_id: @page_template.parent_template_id).to_a
+    return [] if parent_pages.empty?
 
-    Page.where(template_id: @page_template.parent_template_id).map do |parent|
-      [parent, parent.list_objects.where(id: own_ids)]
+    simple_parents, complex_parents = parent_pages.partition do |parent|
+      parent.list_tag_id.present? && parent.effective_conditions["tags"].is_a?(String)
     end
+
+    targets = []
+
+    if simple_parents.any?
+      tag_ids = simple_parents.map(&:list_tag_id)
+
+      ids_by_tag_id = Tagging
+        .where(tag_id: tag_ids, taggable_type: klass.name, taggable_id: matching_objects.select(:id))
+        .pluck(:tag_id, :taggable_id)
+        .each_with_object(Hash.new { |h, k| h[k] = [] }) { |(tag_id, obj_id), h| h[tag_id] << obj_id }
+
+      # Тот же published-фильтр, что и в ListQuery#objects (см.
+      # list_query.rb) — раньше он неявно применялся внутри
+      # parent.list_objects на каждого родителя по отдельности, теперь
+      # считаем один раз и пересекаем в памяти (маленькие массивы на тег).
+      published_ids = klass.include?(Pageable) ? Page.where(pageable_type: klass.name, published: true).pluck(:pageable_id).to_set : nil
+
+      simple_parents.each do |parent|
+        ids = ids_by_tag_id[parent.list_tag_id]
+        next if ids.blank?
+
+        ids = ids.select { |id| published_ids.include?(id) } if published_ids
+        next if ids.empty?
+
+        targets << [parent, klass.where(id: ids)]
+      end
+    end
+
+    complex_parents.each do |parent|
+      targets << [parent, parent.list_objects.where(id: matching_objects.select(:id))]
+    end
+
+    targets
   end
 
   def matching_objects
@@ -180,7 +227,7 @@ class PageTemplateGenerator
       pageable_id: object.id
     )
 
-    save_page(existing, attrs, force)
+    save_page(existing, attrs, force, object)
   end
 
   # Группа тегов, по которой строится List — берётся из первого
@@ -213,8 +260,12 @@ class PageTemplateGenerator
 
     # has_ancestry — parent_id не колонка, ищем через ancestry (см.
     # Ancestry#child_ancestry — то значение ancestry, которое было бы
-    # у прямого потомка parent_for_group).
-    existing = Page.find_by(template_id: @page_template.id, ancestry: parent_for_group.child_ancestry, slug: slug)
+    # у прямого потомка parent_for_group). Ищем по list_tag_id, а НЕ по
+    # slug — slug у самого тега может со временем поменяться (например
+    # синхронизация с geonames.db), и поиск по нему тогда не найдёт уже
+    # существующую страницу и наплодит дубликат вместо update (баг,
+    # словленный именно на этом — см. tags:sync_geoname_slug).
+    existing = Page.find_by(template_id: @page_template.id, ancestry: parent_for_group.child_ancestry, list_tag_id: tag.id)
     return [existing, :skipped] if existing && !force
 
     attrs = base_attrs(renderer, parent_for_group).merge(
@@ -223,7 +274,7 @@ class PageTemplateGenerator
       conditions: conditions_hash(renderer, parent_for_group)
     )
 
-    save_page(existing, attrs, force)
+    save_page(existing, attrs, force, tag)
   end
 
   # Теги всех facet-предков parent_for_group (её самой и её собственных
@@ -312,7 +363,7 @@ class PageTemplateGenerator
     rendered
   end
 
-  def save_page(existing, attrs, force)
+  def save_page(existing, attrs, force, object)
     if existing
       # ready/published НЕ трогаем при обновлении — это решение админа
       # (опубликовал/снял с публикации вручную после генерации), а не
@@ -333,7 +384,40 @@ class PageTemplateGenerator
       # ready/published — только при первом создании страницы.
       attrs[:ready] = @page_template.page_ready
       attrs[:published] = @page_template.page_published
-      [Page.create!(attrs), :created]
+      [create_page_disambiguating_slug(attrs, object), :created]
     end
+  end
+
+  # slug из name (Profile) не уникален — сплошь и рядом несколько разных
+  # Entity с одинаковым названием ("Yoga Studio" в десятке городов), а
+  # Page#uri обязан быть уникален. При коллизии uri пробуем по очереди
+  # уточнить slug городом (addressLocality), потом страной
+  # (addressCountry), и в конце — object.id: он уникален всегда, поэтому
+  # цепочка гарантированно где-то остановится, а не свалится в 404.
+  # У List-страниц (object — Tag, а не Entity) slug и так уникален
+  # (Tag#slug), так что до этих уточнений реально не доходит.
+  def create_page_disambiguating_slug(attrs, object)
+    base_slug = attrs[:slug]
+    suffixes = disambiguation_suffixes(object)
+
+    begin
+      Page.create!(attrs)
+    rescue ActiveRecord::RecordInvalid => e
+      raise if suffixes.empty? || e.record.errors[:uri].blank?
+
+      attrs = attrs.merge(slug: SlugGenerator.call("#{base_slug} #{suffixes.shift}"))
+      retry
+    end
+  end
+
+  def disambiguation_suffixes(object)
+    suffixes = []
+
+    if object.respond_to?(:tags_of_group)
+      suffixes << object.tags_of_group('addressLocality').first&.name
+      suffixes << object.tags_of_group('addressCountry').first&.name
+    end
+
+    (suffixes.compact << object.id).uniq
   end
 end

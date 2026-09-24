@@ -10,10 +10,11 @@
     <input type="file" name="import_file" accept="application/json" required>
     <button type="submit" class="button is-link" title="файл, выгруженный кнопкой export у группы — ищет по name, существующие обновляет, новые создаёт">Import group</button>
   </form>
-  <% if request.path_info == '/admin/tags/address' %>
+  <% if ['/admin/tags/address', '/admin/tags/unsorted'].include?(request.path_info) %>
     <a class="button is-info is-light" href="/admin/tags">&larr; All other tags</a>
   <% else %>
     <a class="button is-info is-light" href="/admin/tags/address">addressCountry / addressRegion / addressLocality / adm_2 &rarr;</a>
+    <a class="button is-info is-light" href="/admin/tags/unsorted">Unsorted &rarr;</a>
   <% end %>
 </p>
 
@@ -160,7 +161,18 @@
       </td>
     </tr>
 
-    <% (tags_in_group - [group]).sort_by { |t| [t.position || 0, t.name.to_s] }.each do |tag| %>
+    <%
+      child_tags = tags_in_group - [group]
+      # На /admin/tags/unsorted интереснее видеть сначала часто
+      # используемые теги (их разбирать в первую очередь) — на
+      # остальных страницах сортировка по position/name сохраняется.
+      child_tags = if request.path_info == '/admin/tags/unsorted'
+        child_tags.sort_by { |t| -(@tagging_counts_by_tag[t.id] || 0) }
+      else
+        child_tags.sort_by { |t| [t.position || 0, t.name.to_s] }
+      end
+    %>
+    <% child_tags.each do |tag| %>
       <tr class="tag-group-child" data-group-id="<%= group.id %>" style="display:none;">
         <td></td>
         <td><%= checkbox_in_place(tag, :active) %></td>
@@ -174,7 +186,8 @@
           <% elsif tag.fixed %>
             <%= tag.slug %>
           <% else %>
-            <%= input_in_place(tag, :slug) %><%#= tag.name %>
+            <%= tag.slug %>
+            <%#= input_in_place(tag, :slug) %><%#= tag.name %>
           <% end %>
         </td>
 
@@ -184,13 +197,15 @@
           <% elsif tag.fixed %>
             <%= tag.name %>
           <% else %>
-            <%= input_in_place(tag, :name) %><%#= tag.name %>
+            <%= tag.name %>
+            <%#= input_in_place(tag, :name) %><%#= tag.name %>
           <% end %>
         </td>
         
         <td class="">
           <% unless tag.fixed %>
-            <%= input_in_place(tag, :short, style: "width:100px") %><%#= tag.name %>
+            <%= tag.short %>
+            <%#= input_in_place(tag, :short, style: "width:100px") %><%#= tag.name %>
           <% else %>
             <%= tag.short %>
           <% end %>
@@ -200,13 +215,15 @@
           <% if tag.table == "ads" || tag.fixed %>
             <%= tag.short_2 %>
           <% else %>
-            <%= input_in_place(tag, :short_2, style: "width:50px") %><%#= tag.name %>
+            <%= tag.short_2 %>
+            <%#= input_in_place(tag, :short_2, style: "width:50px") %><%#= tag.name %>
           <% end %>
         </td>
         
         <td class="">
           <% unless tag.fixed %>
-            <%= input_in_place(tag, :table, style: "width:100px") %><%#= tag.name %>
+            <%#= input_in_place(tag, :table, style: "width:100px") %><%#= tag.name %>
+            <%= tag.table %>
           <% else %>
             <%= tag.table %>
           <% end %> 
@@ -214,14 +231,15 @@
         
         <td class="">
           <% unless tag.fixed %>
-            <%= input_in_place(tag, :table_id, style: "width:40px") %><%#= tag.name %>
+            <%= tag.table_id %>
+            <%#= input_in_place(tag, :table_id, style: "width:40px") %><%#= tag.name %>
           <% else %>
             <%= tag.table_id %>
           <% end %>                                 
         </td>
 
         <td><%= @tagging_counts_by_tag[tag.id] || 0 %></td>
-        <td><%= input_in_place(tag, :admin_notes) %></td>
+        <td><%#= input_in_place(tag, :admin_notes) %></td>
         <td>
           <a href="/admin/tags/<%= tag.id %>" class="button is-small" target='_blank'>tag</a>
           <a href="/admin/tags/<%= tag.id %>/edit" class="button is-small" target='_blank'>edit</a>
@@ -250,6 +268,6 @@
 </div>
 
 <script src="/javascripts/tag-group-toggle.js"></script>
-<script src="/javascripts/tag-merge.js"></script>
+<script src="/javascripts/tag-merge.js?v=<%= File.mtime(File.join(settings.public_folder, 'javascripts/tag-merge.js')).to_i %>"></script>
 <script src="/javascripts/taggable-translate.js"></script>
 

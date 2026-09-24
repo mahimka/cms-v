@@ -10,28 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_19_090000) do
-
-  create_table "ads", force: :cascade do |t|
-    t.string "ancestry"
-    t.string "name"
-    t.string "slug"
-    t.string "feature_code"
-    t.string "country_code"
-    t.string "admin1_code"
-    t.string "admin2_code"
-    t.integer "population"
-    t.float "latitude"
-    t.float "longitude"
-    t.string "timezone"
-    t.boolean "active", default: true
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.string "short"
-    t.index ["ancestry"], name: "index_ads_on_ancestry"
-    t.index ["feature_code"], name: "index_ads_on_feature_code"
-    t.index ["slug"], name: "index_ads_on_slug", unique: true
-  end
+ActiveRecord::Schema.define(version: 2026_09_24_080000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -118,6 +97,7 @@ ActiveRecord::Schema.define(version: 2026_09_19_090000) do
     t.text "translations"
     t.boolean "fixed", default: false
     t.text "icon_svg"
+    t.integer "check_delay_seconds"
     t.index ["ancestry"], name: "index_labels_on_ancestry"
     t.index ["name"], name: "index_labels_on_name", unique: true
   end
@@ -134,6 +114,8 @@ ActiveRecord::Schema.define(version: 2026_09_19_090000) do
     t.string "response"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "redirected", default: false
+    t.string "redirected_to"
     t.index ["label_id"], name: "index_links_on_label_id"
     t.index ["linkable_type", "linkable_id"], name: "index_links_on_linkable_type_and_linkable_id"
   end
@@ -255,7 +237,9 @@ ActiveRecord::Schema.define(version: 2026_09_19_090000) do
     t.integer "template_id"
     t.text "edited_columns"
     t.integer "list_tag_id"
+    t.integer "geonames_id"
     t.index ["ancestry"], name: "index_pages_on_ancestry"
+    t.index ["geonames_id"], name: "index_pages_on_geonames_id"
     t.index ["master_id", "lang"], name: "index_pages_on_master_and_lang", unique: true, where: "master_id IS NOT NULL"
     t.index ["master_id"], name: "index_pages_on_master_id"
     t.index ["uri"], name: "index_pages_on_uri", unique: true
@@ -407,6 +391,8 @@ ActiveRecord::Schema.define(version: 2026_09_19_090000) do
     t.string "slug"
     t.string "table"
     t.integer "table_id"
+    t.integer "geonames_id"
+    t.index ["geonames_id"], name: "index_tags_on_geonames_id"
     t.index ["parent_id"], name: "index_tags_on_parent_id"
     t.index ["slug"], name: "index_tags_on_slug", unique: true
   end
@@ -417,6 +403,7 @@ ActiveRecord::Schema.define(version: 2026_09_19_090000) do
     t.string "password_digest"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "admin", default: false, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

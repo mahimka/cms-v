@@ -2,12 +2,8 @@
 <% end %>
 
 <% content_for :hero do %>
-  <section class="hero is-medium" style="position: relative; overflow: hidden;">
-    <%= partial '_carousel' %>
-    <%= partial '_carousel_overlay' %>
-    <%#= partial '_carousel_div_hero' %>
-  </section>
-<% end %>
+  <%= partial "_hero_wild" %>
+<% end %> 
 
 <% content_for :sidebar do %>
 <% end %> <!-- end of content_for :sidebar -->
@@ -15,22 +11,14 @@
 <%= parse_erb_and_markdown @page.body if @page.body %>
 
 <% if @page.block_1.blank? %>
-  <% if @objects %>
-    <div class="columns is-multiline">
-      <% @objects.each do |object| %>
-        <div class="column is-4">
-          <%= partial '_card', object: object, anchor: "#{object.short || object.name} review" %>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
+  <%= partial '_list_paginated', anchor_suffix: ' review' %>
 <% else %>
   <%= parse_erb_and_markdown @page.block_1 if @page.block_5 %>
 <% end %>
 
 <% if @page.block_5.blank? %>
-  <h2 class="title has-text-weight-medium"><%#= @page.anchor_2 %> by Region</h2>
-  
+  <h2 class="title has-text-weight-medium"><%#= @page.anchor_2 %> by Locality</h2>
+  <%= partial '_geo_sibling_links', child_group: 'addressLocality', anchor: 'anchor_1' %>
 <% else %>
   <%= parse_erb_and_markdown @page.block_5 if @page.block_5 %>
 <% end %>
@@ -41,9 +29,14 @@
 
   <% Tag.where(parent_id: [nil, 0]).each do |t_g| %>
 
-    <% unless partial('_page_children_links_by_group', group: t_g.name).blank? %>
+    <%
+      # Один вызов, не два (blank?-проверка + рендер) — внутри partial'а
+      # батч-запрос счётчиков на всю группу, повторный вызов удваивал бы его.
+      group_html = partial '_page_children_links_by_group', group: t_g.name, anchor: 'anchor_1'
+    %>
+    <% unless group_html.blank? %>
       <h3 class="title is-size-5  is-family-monospace"><%= t_g.name %></h3>
-      <%= partial '_page_children_links_by_group', group: t_g.name %>
+      <%= group_html %>
     <% end %>
 
   <% end %>

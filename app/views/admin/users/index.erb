@@ -38,6 +38,7 @@
     <tr class="is-size-6 has-text-weight-semibold">
       <td>name</td>
       <td>email</td>
+      <td>admin</td>
       <td>pictures</td>
       <td>created_at</td>
       <td></td>
@@ -47,6 +48,7 @@
       <tr>
         <td><%= user.name %></td>
         <td><%= user.email %></td>
+        <td><%= "✓" if user.admin? %></td>
         <td><%= user.pictures.size %></td>
         <td><%= user.created_at %></td>
         <td>
