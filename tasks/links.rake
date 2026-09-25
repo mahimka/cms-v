@@ -9,7 +9,7 @@ namespace :links do
     limit         = ENV['limit']&.to_i
 
     scope = Link.where("checked_at IS NULL OR checked_at < ?", days.days.ago)
-    scope = scope.where(active: true) unless include_dead
+    scope = scope.where(alive: true) unless include_dead
     scope = scope.joins(:label).where(labels: { name: label_name }) if label_name
 
     # Сортируем от самых "старых" проверок — свежепроверенные не оттесняют
@@ -25,12 +25,12 @@ namespace :links do
     # блокировку; у кого нет (обычные сайты) — параллельно в потоках.
     links_by_label_delay = Link.where(id: ids).includes(:label).group_by { |l| l.label&.check_delay_seconds.to_i }
 
-    stats = { active: 0, inactive: 0, redirected: 0, errors: 0 }
+    stats = { alive: 0, dead: 0, redirected: 0, errors: 0 }
     mutex = Mutex.new
 
     record_stats = lambda do |link|
       mutex.synchronize do
-        stats[link.active? ? :active : :inactive] += 1
+        stats[link.alive? ? :alive : :dead] += 1
         stats[:redirected] += 1 if link.redirected?
         stats[:errors] += 1 if link.response.to_s.start_with?("error:")
       end
@@ -74,6 +74,73 @@ namespace :links do
       end
     end
 
-    puts "Готово. active=#{stats[:active]} inactive=#{stats[:inactive]} redirected=#{stats[:redirected]} errors=#{stats[:errors]}"
+    puts "Готово. alive=#{stats[:alive]} dead=#{stats[:dead]} redirected=#{stats[:redirected]} errors=#{stats[:errors]}"
+  end
+
+  desc "Схлопывает 'косметические' редиректы (различие только в www. и/или конечном /) — url становится redirected_to, снимается redirected/response=200 (rake links:fold_trivial_redirects [label=website] [dry_run=true])"
+  task :fold_trivial_redirects do
+    require 'uri'
+
+    label_name = ENV['label']
+    dry_run = ENV['dry_run'] == 'true'
+
+    # "Тривиальный" редирект — тот же scheme+host(без www.)+path(без конечного
+    # /)+query, отличие только в www.-префиксе и/или конечном слэше. Смена
+    # схемы (http->https), пути или домена сюда не попадает — это уже не
+    # косметика, трогать не должны.
+    normalize = lambda do |url|
+      uri = URI.parse(url.to_s.strip)
+      next nil unless uri.host
+
+      host = uri.host.downcase.sub(/\Awww\./, '')
+      path = uri.path.to_s.sub(%r{/\z}, '')
+      "#{uri.scheme}://#{host}#{path}#{uri.query ? '?' + uri.query : ''}"
+    rescue URI::InvalidURIError
+      nil
+    end
+
+    scope = Link.where(redirected: true).where.not(redirected_to: [nil, ''])
+    scope = scope.joins(:label).where(labels: { name: label_name }) if label_name
+
+    folded = 0
+    skipped = 0
+    failed = 0
+
+    scope.find_each do |link|
+      a = normalize.call(link.url)
+      b = normalize.call(link.redirected_to)
+
+      unless a && b && a == b
+        skipped += 1
+        next
+      end
+
+      puts "##{link.id} #{link.url} -> #{link.redirected_to}#{dry_run ? ' (dry_run)' : ''}"
+      next if dry_run
+
+      # Другие rake-таски (websites:parse и т.п.) могут писать в ту же
+      # sqlite параллельно — недолгий ретрай на контенцию, и в любом случае
+      # одна проблемная запись (в т.ч. если её redirected_to кто-то параллельно
+      # обнулил между чтением и записью) не должна ронять весь таск на
+      # тысячах остальных.
+      attempts = 0
+      begin
+        attempts += 1
+        link.update!(url: link.redirected_to, redirected: false, redirected_to: nil, response: "200")
+        folded += 1
+      rescue ActiveRecord::StatementInvalid => e
+        if e.message.include?("locked") && attempts < 5
+          sleep(0.5 * attempts)
+          retry
+        end
+        puts "  ##{link.id}: не удалось обновить — #{e.class}: #{e.message}"
+        failed += 1
+      rescue ActiveRecord::RecordInvalid => e
+        puts "  ##{link.id}: не удалось обновить — #{e.class}: #{e.message}"
+        failed += 1
+      end
+    end
+
+    puts "Схлопнуто: #{folded}, пропущено (не тривиальный редирект — домен/путь реально другие): #{skipped}, не удалось: #{failed}"
   end
 end

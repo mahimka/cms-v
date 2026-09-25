@@ -11,7 +11,7 @@ require 'net/http'
 # поэтому для них отдельно матчим текст заглушки в body.
 #
 # "Домен продаётся" — только эвристика по тексту (Sedo/GoDaddy/HugeDomains
-# и т.п.), ложные срабатывания возможны — поэтому НЕ трогает active,
+# и т.п.), ложные срабатывания возможны — поэтому НЕ трогает alive,
 # только дописывается в response как заметка для модератора.
 #
 # Используется и из tasks/links.rake (плановая проверка), и из кнопок в
@@ -73,7 +73,7 @@ module LinkChecker
 
     if result.error
       link.response = "error: #{result.error}"
-      link.active = false
+      link.alive = false
       link.redirected = false
       link.redirected_to = nil
     else
@@ -82,14 +82,14 @@ module LinkChecker
 
       if result.status_code != 200
         link.response = result.status_code.to_s
-        link.active = false
+        link.alive = false
       elsif dead_content?(label_name, result.body)
         link.response = "200 (похоже на несуществующую страницу)"
-        link.active = false
+        link.alive = false
       else
         note = for_sale?(result.body) ? " (возможно домен продаётся — проверить вручную)" : ""
         link.response = "200#{note}"
-        link.active = true
+        link.alive = true
       end
     end
 

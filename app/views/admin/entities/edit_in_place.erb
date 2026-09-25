@@ -74,8 +74,13 @@
   </div>
 
   <div class="columns">
-    <div class="column is-2"><%= label(:entity, :active, "active", options = {class: 'label'}) %></div>
-    <div class="column is-9"><%= checkbox_in_place(@entity, :active) %></div>
+    <div class="column is-2"><%= label(:entity, :generate_pages, "generate_pages", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@entity, :generate_pages) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:entity, :is_closed, "is_closed", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@entity, :is_closed) %></div>
   </div>
 
   <hr>

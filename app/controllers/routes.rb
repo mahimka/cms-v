@@ -76,7 +76,7 @@ class Routes < App
          @page_tags    = entity.tags.active.each_with_object({}) { |tag, h| h[tag.name] = tag.translation(@page.lang) }
 
          if entity.latitude && entity.longitude
-           @closest_entities = Entity.active
+           @closest_entities = Entity.generate_pages
              .where.not(id: entity.id)
              .where.not(latitude: nil, longitude: nil)
              .near([entity.latitude, entity.longitude], 50, units: :km, order: 'distance ASC')

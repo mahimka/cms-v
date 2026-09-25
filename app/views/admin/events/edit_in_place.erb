@@ -45,7 +45,7 @@
       <p class="help">место проведения — Entity (отель, пляж и т.п.), если уже заведено</p>
     </div>
     <div class="column is-9">
-      <% venues_for_select = Entity.active.order(:name).to_h { |e| [e.id, e.name] } %>
+      <% venues_for_select = Entity.generate_pages.order(:name).to_h { |e| [e.id, e.name] } %>
       <%= select_in_place(@event, :venue_id, venues_for_select) %>
     </div>
   </div>
@@ -71,8 +71,13 @@
   </div>
 
   <div class="columns">
-    <div class="column is-2"><%= label(:event, :active, "active", options = {class: 'label'}) %></div>
-    <div class="column is-9"><%= checkbox_in_place(@event, :active) %></div>
+    <div class="column is-2"><%= label(:event, :generate_pages, "generate_pages", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@event, :generate_pages) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:event, :is_closed, "is_closed", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@event, :is_closed) %></div>
   </div>
 
   <hr>

@@ -109,7 +109,7 @@ namespace :entities do
             latitude: l.latitude,
             longitude: l.longitude,
             schema: schema,
-            active: l.listed && l.ready
+            generate_pages: l.listed && l.ready
           )
           entities_created += 1
         end
@@ -225,7 +225,7 @@ namespace :profiles do
           profileable_id: entity_id,
           site_id: site.id,
           url: p.url,
-          active: p.active.nil? ? true : p.active,
+          alive: p.active.nil? ? true : p.active,
           redirected: p.redirects_to_url.present?,
           redirected_to: p.redirects_to_url,
           status: p.response,

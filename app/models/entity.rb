@@ -7,7 +7,7 @@ class Entity < ActiveRecord::Base
   validates :name, presence: true
   validates :schema, presence: true
 
-  scope :active, -> { where(active: true) }
+  scope :generate_pages, -> { where(generate_pages: true) }
 
   # Координаты уже есть в latitude/longitude при импорте — reverse_geocoded_by
   # только даёт .near(...), сам ничего не геокодирует. extend обязателен
@@ -53,7 +53,7 @@ class Entity < ActiveRecord::Base
   end
 
   def self.ransackable_attributes(auth_object = nil)
-    %w[id active name short parent_id address latitude longitude plus_code schema_id created_at updated_at]
+    %w[id generate_pages is_closed name short parent_id address latitude longitude plus_code schema_id created_at updated_at]
   end
 
   def self.ransackable_associations(auth_object = nil)

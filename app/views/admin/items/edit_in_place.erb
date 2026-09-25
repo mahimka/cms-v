@@ -29,8 +29,13 @@
   </div>
 
   <div class="columns">
-    <div class="column is-2"><%= label(:item, :active, "active", options = {class: 'label'}) %></div>
-    <div class="column is-9"><%= checkbox_in_place(@item, :active) %></div>
+    <div class="column is-2"><%= label(:item, :generate_pages, "generate_pages", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@item, :generate_pages) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:item, :is_closed, "is_closed", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@item, :is_closed) %></div>
   </div>
 
   <hr>

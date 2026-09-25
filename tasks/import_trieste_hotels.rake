@@ -60,7 +60,7 @@ namespace :import do
       types = row['property_types'].to_s.split(',').map(&:strip).reject(&:blank?)
       type_tags = types.map { |token| resolve_type_tag.call(token) }
 
-      entity = Entity.create!(name: name, schema: schema, active: true)
+      entity = Entity.create!(name: name, schema: schema, generate_pages: true)
       (base_tags + type_tags).uniq.each do |tag|
         entity.taggings.where(tag_id: tag.id).first_or_create!
       end

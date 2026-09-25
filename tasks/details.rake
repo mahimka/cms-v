@@ -68,4 +68,37 @@ namespace :details do
     puts "Удалено дополнительно blank-после-strip: #{blank_ish_count}"
     puts "Осталось details: #{Detail.count}"
   end
+
+  CONTACT_LINK_PREFIXES = { 'email' => 'mailto:', 'phone' => 'tel:' }.freeze
+
+  desc "Переносит Link с label email/phone (были tel:/mailto: ссылками — см. WebsiteScraper) в Detail того же объекта, очищая префикс, и удаляет исходный Link"
+  task :migrate_contact_links do
+    moved = 0
+    skipped = 0
+
+    CONTACT_LINK_PREFIXES.each do |label_name, prefix|
+      label = Label.find_by(name: label_name)
+      unless label
+        puts "Label #{label_name.inspect} не найден, пропускаю"
+        next
+      end
+
+      Link.where(label_id: label.id).find_each do |link|
+        record = link.linkable
+        value = link.url.to_s.sub(/\A#{Regexp.escape(prefix)}/, '').strip
+
+        if record.nil? || value.blank?
+          puts "  пропущен Link ##{link.id} (#{link.url.inspect}) — #{record ? 'пустое значение' : 'нет linkable'}"
+          skipped += 1
+          next
+        end
+
+        Detail.find_or_create_by!(detailable: record, label: label) { |d| d.value = value }
+        link.destroy!
+        moved += 1
+      end
+    end
+
+    puts "Перенесено в Detail и удалено из Link: #{moved}, пропущено: #{skipped}"
+  end
 end

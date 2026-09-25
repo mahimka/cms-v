@@ -235,7 +235,7 @@
   <% @profiles.each do |profile| %>
 
     <tr>
-      <td><%= checkbox_in_place profile, :active %></td>
+      <td><%= checkbox_in_place profile, :alive %></td>
       <td><%= profile.url %></td>
       <td><a href="<%= profile.url %>#profile" class='button is-small is-warning'>scrape</a></td>
       <td><%= profile.profileable_type %></td>

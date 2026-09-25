@@ -17,14 +17,14 @@ class LinksController < App
         total:      Link.count,
         checked:    Link.where.not(checked_at: nil).count,
         unchecked:  Link.where(checked_at: nil).count,
-        active:     Link.where(active: true).count,
-        inactive:   Link.where(active: false).count,
+        alive:      Link.where(alive: true).count,
+        dead:       Link.where(alive: false).count,
         redirected: Link.where(redirected: true).count,
         stale:      Link.where("checked_at IS NULL OR checked_at < ?", 15.days.ago).count,
       }
       @checked_by_label = Link.joins(:label)
                                .group("labels.name")
-                               .select("labels.name AS label_name, COUNT(*) AS total, SUM(CASE WHEN links.checked_at IS NOT NULL THEN 1 ELSE 0 END) AS checked, SUM(CASE WHEN links.active = 0 THEN 1 ELSE 0 END) AS inactive")
+                               .select("labels.name AS label_name, COUNT(*) AS total, SUM(CASE WHEN links.checked_at IS NOT NULL THEN 1 ELSE 0 END) AS checked, SUM(CASE WHEN links.alive = 0 THEN 1 ELSE 0 END) AS dead")
 
       erb :"/links/index", layout: :"/layout/wide", views: settings.views_admin
 
@@ -74,7 +74,7 @@ class LinksController < App
     end
 
     # Ручная проверка одной ссылки — см. lib/link_checker.rb. Всегда
-    # проверяет конкретно эту ссылку, даже если она сейчас active:false —
+    # проверяет конкретно эту ссылку, даже если она сейчас alive:false —
     # это явный клик по конкретной записи, а не плановая выборка
     # (в отличие от tasks/links.rake, который мёртвые по умолчанию пропускает).
     post '/links/:id/check' do

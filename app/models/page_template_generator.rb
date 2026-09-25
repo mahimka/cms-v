@@ -180,10 +180,10 @@ class PageTemplateGenerator
 
   def matching_objects
     klass = @page_template.pageable_type.to_s.constantize
-    # Все pageable_type (Entity/Item/Event/Picture) имеют scope :active —
-    # неактивные объекты (сняты с публикации/в архиве) страницы получать
-    # не должны, тот же принцип, что у ListQuery#objects.
-    base = klass.respond_to?(:active) ? klass.active : klass.all
+    # Entity/Item/Event имеют scope :generate_pages, Picture — :active —
+    # объекты, снятые с генерации (сняты с публикации/в архиве), страницы
+    # получать не должны, тот же принцип, что у ListQuery#objects.
+    base = klass.respond_to?(:generate_pages) ? klass.generate_pages : (klass.respond_to?(:active) ? klass.active : klass.all)
     scope =
       if @page_template.template_conditions.blank?
         base

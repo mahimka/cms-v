@@ -35,7 +35,9 @@ class ListQuery
     raise ArgumentError, "unknown list object type: #{object_type.inspect}" unless ALLOWED_OBJECT_TYPES.include?(object_type)
 
     klass = object_type.constantize
-    scope = klass.respond_to?(:active) ? klass.active : klass.all
+    # Entity/Item/Event используют generate_pages (см. миграцию
+    # 20260925090000), Picture — свой отдельный active.
+    scope = klass.respond_to?(:generate_pages) ? klass.generate_pages : (klass.respond_to?(:active) ? klass.active : klass.all)
 
     if @conditions["schema"].present?
       names = Array(@conditions["schema"])
@@ -100,7 +102,7 @@ class ListQuery
       end
 
       klass = object_type.constantize
-      base = klass.respond_to?(:active) ? klass.active : klass.all
+      base = klass.respond_to?(:generate_pages) ? klass.generate_pages : (klass.respond_to?(:active) ? klass.active : klass.all)
 
       if schema_names.present?
         schema_ids = Schema.where(name: schema_names).flat_map { |schema| schema.subtree.pluck(:id) }

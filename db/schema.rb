@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_24_080000) do
+ActiveRecord::Schema.define(version: 2026_09_25_121000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -20,12 +20,13 @@ ActiveRecord::Schema.define(version: 2026_09_24_080000) do
     t.float "numeric_value"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "archived", default: false
     t.index ["detailable_type", "detailable_id", "label_id"], name: "index_details_on_detailable_and_label", unique: true
     t.index ["detailable_type", "detailable_id"], name: "index_details_on_detailable_type_and_detailable_id"
   end
 
   create_table "entities", force: :cascade do |t|
-    t.boolean "active"
+    t.boolean "generate_pages"
     t.string "name", null: false
     t.integer "parent_id"
     t.string "address"
@@ -37,12 +38,13 @@ ActiveRecord::Schema.define(version: 2026_09_24_080000) do
     t.integer "schema_id"
     t.string "plus_code"
     t.string "short"
+    t.boolean "is_closed", default: false
     t.index ["name"], name: "index_entities_on_name"
     t.index ["schema_id"], name: "index_entities_on_schema_id"
   end
 
   create_table "events", force: :cascade do |t|
-    t.boolean "active", default: true
+    t.boolean "generate_pages", default: true
     t.boolean "published", default: false
     t.string "name", null: false
     t.integer "schema_id"
@@ -55,6 +57,7 @@ ActiveRecord::Schema.define(version: 2026_09_24_080000) do
     t.text "details"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "is_closed", default: false
     t.index ["name"], name: "index_events_on_name"
     t.index ["schema_id"], name: "index_events_on_schema_id"
     t.index ["start_at"], name: "index_events_on_start_at"
@@ -77,11 +80,12 @@ ActiveRecord::Schema.define(version: 2026_09_24_080000) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "ean", limit: 14
-    t.boolean "active", default: true
+    t.boolean "generate_pages", default: true
     t.integer "schema_id"
     t.text "details"
-    t.index ["active"], name: "index_items_on_active"
+    t.boolean "is_closed", default: false
     t.index ["ean"], name: "index_items_on_ean", unique: true
+    t.index ["generate_pages"], name: "index_items_on_generate_pages"
     t.index ["name"], name: "index_items_on_name"
     t.index ["schema_id"], name: "index_items_on_schema_id"
   end
@@ -103,7 +107,7 @@ ActiveRecord::Schema.define(version: 2026_09_24_080000) do
   end
 
   create_table "links", force: :cascade do |t|
-    t.boolean "active", default: true
+    t.boolean "alive", default: true
     t.boolean "ready", default: false
     t.boolean "published", default: false
     t.string "linkable_type"
@@ -279,7 +283,7 @@ ActiveRecord::Schema.define(version: 2026_09_24_080000) do
   end
 
   create_table "profiles", force: :cascade do |t|
-    t.boolean "active", default: true
+    t.boolean "alive", default: true
     t.integer "site_id"
     t.string "url"
     t.string "profileable_type"

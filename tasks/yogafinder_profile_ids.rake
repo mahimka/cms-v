@@ -31,7 +31,7 @@ namespace :yogafinder do
           next
         end
 
-        Profile.create!(site_id: site.id, url: url, active: true)
+        Profile.create!(site_id: site.id, url: url, alive: true)
         added << id
       end
 
@@ -801,7 +801,7 @@ namespace :yogafinder do
     — там markers уже связаны с Tag).
 
     - Profile без profileable (5393 новых из csv/yogafinder.cm-business_ids.txt)
-      — заводит Entity (name/address, schema LocalBusiness, active: true),
+      — заводит Entity (name/address, schema LocalBusiness, generate_pages: true),
       phone -> Detail (Label phone), website -> Link (Label website, только
       если есть — у большинства пусто, сайт резал ссылку под нагрузкой),
       profile.profileable проставляется на новую Entity.
@@ -848,7 +848,7 @@ namespace :yogafinder do
             name: details['name'],
             address: details['address'],
             schema: schema,
-            active: true
+            generate_pages: true
           )
           profile.update!(profileable: entity)
           entities_created += 1
@@ -859,7 +859,7 @@ namespace :yogafinder do
           end
 
           if details['website'].present?
-            Link.create!(linkable: entity, label: website_label, url: details['website'], active: true)
+            Link.create!(linkable: entity, label: website_label, url: details['website'], alive: true)
             websites_added += 1
           end
         end
@@ -1037,7 +1037,7 @@ namespace :yogafinder do
           next
         end
 
-        Link.create!(linkable_type: 'Entity', linkable_id: profile.profileable_id, label: website_label, url: website, active: true)
+        Link.create!(linkable_type: 'Entity', linkable_id: profile.profileable_id, label: website_label, url: website, alive: true)
         entities_with_link << profile.profileable_id # на случай нескольких profiles у одной Entity
         created += 1
       end

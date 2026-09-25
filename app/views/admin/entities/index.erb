@@ -27,13 +27,18 @@
   </div>
 
   <div class="column is-1">
-    <input type="checkbox" name="q[active_true]" value='1'  <%= @q.active_true  ? "checked" : "" %>>
-    active 
+    <input type="checkbox" name="q[generate_pages_true]" value='1'  <%= @q.generate_pages_true  ? "checked" : "" %>>
+    generate_pages
   </div>
 
   <div class="column is-2">
-    <input type="checkbox" name="q[active_blank]" value='1'  <%= @q.active_blank  ? "checked" : "" %>>
-    not active 
+    <input type="checkbox" name="q[generate_pages_blank]" value='1'  <%= @q.generate_pages_blank  ? "checked" : "" %>>
+    not generate_pages
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[is_closed_true]" value='1'  <%= @q.is_closed_true  ? "checked" : "" %>>
+    closed
   </div>
 
 
@@ -229,6 +234,7 @@
   <table class="table is-size-7">
     <tr>
       <td></td>
+      <td>closed</td>
       <td>page</td>
       <td>web</td>
       <td>name</td>
@@ -247,7 +253,8 @@
   <% @entities.each do |entity| %>
 
     <tr>
-      <td><%= checkbox_in_place entity, :active %></td>
+      <td><%= checkbox_in_place entity, :generate_pages %></td>
+      <td><%= checkbox_in_place entity, :is_closed %></td>
       <td>
         <% if entity.page %>
           <a href='/admin/pages/<%= entity.page.id %>/edit-in-place'>page</a>

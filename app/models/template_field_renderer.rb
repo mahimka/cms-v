@@ -218,13 +218,13 @@ class TemplateFieldRenderer
   def links_for(label_name)
     return Link.none unless @pageable.respond_to?(:links)
 
-    @pageable.links.joins(:label).where(labels: { name: label_name }).active
+    @pageable.links.joins(:label).where(labels: { name: label_name }).alive
   end
 
   def profiles_for(site_ident)
     return Profile.none unless @pageable.respond_to?(:profiles)
 
-    @pageable.profiles.joins(:site).where("sites.domain = :v OR sites.name = :v", v: site_ident).active
+    @pageable.profiles.joins(:site).where("sites.domain = :v OR sites.name = :v", v: site_ident).alive
   end
 
   # pageable — обычная запись (Entity/Item/Event): её собственные теги

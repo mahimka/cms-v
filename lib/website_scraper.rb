@@ -96,7 +96,12 @@ class WebsiteScraper
     return { status: :error, message: "linkable не Entity" } unless entity.is_a?(Entity)
 
     begin
-      @browser = Ferrum::Browser.new(timeout: @timeout, headless: @headless, window_size: WINDOW_SIZE)
+      # process_timeout — отдельный от timeout: (сетевого) таймаут на сам
+      # запуск процесса Chrome. Дефолт гема — 10с, при 4 параллельных
+      # потоках, стартующих Chrome одновременно, этого не хватало (~37
+      # ProcessTimeoutError на 3900+ прогоне) — увеличиваем с запасом.
+      @browser = Ferrum::Browser.new(timeout: @timeout, headless: @headless, window_size: WINDOW_SIZE,
+                                      process_timeout: 20)
       @browser.headers.set("User-Agent" => UA, "Accept-Language" => "en-US,en;q=0.9")
 
       @browser.goto(@link.url)
@@ -180,7 +185,7 @@ class WebsiteScraper
     )
     LinkChecker.apply_result!(@link, result)
 
-    return { status: :dead, message: @link.response } unless @link.active?
+    return { status: :dead, message: @link.response } unless @link.alive?
     return { status: :for_sale, message: "похоже, домен продаётся — скриншот пропущен" } if LinkChecker.for_sale?(body)
 
     sync_entity!(entity, final_url, body)
@@ -191,8 +196,8 @@ class WebsiteScraper
     data = WebsitePageParser.new.extract(body)
 
     save_screenshot!(entity, final_url)
-    create_contact_link!(entity, 'phone', data['phone'], 'tel:')
-    create_contact_link!(entity, 'email', data['email'], 'mailto:')
+    create_contact_detail!(entity, 'phone', data['phone'])
+    create_contact_detail!(entity, 'email', data['email'])
     create_social_links!(entity, data['social_links'])
     fill_address!(entity, data['address'])
   end
@@ -238,17 +243,18 @@ class WebsiteScraper
     text
   end
 
-  # phone/email/соцсети создаются, только если у entity ещё нет ни одной
-  # ссылки этого label — не затираем то, что уже проверено вручную в админке.
-  def create_contact_link!(entity, label_name, raw_value, uri_prefix)
-    return if raw_value.blank?
-    return if entity.links.joins(:label).where(labels: { name: label_name }).exists?
+  # phone/email — в entity.details (Detail), а не Link: это не переходимая
+  # ссылка, а значение (номер/адрес), плюс так их видно в тех же карточках
+  # деталей, что и остальные данные заведения. WebsitePageParser уже отдаёт
+  # значение без tel:/mailto: — тут просто кладём как есть.
+  def create_contact_detail!(entity, label_name, value)
+    return if value.blank?
 
     label = Label.find_by(name: label_name)
     return unless label
+    return if entity.detail_records.exists?(label: label)
 
-    url = raw_value.start_with?(uri_prefix) ? raw_value : "#{uri_prefix}#{raw_value}"
-    entity.links.create!(label: label, url: url)
+    entity.detail_records.create!(label: label, value: value)
   end
 
   def create_social_links!(entity, social_links)

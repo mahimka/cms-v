@@ -8,20 +8,20 @@
       <div class="column">всего<br><span class="is-size-5"><%= @checked_stats[:total] %></span></div>
       <div class="column">проверено<br><span class="is-size-5"><%= @checked_stats[:checked] %></span></div>
       <div class="column">не проверено<br><span class="is-size-5"><%= @checked_stats[:unchecked] %></span></div>
-      <div class="column has-text-success">active<br><span class="is-size-5"><%= @checked_stats[:active] %></span></div>
-      <div class="column has-text-danger">inactive<br><span class="is-size-5"><%= @checked_stats[:inactive] %></span></div>
+      <div class="column has-text-success">alive<br><span class="is-size-5"><%= @checked_stats[:alive] %></span></div>
+      <div class="column has-text-danger">dead<br><span class="is-size-5"><%= @checked_stats[:dead] %></span></div>
       <div class="column">redirected<br><span class="is-size-5"><%= @checked_stats[:redirected] %></span></div>
       <div class="column">старше 15 дней / не проверено<br><span class="is-size-5"><%= @checked_stats[:stale] %></span></div>
     </div>
 
     <table class="table is-narrow is-size-7 mt-2">
-      <tr class="has-text-weight-semibold"><td>label</td><td>всего</td><td>проверено</td><td>inactive</td></tr>
+      <tr class="has-text-weight-semibold"><td>label</td><td>всего</td><td>проверено</td><td>dead</td></tr>
       <% @checked_by_label.each do |row| %>
         <tr>
           <td><%= row.label_name %></td>
           <td><%= row.total %></td>
           <td><%= row.checked %></td>
-          <td><%= row.inactive %></td>
+          <td><%= row.dead %></td>
         </tr>
       <% end %>
     </table>
@@ -48,12 +48,12 @@
       <%= input(:q, :response_cont, options = {class: 'input is-small', value: @q.response_cont, placeholder: ""}) %>
     </div>
     <div class="column is-1">
-      <input type="checkbox" name="q[active_true]" value='1' <%= @q.active_true ? "checked" : "" %>>
-      active: true
+      <input type="checkbox" name="q[alive_true]" value='1' <%= @q.alive_true ? "checked" : "" %>>
+      alive: true
     </div>
     <div class="column is-1">
-      <input type="checkbox" name="q[active_false]" value='1' <%= @q.active_false ? "checked" : "" %>>
-      active: false
+      <input type="checkbox" name="q[alive_false]" value='1' <%= @q.alive_false ? "checked" : "" %>>
+      alive: false
     </div>
     <div class="column is-1">
       <input type="checkbox" name="q[redirected_true]" value='1' <%= @q.redirected_true ? "checked" : "" %>>
@@ -96,7 +96,7 @@
   <% @links.each do |link| %>
 
     <tr>
-      <td><%= checkbox_in_place(link, :active) %></td>
+      <td><%= checkbox_in_place(link, :alive) %></td>
       <td>
         <% if link.linkable %>
           <a href="/admin/<%= link.linkable.class.name.underscore.pluralize %>/<%= link.linkable.id %>">

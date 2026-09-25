@@ -37,7 +37,7 @@ namespace :import do
           next
         end
 
-        entity = Entity.create!(name: name, schema: schema, active: true)
+        entity = Entity.create!(name: name, schema: schema, generate_pages: true)
 
         (common_tags + [locality_tag]).each do |tag|
           entity.taggings.where(tag_id: tag.id).first_or_create

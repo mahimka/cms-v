@@ -51,7 +51,7 @@ class CheckProfile
     
   	# if status.to_s.match(/^4\d\d$/)
   	if status.to_s == "404"
-	  @profile.active = false
+	  @profile.alive = false
 	  @profile.response = status
 	  @profile.checked_at = DateTime.now 
 
@@ -71,7 +71,7 @@ class CheckProfile
   def manage_redirect
   	if redirected?
 
-      @profile.active = false
+      @profile.alive = false
 	  @profile.response = status
 	  @profile.checked_at = DateTime.now 
 
