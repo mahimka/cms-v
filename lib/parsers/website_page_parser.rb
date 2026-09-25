@@ -79,13 +79,20 @@ class WebsitePageParser
   end
 
   def extract_phone(doc, biz)
-    value = (biz && biz['telephone']) || doc.at_css('a[href^="tel:"]')&.[]('href')&.sub(/\Atel:/, '')
-    value&.strip.presence
+    # telephone у некоторых сайтов — массив (несколько номеров) вместо
+    # строки, не по спеке schema.org, но встречается на реальных страницах —
+    # берём первый.
+    biz_phone = biz && biz['telephone']
+    biz_phone = biz_phone.first if biz_phone.is_a?(Array)
+
+    value = biz_phone || doc.at_css('a[href^="tel:"]')&.[]('href')&.sub(/\Atel:/, '')
+    value&.to_s&.strip.presence
   end
 
   def extract_email(doc, biz)
     biz_email = biz && biz['email']
-    return biz_email if biz_email&.match?(EMAIL_RE)
+    biz_email = biz_email.first if biz_email.is_a?(Array)
+    return biz_email if biz_email.is_a?(String) && biz_email.match?(EMAIL_RE)
 
     # Берём первый mailto: с валидным на вид адресом, а не просто первый
     # попавшийся — на реальных сайтах первая mailto-ссылка на странице
