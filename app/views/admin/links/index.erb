@@ -99,14 +99,27 @@
       <td><%= checkbox_in_place(link, :alive) %></td>
       <td>
         <% if link.linkable %>
-          <a href="/admin/<%= link.linkable.class.name.underscore.pluralize %>/<%= link.linkable.id %>">
+          <a href="/admin/<%= link.linkable.class.name.underscore.pluralize %>/<%= link.linkable.id %>/edit_in_place" target="_blank">
             <%= link.linkable_type %> #<%= link.linkable_id %>
           </a>
         <% else %>
           <%= link.linkable_type %> #<%= link.linkable_id %>
         <% end %>
       </td>
-      <td><%= link.label&.name %></td>
+     <%#= link.label&.name %>
+
+      <%# values = (Dir.glob("**", base: settings.views_project) + Dir.glob("**", base: settings.views))
+                    .delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.uniq.sort.unshift("") %>
+
+  
+    <% values = Label.find(settings.link_labels_id).children.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("— " * l.depth) + l.name] } %>
+    <td width=170>
+      <%#= select(:link, :label_id, @labels_for_select, options = {class: 'select input is-success', value: @link.label_id}) %>
+      <%= select_in_place(link, :label_id, values, class: 'input is-success is-small mt-1') %>
+    </td>
+
+
+
       <td><a href="<%= link.url %>" target="_blank"><%= link.url %></a></td>
       <td><%= link.ready %></td>
       <td><%= link.published %></td>
