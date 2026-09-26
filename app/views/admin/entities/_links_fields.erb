@@ -7,7 +7,14 @@
 
   <div class="column is-9">
 
-    <% labels_for_select = {"": ""}.merge(Label.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("— " * l.depth) + l.name] }) %>
+    <% labels_for_select = {"": ""}.merge(Label.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("" * l.depth) + l.name] }) %>
+
+    <% if settings.respond_to?(:link_labels_id) && settings.link_labels_id %>
+
+      <% labels_for_select = Label.find(settings.link_labels_id).children.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("" * l.depth) + l.name] } %>
+    <% else %>
+      <% labels_for_select = Label.find_by_name('link_labels').children.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("" * l.depth) + l.name] } %>
+    <% end %>
 
     <form method="POST" action="/admin/entities/<%= @entity.id %>/links/check_all" class="mb-3">
       <button type="submit" class="button is-small is-warning" title="Проверить статус всех ссылок этой entity — см. lib/link_checker.rb">⟳ проверить все ссылки</button>
@@ -28,7 +35,6 @@
           <div class="control">
             <button type="submit" class="button is-small is-info">save</button>
           </div>
-
 
         </form>
 
@@ -82,3 +88,6 @@
   </div>
 
 </div>
+
+
+

@@ -49,26 +49,15 @@
 
     <hr class="my-2">
 
+    <% available_labels = effective_labels.reject { |l| used_label_ids.include?(l.id) } %>
 
-    <% labels_for_select = {"": ""}.merge(Label.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("" * l.depth) + l.name] }) %>
-
-    <% if settings.respond_to?(:contact_labels_id) && settings.contact_labels_id %>
-      <% labels_for_select = Label.find(settings.contact_labels_id).children.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("" * l.depth) + l.name] } %>
-    <% else %>
-      <% labels_for_select = Label.find_by_name('contact_labels').children.active.order(:ancestry, :position, :name).to_h { |l| [l.id, ("" * l.depth) + l.name] } %>
-    <% end %>
-
-
-
-    <%# available_labels = effective_labels.reject { |l| used_label_ids.include?(l.id) } %>
-
-    <% if labels_for_select.any? %>
+    <% if available_labels.any? %>
       <form method="POST" action="/admin/details" class="field has-addons">
         <input type="hidden" name="detail[detailable_type]" value="Entity">
         <input type="hidden" name="detail[detailable_id]" value="<%= @entity.id %>">
         <input type="hidden" name="redirect_to" value="/admin/entities/<%= @entity.id %>/edit">
         <div class="control">
-          <%= select(:detail, :label_id, labels_for_select, options = {class: 'select input is-small'}) %>
+          <%= select(:detail, :label_id, available_labels.to_h { |l| [l.id, l.name] }, options = {class: 'select input is-small'}) %>
         </div>
         <div class="control is-expanded">
           <input type="text" class="input is-small" name="detail[value]" placeholder="значение">
