@@ -1,6 +1,21 @@
 <% content_for :head_extra do %>
 <% end %>
 
+<% content_for :hero_1 do %>
+<% end %> 
+
+<% content_for :hero_2 do %>
+<% end %> 
+
+<% content_for :hero_3 do %>
+  <div class="buttons">
+    <%= link_on_page('_regions') %>
+    <%= link_on_page('_options') %>
+    <%#= link_on_page('_gallery') unless @page.pageable.pictures.size == 0 %>
+    <%= link_on_page('_faq') unless @page.faq.blank? %>
+  </div>
+<% end %> 
+
 <% content_for :hero do %>
   <%= partial "_hero_wild" %>
 <% end %> 
@@ -19,7 +34,7 @@
 <%#= partial '_map_stay22' %>
 
 <% if @page.block_5.blank? %>
-  <h2 class="title has-text-weight-medium">more <%= @page.list_tag&.parent&.name %> in <%= @page.parent&.anchor_1 %></h2>
+  <h2 class="title has-text-weight-medium mt-6" id="_options">more <%= @page.list_tag&.parent&.name %> in <%= @page.parent&.anchor_1 %></h2>
   <%= partial '_facet_sibling_links', anchor: 'anchor_1' %>
 <% else %>
   <%= parse_erb_and_markdown @page.block_5 if @page.block_5 %>
