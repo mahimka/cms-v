@@ -83,6 +83,13 @@ class WebsiteScraper
     })()
   JS
 
+  # network.status иногда возвращает nil без единого исключения — сайт
+  # ответил, но Ferrum не успел/не смог связать статус с главным запросом
+  # (не так уж редко на медленных сайтах, живьём воспроизводится — один и
+  # тот же URL то 200, то пустой статус без ошибки). Без этого класса такой
+  # ответ тихо записывался бы как dead с первой же попытки, хотя сайт живой.
+  class BlankStatusError < StandardError; end
+
   def initialize(link, timeout: 25, headless: true, sleep_retry: 5)
     @link = link
     @timeout = timeout
@@ -127,7 +134,7 @@ class WebsiteScraper
         sleep(rand(@sleep_retry))
         retry
       end
-    rescue Ferrum::NodeNotFoundError => e
+    rescue Ferrum::NodeNotFoundError, BlankStatusError => e
       @browser&.quit
       @attempts = (@attempts || 0) + 1
       if @attempts > MAX_ATTEMPTS
@@ -174,6 +181,8 @@ class WebsiteScraper
     # goto — это NoMethodError на строке, молча проглатывается общим rescue
     # Exception там же; тут делаем правильно.
     status_code = @browser.network.status
+    raise BlankStatusError, "network.status пустой при живом ответе" if status_code.blank?
+
     final_url = @browser.current_url
     body = @browser.body.to_s
 
