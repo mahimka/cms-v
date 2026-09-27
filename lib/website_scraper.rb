@@ -69,7 +69,7 @@ class WebsiteScraper
         'got it', 'i understand', 'understood', 'ok',
         'ich stimme zu', 'zustimmen', 'akzeptieren', 'akzeptiere alle', 'alles akzeptieren',
         'alles akzeptiern', 'alle akzeptieren', 'akzeptiere', 'cookies akzeptieren', 'einverstanden',
-        'accetta tutti', 'accetta tutto', 'accetta', 'accetto', 'acconsento',
+        'accetta tutti', 'accetta tutto', 'accettare tutto', 'accettare', 'accetta', 'accetto', 'acconsento',
         'tout accepter', "j'accepte", 'accepter',
         'aceptar todo', 'aceptar', 'acepto',
         'accepteren', 'akkoord',
