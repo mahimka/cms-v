@@ -40,6 +40,12 @@ module LinkChecker
     /Sedo\.com/i,
     /Afternic/i,
     /BuyDomains/i,
+    # GoDaddy-парковка ("oceansports.com is parked free, courtesy of
+    # GoDaddy.com") не попадала под "this domain is parked" — имя домена
+    # стоит между "is" и "parked", а не "this domain".
+    /is parked (free|for free)/i,
+    /get this domain/i,
+    /courtesy of godaddy/i,
   ].freeze
 
   Result = Struct.new(:status_code, :final_url, :redirected, :body, :error, keyword_init: true)
