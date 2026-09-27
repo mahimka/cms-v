@@ -63,17 +63,28 @@ class WebsiteScraper
         if (el) { el.click(); return 'selector:' + knownSelectors[i]; }
       }
 
-      var acceptWords = [
-        'accept all cookies', 'accept all', 'accept everything', 'accept everyting', 'accept',
-        'i agree', 'agree', 'allow all', 'allow cookies', 'allow', 'consent',
-        'got it', 'i understand', 'understood', 'ok',
-        'ich stimme zu', 'zustimmen', 'akzeptieren', 'akzeptiere alle', 'alles akzeptieren',
-        'alles akzeptiern', 'alle akzeptieren', 'akzeptiere', 'cookies akzeptieren', 'einverstanden',
-        'accetta tutti', 'accetta tutto', 'accettare tutto', 'accettare', 'accetta', 'accetto', 'acconsento',
-        'tout accepter', "j'accepte", 'accepter',
-        'aceptar todo', 'aceptar', 'acepto',
-        'accepteren', 'akkoord',
-        'akceptuj', 'aceptuj', 'zgadzam sie'
+      // Многословные/самостоятельные фразы — низкий риск ложного срабатывания
+      // где угодно на странице, безопасны и для широкого поиска по всему
+      // документу. Отдельные короткие слова ("agree", "zustimmen",
+      // "accept", "ok" и т.п.) — почти всегда легитимный accept-текст
+      // ВНУТРИ баннера кук, но могут случайно найтись и на несвязанной
+      // кнопке в другом месте страницы (нашли живьём: "Spots-Map laden
+      // (Google-Sources zustimmen)" — согласие на встроенную карту, а не на
+      // куки) — поэтому такие слова используются только при поиске внутри
+      // явно cookie/consent-контейнера, не по всему документу.
+      var strongAcceptWords = [
+        'accept all cookies', 'accept all', 'accept everything', 'accept everyting',
+        'i agree', 'allow all', 'allow cookies', 'got it', 'i understand',
+        'ich stimme zu', 'akzeptiere alle', 'alles akzeptieren', 'alles akzeptiern',
+        'alle akzeptieren', 'cookies akzeptieren', 'geht klar',
+        'accetta tutti', 'accetta tutto', 'accettare tutto',
+        'tout accepter', "j'accepte", 'aceptar todo', 'zgadzam sie'
+      ];
+      var weakAcceptWords = [
+        'accept', 'agree', 'allow', 'consent', 'understood', 'ok',
+        'zustimmen', 'akzeptieren', 'akzeptiere', 'aktzeptiere', 'einverstanden',
+        'accetta', 'accetto', 'acconsento', 'accettare', 'accepter',
+        'aceptar', 'acepto', 'accepteren', 'akkoord', 'akceptuj', 'aceptuj'
       ];
       var rejectWords = [
         'reject', 'decline', 'deny', 'manage', 'customise', 'customize', 'settings',
@@ -86,44 +97,61 @@ class WebsiteScraper
       ];
 
       function escapeRe(s) { return s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'); }
-      var acceptRe = new RegExp('\\\\b(' + acceptWords.map(escapeRe).join('|') + ')\\\\b', 'i');
-      var rejectRe = new RegExp('\\\\b(' + rejectWords.map(escapeRe).join('|') + ')\\\\b', 'i');
+      function wordsRe(words) { return new RegExp('\\\\b(' + words.map(escapeRe).join('|') + ')\\\\b', 'i'); }
+      var strongRe = wordsRe(strongAcceptWords);
+      var fullRe = wordsRe(strongAcceptWords.concat(weakAcceptWords));
+      var rejectRe = wordsRe(rejectWords);
 
-      // Настоящие button/a/role=button — основной случай. Плюс, отдельно,
-      // любые div/span ВНУТРИ явно cookie/consent-контейнера — часть CMP
-      // (например итальянский "bottone_accetta") рисует кнопку голым div
-      // без role и без тега button, обычный селектор такое не видит вообще.
-      var candidates = Array.from(
-        document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]')
-      );
+      function pickBest(candidates, re) {
+        var best = null;
+        for (var i = 0; i < candidates.length; i++) {
+          var el = candidates[i];
+          var text = (el.innerText || el.value || el.getAttribute('aria-label') || '').trim();
+          if (!text || text.length > 60) continue;
+          if (rejectRe.test(text)) continue;
+          if (!re.test(text)) continue;
+
+          var rect = el.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) continue;
+
+          // Из нескольких совпадений (частый случай — обёртка вида
+          // <div>кнопка1 кнопка2</div> сама тоже проходит текстовую
+          // проверку) берём самый "вложенный" элемент — у него меньше
+          // всего дочерних узлов, значит это и есть настоящая кнопка,
+          // а не её обёртка.
+          var depth = el.querySelectorAll('*').length;
+          if (!best || depth < best.depth) best = { el: el, text: text, depth: depth };
+        }
+        return best;
+      }
+
+      // Приоритет 1 — внутри явно cookie/consent/gdpr/cmp-контейнера, любым
+      // словом (включая "слабые" — тут это безопасно, т.к. контейнер уже
+      // однозначно про куки). Ищем и настоящие button/a/role, и голые
+      // div/span (часть CMP рисует кнопку без семантического тега вообще —
+      // например итальянский "bottone_accetta").
       var scopes = document.querySelectorAll(
         '[class*="cookie" i], [id*="cookie" i], [class*="consent" i], [id*="consent" i], ' +
         '[class*="gdpr" i], [id*="gdpr" i], [class*="cmp" i], [id*="cmp" i]'
       );
+      var scoped = [];
       for (var s = 0; s < scopes.length; s++) {
-        candidates = candidates.concat(Array.from(scopes[s].querySelectorAll('div, span')));
+        scoped = scoped.concat(Array.from(
+          scopes[s].querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"], div, span')
+        ));
       }
+      var best = pickBest(scoped, fullRe);
+      if (best) { best.el.click(); return 'scoped:' + best.text; }
 
-      var best = null;
-      for (var i = 0; i < candidates.length; i++) {
-        var el = candidates[i];
-        var text = (el.innerText || el.value || el.getAttribute('aria-label') || '').trim();
-        if (!text || text.length > 60) continue;
-        if (rejectRe.test(text)) continue;
-        if (!acceptRe.test(text)) continue;
+      // Приоритет 2 — по всему документу, но только "сильными" (многословными)
+      // фразами, чтобы не попасть на несвязанную кнопку согласия где-то
+      // ещё на странице (embed-карта, видео и т.п.).
+      var broad = Array.from(
+        document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]')
+      );
+      best = pickBest(broad, strongRe);
+      if (best) { best.el.click(); return 'broad:' + best.text; }
 
-        var rect = el.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) continue;
-
-        // Из нескольких совпадений (частый случай — обёртка вида
-        // <div>кнопка1 кнопка2</div> сама тоже проходит текстовую проверку)
-        // берём самый "вложенный" элемент — у него меньше всего дочерних
-        // узлов, значит это и есть настоящая кнопка, а не её обёртка.
-        var depth = el.querySelectorAll('*').length;
-        if (!best || depth < best.depth) best = { el: el, text: text, depth: depth };
-      }
-
-      if (best) { best.el.click(); return 'text:' + best.text; }
       return null;
     })()
   JS
