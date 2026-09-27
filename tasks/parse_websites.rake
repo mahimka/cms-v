@@ -73,8 +73,10 @@ namespace :websites do
     # Идемпотентность: прогон на тысячи ссылок идёт часами — не пересобираем
     # скриншот у entity, у которой он уже есть, чтобы прогон можно было
     # спокойно прервать и продолжить. force=true — пересобрать всё заново.
+    # active: true — иначе отклонённый вручную скриншот (active: false)
+    # навсегда считался бы "уже готов" и никогда не переснимался заново.
     unless force
-      already_done = Picture.where(imageable_type: 'Entity').where("file LIKE ?", "/images/screenshots/%").select(:imageable_id)
+      already_done = Picture.where(imageable_type: 'Entity', active: true).where("file LIKE ?", "/images/screenshots/%").select(:imageable_id)
       scope = scope.where.not(linkable_id: already_done)
     end
 

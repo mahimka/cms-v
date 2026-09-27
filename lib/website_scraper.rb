@@ -36,11 +36,15 @@ class WebsiteScraper
 
   # Пытается закрыть баннер согласия на куки/GDPR-плашку перед скриншотом —
   # сперва по ID кнопки у самых частых CMP (OneTrust/Cookiebot/Didomi/
-  # Quantcast и т.п., быстро и точно), потом фоллбеком — по тексту кнопки на
-  # нескольких языках (сайты студий встречаются на en/de/it/fr/es). Не
-  # претендует на покрытие всех CMP на рынке (их сотни) — это тот же
-  # практичный подход, что у расширений вроде "I don't care about cookies":
-  # ловим самые частые случаи, остальное просто остаётся на скриншоте.
+  # Quantcast и т.п., быстро и точно), потом фоллбеком — по ключевым словам
+  # кнопки на нескольких языках. Список слов конечен и точно не покрывает
+  # все формулировки (сайты студий на en/de/it/fr/es/nl/pl попадались с
+  # разными вариантами — "Ich stimme zu", "Alle akzeptieren", "accetta
+  # tutti", "Accepteren", "Akceptuj" и т.п., и наверняка есть ещё) — вместо
+  # точного совпадения всей фразы (было раньше, ломалось на каждую новую
+  # формулировку) сравниваем по границе слова (\b), это переживает и
+  # опечатки на конце фразы, и разный порядок слов. \b, а не includes() —
+  # иначе короткие токены вроде "ok" ложно совпадают внутри "cookie"/"book".
   DISMISS_CONSENT_JS = <<~JS
     (function () {
       var knownSelectors = [
@@ -59,24 +63,41 @@ class WebsiteScraper
         if (el) { el.click(); return 'selector:' + knownSelectors[i]; }
       }
 
-      var textPatterns = [
-        /^accept all cookies$/i, /^accept all$/i, /^accept$/i, /^i agree$/i, /^agree$/i,
-        /^consent$/i, /^allow all$/i, /^allow all cookies$/i, /^got it$/i, /^i understand$/i,
-        /^alle akzeptieren$/i, /^akzeptieren$/i, /^zustimmen$/i, /^einverstanden$/i,
-        /^accetta tutto$/i, /^accetta$/i, /^accetto$/i, /^acconsento$/i,
-        /^tout accepter$/i, /^j.accepte$/i, /^accepter$/i,
-        /^aceptar todo$/i, /^aceptar$/i, /^acepto$/i
+      var acceptWords = [
+        'accept all cookies', 'accept all', 'accept everything', 'accept everyting', 'accept',
+        'i agree', 'agree', 'allow all', 'allow cookies', 'allow', 'consent',
+        'got it', 'i understand', 'understood', 'ok',
+        'ich stimme zu', 'zustimmen', 'akzeptieren', 'akzeptiere alle', 'alles akzeptieren',
+        'alles akzeptiern', 'alle akzeptieren', 'akzeptiere', 'cookies akzeptieren', 'einverstanden',
+        'accetta tutti', 'accetta tutto', 'accetta', 'accetto', 'acconsento',
+        'tout accepter', "j'accepte", 'accepter',
+        'aceptar todo', 'aceptar', 'acepto',
+        'accepteren', 'akkoord',
+        'akceptuj', 'aceptuj', 'zgadzam sie'
       ];
+      var rejectWords = [
+        'reject', 'decline', 'deny', 'manage', 'customise', 'customize', 'settings',
+        'preferences', 'only necessary', 'more options',
+        'ablehnen', 'verweigern', 'einstellungen', 'anpassen',
+        'rifiuta', 'personalizza', 'impostazioni',
+        'rechazar', 'configurar',
+        'weiger', 'aanpassen', 'instellingen',
+        'odrzuc', 'ustawienia'
+      ];
+
+      function escapeRe(s) { return s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'); }
+      var acceptRe = new RegExp('\\\\b(' + acceptWords.map(escapeRe).join('|') + ')\\\\b', 'i');
+      var rejectRe = new RegExp('\\\\b(' + rejectWords.map(escapeRe).join('|') + ')\\\\b', 'i');
+
       var els = document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]');
       for (var i = 0; i < els.length; i++) {
         var el = els[i];
         var text = (el.innerText || el.value || el.getAttribute('aria-label') || '').trim();
-        if (!text) continue;
-        for (var j = 0; j < textPatterns.length; j++) {
-          if (textPatterns[j].test(text)) {
-            var rect = el.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) { el.click(); return 'text:' + text; }
-          }
+        if (!text || text.length > 60) continue;
+        if (rejectRe.test(text)) continue;
+        if (acceptRe.test(text)) {
+          var rect = el.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) { el.click(); return 'text:' + text; }
         }
       }
       return null;
@@ -173,6 +194,22 @@ class WebsiteScraper
     nil
   end
 
+  # Многие сайты вешают lazy-load картинок на scroll/IntersectionObserver —
+  # даже то, что попадает в самый первый экран, может остаться недогруженным
+  # (пустые полосы на скриншоте), если ни разу не было события скролла.
+  # Скроллим чуть вниз и обратно, как реальный пользователь, и даём сети
+  # время догрузить то, что после этого включилось.
+  def wait_for_render!
+    @browser.evaluate("window.scrollTo(0, 400)")
+    sleep 0.4
+    @browser.evaluate("window.scrollTo(0, 0)")
+    sleep 0.3
+
+    @browser.network.wait_for_idle(timeout: 4)
+  rescue StandardError
+    nil
+  end
+
   def process_response(entity)
     # browser.goto возвращает frameId (строку), а не response — правильный
     # способ получить статус главного запроса это network.status (см.
@@ -220,6 +257,8 @@ class WebsiteScraper
     disk_path = File.join(PUBLIC_FOLDER, relative_path)
     FileUtils.mkdir_p(File.dirname(disk_path))
 
+    wait_for_render!
+
     # Без full: — снимает ровно видимую область (WINDOW_SIZE), не всю
     # прокрутку. Кодирует сразу в JPEG (quality:) через сам Chrome — так
     # выходит компактнее PNG (без него полностраничный скриншот весил
@@ -229,13 +268,29 @@ class WebsiteScraper
 
     image = MiniMagick::Image.open(disk_path)
 
+    # Имя файла содержит дату — повторный прогон в другой день иначе создавал
+    # бы ещё одну Picture вместо замены старой (см. запрос пользователя
+    # 2026-09-27: дубли копились по одной на каждый день перепрогона).
+    # Один скриншот на entity: старые (включая отклонённые active: false)
+    # удаляем перед записью новой.
+    remove_other_screenshots!(entity, keep_path: relative_path)
+
     picture = Picture.find_or_initialize_by(imageable: entity, file: relative_path)
     picture.content_type = "image/jpeg"
     picture.width = image.width
     picture.height = image.height
     picture.ratio = PICTURE_RATIO
     picture.alt = build_alt_text(entity)
+    picture.active = true
     picture.save!
+  end
+
+  def remove_other_screenshots!(entity, keep_path:)
+    entity.pictures.where("file LIKE ?", "/images/#{SCREENSHOT_DIR}/%").where.not(file: keep_path).find_each do |old|
+      disk = File.join(PUBLIC_FOLDER, old.file.to_s)
+      File.delete(disk) if File.exist?(disk)
+      old.destroy!
+    end
   end
 
   def build_alt_text(entity)
