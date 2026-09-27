@@ -49,7 +49,8 @@
 
   <table class="table is-narrow is-size-7">
     <tr class="is-size-6 has-text-weight-semibold">
-      <td>active</td>
+      <td>a</td>
+      <td>p</td>
       <td>preview</td>
       <td>imageable</td>
       <td>alt</td>
@@ -62,7 +63,8 @@
 
     <tr>
       <td><%= checkbox_in_place(picture, :active) %></td>
-      <td><img src="<%= picture.file %>" alt="<%= picture.alt %>" style="max-height: 40px;"></td>
+      <td><%= checkbox_in_place(picture, :published) %></td>
+      <td><img src="<%= picture.file %>" alt="<%= picture.alt %>" style="max-height: 800px;"></td>
       <td>
         <% if picture.imageable %>
           <a href="/admin/<%= picture.imageable.class.name.underscore.pluralize %>/<%= picture.imageable.id %>">

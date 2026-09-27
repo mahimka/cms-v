@@ -1,6 +1,21 @@
 <% content_for :head_extra do %>
 <% end %>
 
+<% content_for :hero_1 do %>
+<% end %> 
+
+<% content_for :hero_2 do %>
+<% end %> 
+
+<% content_for :hero_3 do %>
+  <div class="buttons">
+    <%= link_on_page('_regions') %>
+    <%= link_on_page('_options') %>
+    <%#= link_on_page('_gallery') unless @page.pageable.pictures.size == 0 %>
+    <%= link_on_page('_faq') unless @page.faq.blank? %>
+  </div>
+<% end %> 
+
 <% content_for :hero do %>
   <%= partial "_hero_wild" %>
 <% end %> 
@@ -33,10 +48,13 @@
       group_html = partial '_page_children_links_by_group', group: t_g.name, anchor: 'anchor_1'
     %>
     <% unless group_html.blank? %>
-      <h3 class="title is-size-5  is-family-monospace"><%= t_g.short %></h3>
-      <%= group_html %>
+      <article class="message">
+        <div class="message-body">
+          <h3 class="title is-size-5 has-text-weight-medium"><%= t_g.name %> <span class="tag"><%= @page.h1 %></span></h3>
+          <%= group_html %>
+        </div>
+      </article>
     <% end %>
-
   <% end %>
 
 <% else %>

@@ -10,30 +10,10 @@
              
                   <h1 class="title is-size-2 has-text-grey-dark"><%= @page.h1 %></h1>
                   <p class='subtitle mt-3'><%= @page.subtitle %></p>
-
-
-                  <% unless @page.hero_1.blank? %>
-                    <%= @page.hero_1 %>
-                  <% end %>
-
-                  <% unless @page.hero_2.blank? %>
-                    <%= @page.hero_2 %>
-                  <% end %>
-
-
-                  <div class="tags mt-4 is-light">
-                    <%#= @page.pageable.tags_of_group('Lessons').active.map{|tag| "<span class='tag ml-1 is-info is-light'>#{tag.translation(@page.lang).downcase}</span>"}.join %>
-                   </div>
-
-                  <div class="buttons">
-                    <%= @page.hero_3 %>
-
-                    <%= link_on_page('_regions') %>
-                    <%= link_on_page('_options') %>
-                    <%#= link_on_page('_gallery') unless @page.pageable.pictures.size == 0 %>
-                    <%= link_on_page('_faq') unless @page.faq.blank? %>
-                  </div>
-
+        
+                  <%= @page.hero_1.blank? ? yield_content(:hero_1) : @page.hero_1 %>
+                  <%= @page.hero_2.blank? ? yield_content(:hero_2) : @page.hero_2 %>
+                  <%= @page.hero_3.blank? ? yield_content(:hero_3) : @page.hero_3 %>
                 
                 </div>
 

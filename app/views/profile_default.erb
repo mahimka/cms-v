@@ -174,9 +174,7 @@
 
   <% @page.source_page.pageable.profiles.alive.each do |profile| %>
     <% unless profile.rating.blank? %>
-
-
-      <a href="<%= profile.url %>" target="_blank" rel="noopener noreferrer" class="box grid mb-1 "  style="text-decoration: none;">
+      <a href="<%= profile.url %>" target="_blank" rel="noopener noreferrer" class="box grid mb-1" style="text-decoration: none;">
            <div class="cell">
              <span class="icon mr-2" style="display: inline-block; vertical-align: middle;"><%= profile.site.icon_svg %></span><%= profile.site.name %>
            </div>
