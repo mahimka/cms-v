@@ -18,6 +18,14 @@
       <tag class="tag is-size-7">tags_name_cont</tag>
       <%= input(:q, :tags_name_cont, options = {class: 'input is-small', value: @q.tags_name_cont, placeholder: ""}) %>
     </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">active_eq</tag>
+      <%= select(:q, :active_eq, {"" => "", "true" => "true", "false" => "false"}, options = {class: 'select input is-small', value: @q.active_eq}) %>
+    </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">published_eq</tag>
+      <%= select(:q, :published_eq, {"" => "", "true" => "true", "false" => "false"}, options = {class: 'select input is-small', value: @q.published_eq}) %>
+    </div>
   </div>
 
   <div class="columns">
