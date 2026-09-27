@@ -34,8 +34,12 @@
 <%#= partial '_map_stay22' %>
 
 <% if @page.block_5.blank? %>
-  <h2 class="title has-text-weight-medium mt-6" id="_options">more <%= @page.list_tag&.parent&.name %> in <%= @page.parent&.anchor_1 %></h2>
-  <%= partial '_facet_sibling_links', anchor: 'anchor_1' %>
+  <article class="message">
+    <div class="message-body">
+      <h2 class="title is-size-4 has-text-weight-medium" id="_options">more <%= @page.list_tag&.parent&.name.pluralize %> in <%= @page.parent&.anchor_1 %></h2>
+        <%= partial '_facet_sibling_links', anchor: 'anchor_1' %>
+    </div>
+  </article>
 <% else %>
   <%= parse_erb_and_markdown @page.block_5 if @page.block_5 %>
 <% end %>
