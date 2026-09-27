@@ -89,17 +89,41 @@ class WebsiteScraper
       var acceptRe = new RegExp('\\\\b(' + acceptWords.map(escapeRe).join('|') + ')\\\\b', 'i');
       var rejectRe = new RegExp('\\\\b(' + rejectWords.map(escapeRe).join('|') + ')\\\\b', 'i');
 
-      var els = document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]');
-      for (var i = 0; i < els.length; i++) {
-        var el = els[i];
+      // Настоящие button/a/role=button — основной случай. Плюс, отдельно,
+      // любые div/span ВНУТРИ явно cookie/consent-контейнера — часть CMP
+      // (например итальянский "bottone_accetta") рисует кнопку голым div
+      // без role и без тега button, обычный селектор такое не видит вообще.
+      var candidates = Array.from(
+        document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]')
+      );
+      var scopes = document.querySelectorAll(
+        '[class*="cookie" i], [id*="cookie" i], [class*="consent" i], [id*="consent" i], ' +
+        '[class*="gdpr" i], [id*="gdpr" i], [class*="cmp" i], [id*="cmp" i]'
+      );
+      for (var s = 0; s < scopes.length; s++) {
+        candidates = candidates.concat(Array.from(scopes[s].querySelectorAll('div, span')));
+      }
+
+      var best = null;
+      for (var i = 0; i < candidates.length; i++) {
+        var el = candidates[i];
         var text = (el.innerText || el.value || el.getAttribute('aria-label') || '').trim();
         if (!text || text.length > 60) continue;
         if (rejectRe.test(text)) continue;
-        if (acceptRe.test(text)) {
-          var rect = el.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) { el.click(); return 'text:' + text; }
-        }
+        if (!acceptRe.test(text)) continue;
+
+        var rect = el.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) continue;
+
+        // Из нескольких совпадений (частый случай — обёртка вида
+        // <div>кнопка1 кнопка2</div> сама тоже проходит текстовую проверку)
+        // берём самый "вложенный" элемент — у него меньше всего дочерних
+        // узлов, значит это и есть настоящая кнопка, а не её обёртка.
+        var depth = el.querySelectorAll('*').length;
+        if (!best || depth < best.depth) best = { el: el, text: text, depth: depth };
       }
+
+      if (best) { best.el.click(); return 'text:' + best.text; }
       return null;
     })()
   JS
@@ -189,7 +213,27 @@ class WebsiteScraper
   # и т.п.) — просто не закрываем баннер, скриншот всё равно снимаем.
   def dismiss_cookie_consent!
     clicked = @browser.evaluate(DISMISS_CONSENT_JS)
-    sleep 0.5 if clicked
+    return unless clicked
+
+    sleep 0.5
+
+    # Часть CMP просто пишет cookie/localStorage на клик и полагается на
+    # то, что баннер сам не отрендерится при следующей загрузке — саму
+    # видимую плашку динамически не убирают (проверено на живом сайте:
+    # cookie_gdpr_consent реально выставляется, а DOM баннера остаётся
+    # нетронутым до перезагрузки). Значит один клик без перезахода не
+    # гарантирует чистый скриншот — перезаходим на тот же URL и, если
+    # вдруг вылезло что-то новое, пробуем ещё раз (без рекурсии дальше:
+    # решает подавляющее большинство случаев, а зацикливаться на упрямых
+    # баннерах — уже не про это).
+    @browser.goto(@browser.current_url)
+    begin
+      @browser.network.wait_for_idle(timeout: 5)
+    rescue Ferrum::TimeoutError
+      nil
+    end
+    @browser.evaluate(DISMISS_CONSENT_JS)
+    sleep 0.3
   rescue StandardError
     nil
   end
