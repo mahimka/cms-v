@@ -252,7 +252,13 @@ class WebsiteScraper
     domain = URI.parse(final_url).host.to_s.sub(/\Awww\./, '')
     return if domain.empty?
 
-    filename = "#{domain}-#{Date.today.iso8601}.jpg"
+    # entity.id в имени обязателен — несколько entity нередко ссылаются на
+    # один и тот же домен (франшизы/сети вроде CorePower Yoga с локациями на
+    # одном сайте, или просто у нескольких записей совпал url), и без id все
+    # они писали бы в один и тот же файл на диске, затирая скриншоты друг
+    # друга (нашли на кейсе ion-club.net на kitezilla.com — 8 разных филиалов
+    # делили один файл). Домен+дата оставлены для читаемости имени на диске.
+    filename = "#{domain}-#{entity.id}-#{Date.today.iso8601}.jpg"
     relative_path = "/images/#{SCREENSHOT_DIR}/#{filename}"
     disk_path = File.join(PUBLIC_FOLDER, relative_path)
     FileUtils.mkdir_p(File.dirname(disk_path))
