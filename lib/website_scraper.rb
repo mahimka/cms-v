@@ -81,14 +81,14 @@ class WebsiteScraper
         'tout accepter', "j'accepte", 'aceptar todo', 'zgadzam sie'
       ];
       var weakAcceptWords = [
-        'accept', 'agree', 'allow', 'consent', 'understood', 'ok',
+        'accept', 'agree', 'allow', 'consent', 'understood', 'ok', 'okay',
         'zustimmen', 'akzeptieren', 'akzeptiere', 'aktzeptiere', 'einverstanden',
         'accetta', 'accetto', 'acconsento', 'accettare', 'accepter',
         'aceptar', 'acepto', 'accepteren', 'akkoord', 'akceptuj', 'aceptuj'
       ];
       var rejectWords = [
         'reject', 'decline', 'deny', 'manage', 'customise', 'customize', 'settings',
-        'preferences', 'only necessary', 'more options',
+        'preferences', 'only necessary', 'more options', 'choices', 'switch to',
         'ablehnen', 'verweigern', 'einstellungen', 'anpassen',
         'rifiuta', 'personalizza', 'impostazioni',
         'rechazar', 'configurar',
@@ -243,17 +243,24 @@ class WebsiteScraper
     clicked = @browser.evaluate(DISMISS_CONSENT_JS)
     return unless clicked
 
-    sleep 0.5
+    sleep 1.5
 
-    # Часть CMP просто пишет cookie/localStorage на клик и полагается на
-    # то, что баннер сам не отрендерится при следующей загрузке — саму
-    # видимую плашку динамически не убирают (проверено на живом сайте:
-    # cookie_gdpr_consent реально выставляется, а DOM баннера остаётся
-    # нетронутым до перезагрузки). Значит один клик без перезахода не
-    # гарантирует чистый скриншот — перезаходим на тот же URL и, если
-    # вдруг вылезло что-то новое, пробуем ещё раз (без рекурсии дальше:
-    # решает подавляющее большинство случаев, а зацикливаться на упрямых
-    # баннерах — уже не про это).
+    # Большинство CMP убирают баннер из DOM сами сразу на клик — перезаход
+    # им не нужен, а на некоторых сайтах (bretterbude.de) даже вредит:
+    # cookie-согласие пишется асинхронным запросом, и перезаход, случившийся
+    # до того как он долетел, показывает баннер заново. Поэтому сперва
+    # просто проверяем, остался ли ещё хоть один подходящий кандидат — если
+    # нет, баннер сам исчез, перезаход не нужен.
+    still_there = @browser.evaluate(DISMISS_CONSENT_JS)
+    return unless still_there
+
+    # А вот эта часть CMP правда только пишет cookie/localStorage на клик и
+    # полагается на то, что баннер сам не отрендерится при следующей
+    # загрузке — саму видимую плашку динамически не убирают (проверено на
+    # живом сайте: cookie_gdpr_consent реально выставляется, а DOM баннера
+    # остаётся нетронутым до перезагрузки). Тут перезаход — единственный
+    # способ получить чистый скриншот.
+    sleep 1.0
     @browser.goto(@browser.current_url)
     begin
       @browser.network.wait_for_idle(timeout: 5)
