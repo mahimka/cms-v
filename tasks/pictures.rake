@@ -69,4 +69,28 @@ namespace :pictures do
 
     puts "Удалено отклонённых: #{removed_inactive}, удалено дублей: #{removed_dupes}"
   end
+
+  desc "Удаляет скриншоты, у которых один и тот же файл на диске делят НЕСКОЛЬКО РАЗНЫХ entity (имя файла было домен+дата без entity.id — см. WebsiteScraper, франшизы вроде ion-club.net/corepoweryoga.com затирали скриншоты друг друга) — какой из них правильный, не определить, поэтому удаляются все причастные, чтобы на следующем прогоне пересняться заново с уникальным именем (rake pictures:fix_screenshot_collisions [dry_run=true])"
+  task :fix_screenshot_collisions do
+    dry_run = ENV['dry_run'] == 'true'
+
+    scope = Picture.where(imageable_type: 'Entity').where("file LIKE ?", "/images/screenshots/%")
+
+    removed = 0
+    entities_affected = 0
+
+    scope.group(:file).having("COUNT(DISTINCT imageable_id) > 1").pluck(:file).each do |file|
+      pictures = scope.where(file: file).to_a
+      entity_ids = pictures.map(&:imageable_id).uniq
+      puts "#{file} — #{entity_ids.size} entity делят один файл: #{entity_ids.join(', ')}#{dry_run ? ' (dry_run)' : ''}"
+      entities_affected += entity_ids.size
+      next if dry_run
+
+      disk = File.join(PUBLIC_FOLDER, file.to_s)
+      File.delete(disk) if File.exist?(disk)
+      pictures.each { |p| p.destroy!; removed += 1 }
+    end
+
+    puts "Удалено записей: #{removed}, задето entity: #{entities_affected} — пересоберутся на следующем rake websites:parse"
+  end
 end
