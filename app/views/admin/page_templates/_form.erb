@@ -1,0 +1,335 @@
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :active, "active", options = {class: 'label'}) %>
+    <p class="help">признак самого template (не генерируемой страницы) — для массовой генерации сразу по нескольким активным template'ам</p>
+  </div>
+
+  <div class="column is-9">
+    <label class="checkbox">
+      <input type="hidden" name="page_template[active]" value="0">
+      <input type="checkbox" name="page_template[active]" value="1" <%= @page_template.active ? "checked" : "" %>>
+      active
+    </label>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :page_ready, "page_ready / page_published", options = {class: 'label'}) %>
+    <p class="help">ready/published, которые проставляются сгенерированной странице (не самому template)</p>
+  </div>
+
+  <div class="column is-9">
+    <label class="checkbox mr-4">
+      <input type="hidden" name="page_template[page_ready]" value="0">
+      <input type="checkbox" name="page_template[page_ready]" value="1" <%= @page_template.page_ready ? "checked" : "" %>>
+      page_ready
+    </label>
+    <label class="checkbox">
+      <input type="hidden" name="page_template[page_published]" value="0">
+      <input type="checkbox" name="page_template[page_published]" value="1" <%= @page_template.page_published ? "checked" : "" %>>
+      page_published
+    </label>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :template_type, "template_type", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= select(:page_template, :template_type, {"": ""}.merge(PageTemplate::TEMPLATE_TYPES.index_by(&:itself)), options = {class: 'select input is-success', value: @page_template.template_type}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :pageable_type, "pageable_type", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= select(:page_template, :pageable_type, {"": ""}.merge(PageTemplate::PAGEABLE_TYPES.index_by(&:itself)), options = {class: 'select input is-success', value: @page_template.pageable_type}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :template_conditions, "template_conditions", options = {class: 'label'}) %>
+    <p class="help">какие объекты pageable_type получают страницу по этому template — JSON, формат свободный</p>
+  </div>
+
+  <div class="column is-9">
+    <textarea name="page_template[template_conditions]" class="textarea autosize-textarea is-family-monospace" rows="3"><%= @page_template.template_conditions %></textarea>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :schema_id, "schema_id", options = {class: 'label'}) %>
+    <p class="help">доп. фильтр к template_conditions — объект должен принадлежать этой schema (с поддеревом). Пусто — не фильтрует</p>
+  </div>
+
+  <div class="column is-9">
+    <% @schemas_for_select = {"": ""}.merge(Schema.active.order(:ancestry, :position, :name).to_h { |schema| [schema.id.to_s, ("— " * schema.depth) + schema.name] }) %>
+    <%= select(:page_template, :schema_id, @schemas_for_select, options = {class: 'select input is-success', value: @page_template.schema_id.to_s}) %>
+  </div>
+
+</div>
+
+<% if @page_template.parent_template_id.present? %>
+  <%
+    @nesting_parent_template = PageTemplate.find_by(id: @page_template.parent_template_id)
+    @nesting_parent_pages = @nesting_parent_template ? Page.where(template_id: @nesting_parent_template.id).order(:uri) : Page.none
+  %>
+  <div class="notification is-info is-light py-2 px-3 mb-4">
+    Вложенный template — facet-страницы создаются ПОД КАЖДОЙ страницей родительского template'а
+    #<%= @nesting_parent_template&.id %>, slug: <code><%= @nesting_parent_template&.slug %></code>.
+    <% if @nesting_parent_pages.any? %>
+      Уже создано (<%= @nesting_parent_pages.size %>), например:
+      <%= @nesting_parent_pages.first(5).map(&:uri).join(", ") %><%= @nesting_parent_pages.size > 5 ? ", ..." : "" %>.
+    <% else %>
+      По родительскому template'у страницы ещё не созданы.
+    <% end %>
+  </div>
+<% end %>
+
+<% unless @page_template.parent_template_id.present? %>
+  <div class="columns">
+
+    <div class="column is-2">
+      <%= label(:page_template, :parent_page_id, "parent_page_id", options = {class: 'label'}) %>
+      <p class="help">родитель для генерируемых страниц — только страницы, не созданные по template</p>
+    </div>
+
+    <div class="column is-9">
+      <%
+        # parent_page_id — string-колонка, а select() сравнивает id == value
+        # без приведения типов ("360" == 360 -> false) — ключи хэша тоже
+        # приводим к строке, иначе нужный option никогда не помечается
+        # selected и форма при сохранении тихо стирает значение.
+        @parent_pages_for_select = {"": ""}.merge(Page.where(template_id: [nil, 0]).order(:uri).to_h { |page| [page.id.to_s, page.uri] })
+      %>
+      <%= select(:page_template, :parent_page_id, @parent_pages_for_select, options = {class: 'select input is-success', value: @page_template.parent_page_id}) %>
+    </div>
+
+  </div>
+<% end %>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :parent_template_id, "parent_template_id", options = {class: 'label'}) %>
+    <p class="help">только для List — если задан, страницы генерируются ПОД КАЖДОЙ страницей выбранного (тоже List) template'а вместо parent_page_id (тот тогда игнорируется). Пусто — обычный List/Profile с одним общим parent_page_id</p>
+  </div>
+
+  <div class="column is-9">
+    <%
+      @parent_templates_for_select = {"": ""}.merge(
+        PageTemplate.where(template_type: "List").where.not(id: @page_template.id).order(:id)
+          .to_h { |template| [template.id.to_s, "##{template.id} — #{template.title.presence || template.slug}"] }
+      )
+    %>
+    <%= select(:page_template, :parent_template_id, @parent_templates_for_select, options = {class: 'select input is-success', value: @page_template.parent_template_id.to_s}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :slug, "slug", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:page_template, :slug, options = {class: 'input is-success', value: @page_template.slug, placeholder: "enter slug"}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :conditions, "conditions", options = {class: 'label'}) %>
+    <p class="help">
+      Только "tags" (не весь Page#conditions-hash — "object" и "schema" генератор подставит сам из pageable_type/schema_id выше).
+      Формат — как в template_conditions (строка/AST тегов). Обычно тут placeholder СВОЕЙ группы, той же, что в slug —
+      например <code>["Lessons", col: "slug"]</code>.<br>
+      Для вложенного template'а (parent_template_id задан) это АВТОМАТИЧЕСКИ AND'ится с tags родительской facet-страницы —
+      писать сам parent-тег тут не нужно, генератор возьмёт его из страницы-родителя. Пусто — просто взять tags родителя как есть, без доп. сужения.
+    </p>
+  </div>
+
+  <div class="column is-9">
+    <textarea name="page_template[conditions]" class="textarea autosize-textarea is-family-monospace" rows="3"><%= @page_template.conditions %></textarea>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :lang, "lang", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <% @langs_for_select = settings.languages.to_h { |code, info| [code.to_s, "#{info[:icon]} #{info[:name]} (#{code})"] } %>
+    <%= select(:page_template, :lang, @langs_for_select, options = {class: 'select input is-success', value: @page_template.lang}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :layout, "layout", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <% layout_values = (Dir.glob("**", base: File.join(settings.views_project, "layout")) + Dir.glob("**", base: File.join(settings.views, "layout")))
+                          .delete_if { |file| file.start_with?("_") }.uniq.sort.unshift("") %>
+    <%= select(:page_template, :layout, layout_values, options = {class: 'select input is-success', value: @page_template.layout}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :view, "view", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <% view_values = (Dir.glob("**", base: settings.views_project) + Dir.glob("**", base: settings.views))
+                        .delete_if { |file| !file.end_with?(".erb") || file.start_with?("_") }.uniq.sort.unshift("") %>
+    <%= select(:page_template, :view, view_values, options = {class: 'select input is-success', value: @page_template.view}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :title, "title", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:page_template, :title, options = {class: 'input is-success', value: @page_template.title}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :h1, "h1", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:page_template, :h1, options = {class: 'input is-success', value: @page_template.h1}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :subtitle, "subtitle", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:page_template, :subtitle, options = {class: 'input is-success', value: @page_template.subtitle}) %>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :meta_description, "meta_description", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <textarea name="page_template[meta_description]" class="textarea autosize-textarea" rows="2"><%= @page_template.meta_description %></textarea>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :body, "body", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <textarea name="page_template[body]" class="textarea autosize-textarea" rows="4"><%= @page_template.body %></textarea>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :faq, "faq", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <textarea name="page_template[faq]" class="textarea autosize-textarea" rows="2"><%= @page_template.faq %></textarea>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :schema, "schema", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <textarea name="page_template[schema]" class="textarea autosize-textarea is-family-monospace" rows="2"><%= @page_template.schema %></textarea>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <label class="label">anchors</label>
+  </div>
+
+  <div class="column is-3">
+    <%= input(:page_template, :anchor_1, options = {class: 'input is-success', value: @page_template.anchor_1, placeholder: "anchor_1"}) %>
+  </div>
+  <div class="column is-3">
+    <%= input(:page_template, :anchor_2, options = {class: 'input is-success', value: @page_template.anchor_2, placeholder: "anchor_2"}) %>
+  </div>
+  <div class="column is-3">
+    <%= input(:page_template, :anchor_3, options = {class: 'input is-success', value: @page_template.anchor_3, placeholder: "anchor_3"}) %>
+  </div>
+
+</div>
+
+<% %i[hero_1 hero_2 hero_3 sidebar_1 sidebar_2 sidebar_3 footer_1 footer_2 footer_3 block_1 block_2 block_3 block_4 block_5 block_6].each do |field| %>
+  <div class="columns">
+
+    <div class="column is-2">
+      <%= label(:page_template, field, field.to_s, options = {class: 'label'}) %>
+    </div>
+
+    <div class="column is-9">
+      <textarea name="page_template[<%= field %>]" class="textarea autosize-textarea" rows="2"><%= @page_template.send(field) %></textarea>
+    </div>
+
+  </div>
+<% end %>

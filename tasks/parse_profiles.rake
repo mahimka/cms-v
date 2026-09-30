@@ -30,7 +30,7 @@ end
 #     end
 
 #     # Выбираем нужные профили по заданным условиям
-#     profiles = Profile.where(site_id: site_id, profileable_type: profileable_type, active: true)
+#     profiles = Profile.where(site_id: site_id, profileable_type: profileable_type, alive: true)
 #                       .where(redirected: [false, nil])
 #                       .where("scraped_at < ? OR scraped_at IS NULL", date_threshold)
 
@@ -67,7 +67,7 @@ end
 #     end
 
 #     # Выбираем нужные профили по заданным условиям
-#     profiles = Profile.where(site_id: site_id, profileable_type: profileable_type, active: true)
+#     profiles = Profile.where(site_id: site_id, profileable_type: profileable_type, alive: true)
 #                       .where(redirected: [false, nil])
 #                       .where("scraped_at < ? OR scraped_at IS NULL", date_threshold).order(id: :desc)
 
@@ -103,7 +103,7 @@ namespace :profiles do
     end
 
     # Вытаскиваем только ID профилей, чтобы не держать объекты ActiveRecord в памяти потоков
-    profile_ids = Profile.where(site_id: site_id, profileable_type: profileable_type, active: true)
+    profile_ids = Profile.where(site_id: site_id, profileable_type: profileable_type, alive: true)
                           .where(redirected: [false, nil])
                           .where("scraped_at < ? OR scraped_at IS NULL", date_threshold)
                           # .order(id: :desc)

@@ -2,6 +2,8 @@ require_relative 'google_maps_parser'
 require_relative 'dobre_gostilne_parser'
 require_relative 'facebook_parser'
 require_relative 'booking_parser'
+require_relative 'vdws_parser'
+require_relative 'iko_parser'
 
 # site.domain -> класс детерминированного (без AI) парсера снапшота,
 # используется синхронно в post '/api/parse' (app.rb): если для сайта
@@ -22,7 +24,9 @@ module SiteParserRegistry
     'google.com' => GoogleMapsParser,
     'dobregostilne.si' => DobreGostilneParser,
     'facebook.com' => FacebookParser,
-    'booking.com' => BookingParser
+    'booking.com' => BookingParser,
+    'vdws.de' => VdwsParser,
+    'ikointl.com' => IkoParser
   }.freeze
 
   def self.for(site_domain)

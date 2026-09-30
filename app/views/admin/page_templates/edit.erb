@@ -1,0 +1,58 @@
+<%= erb :'/layout/_flash', views: settings.views_admin %>
+
+<div class="content m-3">
+
+  <p class="is-size-7 has-text-grey mb-2">
+    страниц создано по этому template: <strong><%= @page_template.pages.size %></strong>
+    <% if @page_template.pages.any? %>
+      (published: <%= @page_template.pages.where(published: true).size %>,
+      не published: <%= @page_template.pages.where(published: false).size %>,
+      ready: <%= @page_template.pages.where(ready: true).size %>,
+      не ready: <%= @page_template.pages.where(ready: false).size %>)
+    <% end %>
+    <a href="/admin/pages?q[template_id_eq]=<%= @page_template.id %>" class="button is-small is-light" target="_blank">Pages &rarr;</a>
+  </p>
+
+  <h1 class="title"><%= @page_template.title.presence || "Page Template ##{@page_template.id}" %></h1>
+
+  <% if %w[Profile List].include?(@page_template.template_type) %>
+    <p class="mb-3">
+      <form method="POST" action="/admin/page_templates/<%= @page_template.id %>/generate" style="display:inline;"
+            onsubmit="return confirm('Найти объекты <%= @page_template.pageable_type %> по template_conditions и создать недостающие страницы? Уже существующие не трогает.')">
+        <button type="submit" class="button is-small is-link is-light">Generate pages</button>
+      </form>
+      <form method="POST" action="/admin/page_templates/<%= @page_template.id %>/generate" style="display:inline;">
+        <input type="hidden" name="force" value="true">
+        <button type="submit" class="button is-small is-warning is-light"
+                onclick="return confirm('ВНИМАНИЕ: обновит ВСЕ поля у УЖЕ СУЩЕСТВУЮЩИХ страниц, сгенерированных этим template — ручные правки будут перезаписаны. Продолжить?')">force refresh</button>
+      </form>
+    </p>
+  <% end %>
+
+  <form method="POST" action="/admin/page_templates/<%= @page_template.id %>">
+    <input type="hidden" name="_method" value="PATCH">
+
+    <%= erb :'/page_templates/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Update Page Template" class="button is-link is-warning">
+      </div>
+      <div class="control">
+        <a href="/admin/page_templates" class="button">Back to list</a>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- отдельная форма, НЕ вложенная в форму обновления выше — вложенные
+       form-теги невалидны в HTML, браузер "разворачивает" их, и оба
+       hidden name="_method" (PATCH и DELETE) оказываются в одной форме;
+       какой из них уйдёт на сервер — не гарантировано (реально
+       наблюдалось: Update удалял запись). -->
+  <form method="POST" action="/admin/page_templates/<%= @page_template.id %>" onsubmit="return confirm('Delete this page template?')">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit" class="button is-danger is-small">Delete</button>
+  </form>
+
+</div>

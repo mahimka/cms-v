@@ -1,0 +1,17 @@
+<%
+  # Ссылки на дочерние страницы текущей (или переданной через page:)
+  # страницы — для hub-страниц (/egypt) это facet-страницы
+  # (/egypt/advanced-kite-lessons, /egypt/bar-restaurant, ...).
+  # page = page || @page — работает и без локальной переменной page
+  # (не передали — берём @page).
+  page = page || @page
+  children_pages = page.children.where(published: true).order(:h1)
+%>
+
+<% if children_pages.any? %>
+  <div class="tags">
+    <% children_pages.each do |child_page| %>
+      <a href="<%= child_page.uri %>" class="tag is-light is-medium"><%= child_page.h1.presence || child_page.title %></a>
+    <% end %>
+  </div>
+<% end %>

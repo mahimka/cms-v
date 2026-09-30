@@ -47,6 +47,7 @@
   <table class="table is-size-7">
     <tr>
       <td></td>
+      <td>closed</td>
       <td>name</td>
       <td>ean</td>
       <td>schema</td>
@@ -57,7 +58,8 @@
   <% @items.each do |item| %>
 
     <tr>
-      <td><%= checkbox_in_place(item, :active) %></td>
+      <td><%= checkbox_in_place(item, :generate_pages) %></td>
+      <td><%= checkbox_in_place(item, :is_closed) %></td>
       <td><%= item.name %></td>
       <td><%= item.ean %></td>
       <td><%= item.schema&.name %></td>

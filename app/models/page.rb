@@ -43,12 +43,38 @@ class Page < ActiveRecord::Base
     conditions
   ].freeze
 
+  # Поля, которые может перезаписать PageTemplateGenerator (force: true)
+  # — то же, что TRANSLATABLE_FIELDS, плюс schema (JSON-LD, генератор
+  # его тоже пишет, хоть и не переводит) и slug/view/layout. Именно эти
+  # имена можно защитить через edited_columns.
+  PROTECTABLE_FIELDS = (TRANSLATABLE_FIELDS + %w[schema slug view layout]).freeze
+
   serialize :conditions, JSON
+  serialize :edited_columns, JSON
 
   belongs_to :master,
              class_name: "Page",
              optional: true,
              inverse_of: :translations
+
+  # У List-страницы, сгенерированной PageTemplateGenerator — какой
+  # именно тег группы был использован для этой конкретной страницы
+  # (см. PageTemplateGenerator#list_group). Нужен вложенным template'ам:
+  # чтобы отрендерить в child-странице плейсхолдер группы РОДИТЕЛЯ
+  # (например ["addressCountry"] в шаблоне child-template'а, у которого
+  # своя группа — "Lessons"), генератор поднимается по Page#path и
+  # собирает list_tag_id всех предков.
+  belongs_to :list_tag, class_name: "Tag", optional: true
+
+  # PageTemplate, по которому сгенерирована эта страница (если вообще
+  # сгенерирована) — колонка называется template_id, а не
+  # page_template_id, по явной просьбе при её добавлении.
+  belongs_to :template, class_name: "PageTemplate", optional: true
+
+  # Geoname — отдельная БД (db/geonames.db, см. GeonamesRecord в app.rb).
+  # Заполнен только у гео-страниц (country/region/locality/adm_2) — см.
+  # rake pages:backfill_geonames_id.
+  belongs_to :geoname, foreign_key: :geonames_id, optional: true
 
   has_many :translations,
            class_name: "Page",
@@ -170,6 +196,13 @@ class Page < ActiveRecord::Base
     ListQuery.new(effective_conditions).objects
   end
 
+  # {page.id => list_objects.count}, одним набором запросов на весь
+  # список pages вместо одного per-page (см. ListQuery.batch_counts_for) —
+  # для списков ссылок-сиблингов со счётчиком (_page_link_with_count).
+  def self.batch_list_objects_counts(pages)
+    ListQuery.batch_counts_for(pages)
+  end
+
   # pageable_type — MASTER_ONLY_FIELDS (пустой у переводов), а pageable_id
   # задан и у мастера, и у переводов. Поэтому обычный полиморфный
   # belongs_to здесь не сработает на переводе (Rails возьмёт свой пустой
@@ -179,6 +212,29 @@ class Page < ActiveRecord::Base
     return nil if pageable_id.blank?
 
     effective_pageable_type&.safe_constantize&.find_by(id: pageable_id)
+  end
+
+  # true, если поле правили руками через /admin/pages/:id (см.
+  # PagesController#patch) — PageTemplateGenerator с force: true такое
+  # поле не трогает.
+  def edited_field?(field)
+    Array(edited_columns).include?(field.to_s)
+  end
+
+  # Помечает поля как отредактированные вручную (только из
+  # PROTECTABLE_FIELDS — остальное молча игнорирует). update_column —
+  # это служебная пометка, не настоящее изменение контента, не нужно
+  # гонять остальные validations/callbacks ради неё.
+  def mark_edited_fields!(fields)
+    to_add = Array(fields).map(&:to_s) & PROTECTABLE_FIELDS
+    return if to_add.empty?
+
+    update_column(:edited_columns, (Array(edited_columns) | to_add))
+  end
+
+  # Снимает защиту с одного поля — "открепить" на конкретной странице.
+  def unmark_edited_field!(field)
+    update_column(:edited_columns, Array(edited_columns) - [field.to_s])
   end
 
   # Основная страница и все её переводы.
