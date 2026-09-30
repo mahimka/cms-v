@@ -7,7 +7,7 @@ class Detail < ActiveRecord::Base
   before_save :set_numeric_value
 
   def self.ransackable_attributes(auth_object = nil)
-    %w[id detailable_type detailable_id label_id value numeric_value created_at updated_at]
+    %w[id detailable_type detailable_id label_id value numeric_value archived created_at updated_at]
   end
 
   def self.ransackable_associations(auth_object = nil)

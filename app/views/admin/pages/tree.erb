@@ -96,7 +96,13 @@
   list-style: none;
 }
 
-.page-tree-children {
+/* ul.page-tree-children, а не просто .page-tree-children — специфичность
+   (класс+тег) должна быть не ниже, чем у ".page-tree ul" выше (тоже
+   класс+тег): иначе margin-left/padding-left тут молча перебиваются
+   тем сбросом в margin:0/padding:0 (специфичность выше вопреки более
+   позднему месту в файле) — реального отступа вложенности не было
+   вообще, дерево держалось только на тонкой линии-коннекторе снизу. */
+ul.page-tree-children {
   position: relative;
   margin-left: 0.85rem;
   padding-left: 1.15rem;
@@ -132,6 +138,25 @@
   align-items: center;
   gap: 0.3rem;
   min-height: 1.8rem;
+}
+
+/* Строка на дочернем уровне (раскрыта кликом по "+") — "↳" вынесен
+   ИЗ грида строки (иначе для вложенных строк пришлось бы менять
+   grid-template-columns, что ломает выравнивание с корневыми строками)
+   и спозиционирован абсолютно в отступе-«коридоре» слева, который уже
+   даёт .page-tree-children (margin-left 0.85rem + padding-left 1.15rem
+   = 2rem). left подобран так, чтобы "↳" оказался визуально под "+"/"−"
+   родительской строки (первая колонка её грида шириной 1.7rem).
+   .page-tree-node уже position: relative — родитель для позиционирования. */
+.page-tree-nested-arrow {
+  position: absolute;
+  top: 50%;
+  left: -1.58rem;
+  transform: translateY(-50%);
+  color: var(--pico-muted-color);
+  font-size: 0.85rem;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .page-tree-type {

@@ -72,6 +72,20 @@ class EntitiesController < App
       erb :"/entities/_#{params[:section]}_fields", views: settings.views_admin, layout: false
     end
 
+    # Проверяет все ссылки этой entity разом — см. lib/link_checker.rb.
+    # Синхронно (клик по одной конкретной entity, не массовая проверка по
+    # всей базе — та живёт в tasks/links.rake с реальным параллелизмом);
+    # с задержкой для facebook/instagram (Label#check_delay_seconds) это
+    # может занять десяток секунд, что для формы редактирования одной
+    # entity приемлемо.
+    post '/entities/:id/links/check_all' do
+      entity = Entity.find(params[:id])
+      entity.links.each { |link| link.check! }
+
+      halt 200, "ok" if request.xhr?
+      redirect "/admin/entities/#{entity.id}/edit_in_place"
+    end
+
     # Тег — чекбоксом без формы (см. entities/_tags_fields.erb на
     # edit_in_place): один клик — сразу AJAX, без общего "Update Entity".
     post '/entities/:id/tags/:tag_id/toggle' do

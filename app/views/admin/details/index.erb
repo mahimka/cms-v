@@ -43,6 +43,7 @@
       <td>label</td>
       <td>value</td>
       <td>numeric_value</td>
+      <td>archived</td>
     </tr>
 
   <% @details.each do |detail| %>
@@ -60,6 +61,7 @@
       <td><%= detail.label&.name %></td>
       <td><%= detail.value %></td>
       <td><%= detail.numeric_value %></td>
+      <td><%= checkbox_in_place(detail, :archived) %></td>
     </tr>
 
   <% end %>

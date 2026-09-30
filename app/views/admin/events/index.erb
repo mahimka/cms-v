@@ -47,6 +47,7 @@
   <table class="table is-size-7">
     <tr>
       <td></td>
+      <td>closed</td>
       <td>name</td>
       <td>schema</td>
       <td>start_at</td>
@@ -58,7 +59,8 @@
   <% @events.each do |event| %>
 
     <tr>
-      <td><%= checkbox_in_place(event, :active) %></td>
+      <td><%= checkbox_in_place(event, :generate_pages) %></td>
+      <td><%= checkbox_in_place(event, :is_closed) %></td>
       <td><%= event.name %></td>
       <td><%= event.schema&.name %></td>
       <td><%= event.start_at %></td>

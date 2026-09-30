@@ -24,8 +24,8 @@
     <td><%= @link.label&.name %></td>
   </tr>
   <tr>
-    <td>ready / published / active</td>
-    <td><%= @link.ready %> / <%= @link.published %> / <%= @link.active %></td>
+    <td>ready / published / alive</td>
+    <td><%= @link.ready %> / <%= @link.published %> / <%= @link.alive %></td>
   </tr>
   <tr>
     <td>checked_at</td>
@@ -35,4 +35,17 @@
     <td>response</td>
     <td><%= @link.response %></td>
   </tr>
+  <tr>
+    <td>redirected</td>
+    <td>
+      <%= @link.redirected %>
+      <% if @link.redirected? && @link.redirected_to.present? %>
+        → <a href="<%= @link.redirected_to %>" target="_blank"><%= @link.redirected_to %></a>
+      <% end %>
+    </td>
+  </tr>
 </table>
+
+<form method="POST" action="/admin/links/<%= @link.id %>/check" class="mt-2">
+  <button type="submit" class="button is-small is-link">check now</button>
+</form>

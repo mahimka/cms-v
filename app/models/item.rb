@@ -6,7 +6,7 @@ class Item < ActiveRecord::Base
   validates :name, presence: true
   validates :schema, presence: true
 
-  scope :active, -> { where(active: true) }
+  scope :generate_pages, -> { where(generate_pages: true) }
 
   belongs_to :schema
 

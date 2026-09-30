@@ -181,27 +181,26 @@
 
   <div class="message-body">
 
-  <% @page.source_page.pageable.profiles.active.each do |profile| %>
-    <% unless profile.rating.blank? %>
+    <% @page.source_page.pageable.profiles.alive.each do |profile| %>
+      <% unless profile.rating.blank? %>
 
 
-      <a href="<%= profile.url %>" target="_blank" rel="noopener noreferrer" class="box grid mb-1 "  style="text-decoration: none;">
-           <div class="cell">
-             <span class="icon mr-2" style="display: inline-block; vertical-align: middle;"><%= profile.site.icon_svg %></span><%= profile.site.name %>
-           </div>
-           <div class="cell"><span class="icon mr-2"><%= profile.rating %></span> 
-             <span><%= star_rating(profile.rating) %></span> 
-            </div>
-           <div class="cell"><%= profile.review_count %> <%= label_by_lang("_reviews") %></div>
-           <div class="cell"><span class="tag"><%= profile.updated_at.strftime("%d %b %Y") %></span> </div>
-      </a>
-        
+        <a href="<%= profile.url %>" target="_blank" rel="noopener noreferrer" class="box grid mb-1 "  style="text-decoration: none;">
+             <div class="cell">
+               <span class="icon mr-2" style="display: inline-block; vertical-align: middle;"><%= profile.site.icon_svg %></span><%= profile.site.name %>
+             </div>
+             <div class="cell"><span class="icon mr-2"><%= profile.rating %></span> 
+               <span><%= star_rating(profile.rating) %></span> 
+              </div>
+             <div class="cell"><%= profile.review_count %> <%= label_by_lang("_reviews") %></div>
+             <div class="cell"><span class="tag"><%= profile.updated_at.strftime("%d %b %Y") %></span> </div>
+        </a>
+          
+      <% end %>
     <% end %>
-  <% end %>
-
-    
+      
   </div>
-      <p class="mt-3"><%= label_by_lang('_know_review').capitalize %> <a href=''><%= label_by_lang('_offer_us_review').capitalize %></a>
+  <p class="mt-3"><%= label_by_lang('_know_review').capitalize %> <a href=''><%= label_by_lang('_offer_us_review').capitalize %></a>
 
 </article>
 

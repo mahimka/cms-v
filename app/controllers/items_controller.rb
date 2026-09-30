@@ -46,6 +46,44 @@ class ItemsController < App
 
     end
 
+    # Всё редактируется на месте (in_place_* хелперы + AJAX), без формы и
+    # без единой перезагрузки страницы — см. app/helpers/in_place_editing_helpers.rb
+    # и общий /admin/:table_name/:object_id/ajax в admin_controller.rb. Тот
+    # же паттерн, что у entities/edit_in_place — см. entities_controller.rb.
+    get '/items/:id/edit_in_place' do
+
+      @item = Item.find(params[:id])
+
+      erb :"/items/edit_in_place", layout: :"/layout/wide", views: settings.views_admin
+
+    end
+
+    # Отдаёт свежий HTML одной секции (details/links/profiles) без layout —
+    # item-edit-in-place.js подставляет это вместо своего <div> после
+    # AJAX-сохранения строки, вместо перезагрузки всей страницы.
+    get '/items/:id/fields/:section' do
+      halt 404 unless %w[details links profiles].include?(params[:section])
+
+      @item = Item.find(params[:id])
+      erb :"/items/_#{params[:section]}_fields", views: settings.views_admin, layout: false
+    end
+
+    # Тег — чекбоксом без формы (см. items/_tags_fields.erb на
+    # edit_in_place): один клик — сразу AJAX, без общего "Update Item".
+    post '/items/:id/tags/:tag_id/toggle' do
+      item = Item.find(params[:id])
+      tag_id = params[:tag_id].to_i
+
+      if params[:checked] == "true"
+        item.tag_ids |= [tag_id]
+      else
+        item.tag_ids -= [tag_id]
+      end
+
+      status 200
+      "ok"
+    end
+
     # update - step 2: остальные поля + tags (details теперь свои формы, см. DetailsController)
     patch '/items/:id' do
 

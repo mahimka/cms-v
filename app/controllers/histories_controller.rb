@@ -16,7 +16,9 @@ class HistoriesController < App
     # new — ручное добавление редиректа (обычно записи создаются
     # автоматически из Page при смене uri, см. History#page comment)
     get '/histories/new' do
-      @history = History.new(redirect_code: 301)
+      # ?history[old_uri]=... — сюда ведёт кнопка "Add History" из
+      # /admin/lost_urls, чтобы не перепечатывать путь руками.
+      @history = History.new(redirect_code: 301, old_uri: params.dig('history', 'old_uri'))
       erb :"/histories/new", layout: :"/layout/wide", views: settings.views_admin
     end
 

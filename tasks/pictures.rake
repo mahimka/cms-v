@@ -32,4 +32,65 @@ namespace :pictures do
       failed.each { |id, msg| puts "  ##{id} — #{msg}" }
     end
   end
+
+  desc "Разовая чистка скриншотов сайтов: удаляет отклонённые (active: false) и лишние дубли (имя файла включает дату — повторный прогон в другой день плодил новую Picture вместо замены старой), оставляя максимум одну на entity (rake pictures:cleanup_website_screenshots [dry_run=true])"
+  task :cleanup_website_screenshots do
+    dry_run = ENV['dry_run'] == 'true'
+
+    scope = Picture.where(imageable_type: 'Entity').where("file LIKE ?", "/images/screenshots/%")
+
+    removed_inactive = 0
+    removed_dupes = 0
+
+    remove = lambda do |picture|
+      puts "  ##{picture.id} #{picture.file} (active=#{picture.active})#{dry_run ? ' (dry_run)' : ''}"
+      next if dry_run
+
+      disk = File.join(PUBLIC_FOLDER, picture.file.to_s)
+      File.delete(disk) if File.exist?(disk)
+      picture.destroy!
+    end
+
+    puts "-- отклонённые (active: false) --"
+    scope.where(active: false).find_each do |picture|
+      remove.call(picture)
+      removed_inactive += 1
+    end
+
+    puts "-- дубли (оставляем самую новую на entity) --"
+    scope.where(active: true).group_by(&:imageable_id).each_value do |pictures|
+      next if pictures.size <= 1
+
+      pictures.sort_by(&:id).first(pictures.size - 1).each do |picture|
+        remove.call(picture)
+        removed_dupes += 1
+      end
+    end
+
+    puts "Удалено отклонённых: #{removed_inactive}, удалено дублей: #{removed_dupes}"
+  end
+
+  desc "Удаляет скриншоты, у которых один и тот же файл на диске делят НЕСКОЛЬКО РАЗНЫХ entity (имя файла было домен+дата без entity.id — см. WebsiteScraper, франшизы вроде ion-club.net/corepoweryoga.com затирали скриншоты друг друга) — какой из них правильный, не определить, поэтому удаляются все причастные, чтобы на следующем прогоне пересняться заново с уникальным именем (rake pictures:fix_screenshot_collisions [dry_run=true])"
+  task :fix_screenshot_collisions do
+    dry_run = ENV['dry_run'] == 'true'
+
+    scope = Picture.where(imageable_type: 'Entity').where("file LIKE ?", "/images/screenshots/%")
+
+    removed = 0
+    entities_affected = 0
+
+    scope.group(:file).having("COUNT(DISTINCT imageable_id) > 1").pluck(:file).each do |file|
+      pictures = scope.where(file: file).to_a
+      entity_ids = pictures.map(&:imageable_id).uniq
+      puts "#{file} — #{entity_ids.size} entity делят один файл: #{entity_ids.join(', ')}#{dry_run ? ' (dry_run)' : ''}"
+      entities_affected += entity_ids.size
+      next if dry_run
+
+      disk = File.join(PUBLIC_FOLDER, file.to_s)
+      File.delete(disk) if File.exist?(disk)
+      pictures.each { |p| p.destroy!; removed += 1 }
+    end
+
+    puts "Удалено записей: #{removed}, задето entity: #{entities_affected} — пересоберутся на следующем rake websites:parse"
+  end
 end

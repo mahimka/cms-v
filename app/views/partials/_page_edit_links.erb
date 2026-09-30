@@ -1,0 +1,24 @@
+<% if current_user&.admin? %>
+  <div class="navbar-item">
+    <a href="/admin/pages/<%= @page.id %>/edit-in-place" class="button is-small is-light" target="_blank" title="Редактировать саму страницу (title/h1/body/...)">✎ Страница</a>
+  </div>
+
+  <%
+    # @page.pageable — Entity/Item/Event, к которому привязана эта
+    # detail-страница (Page#pageable, см. app/models/page.rb) — nil у
+    # List-страниц (country/region/тег-подборки и т.п.), там кроме самой
+    # страницы редактировать нечего.
+    #
+    object = @page.pageable
+    object_edit_path = case @page.effective_pageable_type
+      when 'Entity' then "/admin/entities/#{object.id}/edit_in_place" if object
+      when 'Item'   then "/admin/items/#{object.id}/edit_in_place" if object
+      when 'Event'  then "/admin/events/#{object.id}/edit_in_place" if object
+    end
+  %>
+  <% if object_edit_path %>
+    <div class="navbar-item">
+      <a href="<%= object_edit_path %>" class="button is-small is-light" target="_blank" title="Редактировать <%= @page.effective_pageable_type %> (details/tags/links/...)">✎ <%= @page.effective_pageable_type %></a>
+    </div>
+  <% end %>
+<% end %>

@@ -18,6 +18,14 @@
       <tag class="tag is-size-7">tags_name_cont</tag>
       <%= input(:q, :tags_name_cont, options = {class: 'input is-small', value: @q.tags_name_cont, placeholder: ""}) %>
     </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">active_eq</tag>
+      <%= select(:q, :active_eq, {"" => "", "true" => "true", "false" => "false"}, options = {class: 'select input is-small', value: @q.active_eq}) %>
+    </div>
+    <div class="column is-2">
+      <tag class="tag is-size-7">published_eq</tag>
+      <%= select(:q, :published_eq, {"" => "", "true" => "true", "false" => "false"}, options = {class: 'select input is-small', value: @q.published_eq}) %>
+    </div>
   </div>
 
   <div class="columns">
@@ -41,7 +49,8 @@
 
   <table class="table is-narrow is-size-7">
     <tr class="is-size-6 has-text-weight-semibold">
-      <td>active</td>
+      <td>a</td>
+      <td>p</td>
       <td>preview</td>
       <td>imageable</td>
       <td>alt</td>
@@ -54,7 +63,8 @@
 
     <tr>
       <td><%= checkbox_in_place(picture, :active) %></td>
-      <td><img src="<%= picture.file %>" alt="<%= picture.alt %>" style="max-height: 40px;"></td>
+      <td><%= checkbox_in_place(picture, :published) %></td>
+      <td><img src="<%= picture.file %>" alt="<%= picture.alt %>" style="max-height: 800px;"></td>
       <td>
         <% if picture.imageable %>
           <a href="/admin/<%= picture.imageable.class.name.underscore.pluralize %>/<%= picture.imageable.id %>">

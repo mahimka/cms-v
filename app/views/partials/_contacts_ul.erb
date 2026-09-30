@@ -1,0 +1,35 @@
+<ul style='list-style-type: none;' class='m-0 p-0 mt-2 mb-5 is-size-7' >
+
+
+  <% if @page_details['phone'] %>
+    <li>
+      <a href="<%= @page_details['phone'] %>" target="_blank" rel="noopener noreferrer nofollow">
+        <span class="icon-text">
+          <%= label_icon("phone") %><%= @page_details['phone'].split('/').last %>
+        </span>
+      </a>
+    </li>
+  <% end %>
+
+  <% if @page_details['email'] %>
+    <li>
+      <a href="<%= @page_details['email'] %>" target="_blank" rel="noopener noreferrer nofollow">
+        <span class="icon-text">
+          <%= label_icon("email") %><%= @page_details['email'].split('/').last %>
+        </span>
+      </a>
+    </li>
+  <% end %>
+
+  <% if @page_details['whatsapp'] %>
+    <li>
+      <a href="<%= @page_details['whatsapp'] %>" target="_blank" rel="noopener noreferrer nofollow">
+        <span class="icon-text">
+          <%= label_icon("whatsapp") %><%= @page_details['whatsapp'].split('/').last %>
+        </span>
+      </a>
+    </li>
+  <% end %>
+ 
+
+</ul>
