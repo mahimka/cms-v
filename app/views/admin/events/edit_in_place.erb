@@ -1,0 +1,116 @@
+<%= erb :'/layout/_flash', views: settings.views_admin %>
+
+<div class="content m-3">
+
+  <h1 class="title"><%= @event.name %></h1>
+
+  <p class="subtitle is-6">
+    Всё сохраняется сразу по месту, без кнопки Update.
+    <a href="/admin/events/<%= @event.id %>/edit">обычная форма</a> ·
+    <a href="/admin/events">все events</a>
+  </p>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:event, :name, "name", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@event, :name) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:event, :schema_id, "schema", options = {class: 'label'}) %></div>
+    <div class="column is-9">
+      <% schemas_for_select = Schema.active.order(:ancestry, :position, :name).to_h { |s| [s.id, ("— " * s.depth) + s.name] } %>
+      <%= select_in_place(@event, :schema_id, schemas_for_select) %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2">
+      <%= label(:event, :start_at, "start_at", options = {class: 'label'}) %>
+      <p class="help">YYYY-MM-DD HH:MM</p>
+    </div>
+    <div class="column is-9"><%= input_in_place(@event, :start_at) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2">
+      <%= label(:event, :end_at, "end_at", options = {class: 'label'}) %>
+      <p class="help">пусто, если событие без времени окончания</p>
+    </div>
+    <div class="column is-9"><%= input_in_place(@event, :end_at) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2">
+      <%= label(:event, :venue_id, "venue", options = {class: 'label'}) %>
+      <p class="help">место проведения — Entity (отель, пляж и т.п.), если уже заведено</p>
+    </div>
+    <div class="column is-9">
+      <% venues_for_select = Entity.generate_pages.order(:name).to_h { |e| [e.id, e.name] } %>
+      <%= select_in_place(@event, :venue_id, venues_for_select) %>
+    </div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:event, :address, "address", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@event, :address) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:event, :latitude, "latitude", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@event, :latitude) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:event, :longitude, "longitude", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= input_in_place(@event, :longitude) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:event, :published, "published", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@event, :published) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:event, :generate_pages, "generate_pages", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@event, :generate_pages) %></div>
+  </div>
+
+  <div class="columns">
+    <div class="column is-2"><%= label(:event, :is_closed, "is_closed", options = {class: 'label'}) %></div>
+    <div class="column is-9"><%= checkbox_in_place(@event, :is_closed) %></div>
+  </div>
+
+  <hr>
+
+  <div id="event-details-fields">
+    <%= erb :'/events/_details_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <div id="event-links-fields">
+    <%= erb :'/events/_links_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <div id="event-profiles-fields">
+    <%= erb :'/events/_profiles_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <div id="event-tags-fields">
+    <%= erb :'/events/_tags_fields', views: settings.views_admin %>
+  </div>
+
+  <hr>
+
+  <%= erb :'/events/_pictures_fields', views: settings.views_admin %>
+
+</div>
+
+<script src="/javascripts/event-edit-in-place.js"></script>
+<script>
+  initEventEditInPlace(<%= @event.id %>);
+</script>

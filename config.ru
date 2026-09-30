@@ -24,8 +24,10 @@ use PicturesController
 use ItemsController
 use EntitiesController
 use EventsController
+use PageTemplatesController
 use PagesController
 use HistoriesController
+use LostUrlsController
 use SessionsController
 use UsersController
 use PublicPhotosController
@@ -34,13 +36,12 @@ use RoutesFirst
 use Routes
 use RoutesLast
 use RoutesHistory
+use RoutesLost
 
 # use GeonamesController
-# use AdsController
 
 # use ProfilesController
 # use TagsController
-# use AdsController
 
 # use ProjectMethods
 # use RssRoutesController

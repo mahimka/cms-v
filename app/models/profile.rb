@@ -1,6 +1,6 @@
 class Profile < ActiveRecord::Base
 
-  scope :active, -> { where(active: true) }
+  scope :alive, -> { where(alive: true) }
 	
   belongs_to :site
 
@@ -32,7 +32,7 @@ class Profile < ActiveRecord::Base
   # Opt-in attributes
   def self.ransackable_attributes(auth_object = nil)
     [
-      "active", 
+      "alive",
       "site_id",
       "url",
       "profileable_type",

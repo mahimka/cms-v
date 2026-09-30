@@ -27,13 +27,18 @@
   </div>
 
   <div class="column is-1">
-    <input type="checkbox" name="q[active_true]" value='1'  <%= @q.active_true  ? "checked" : "" %>>
-    active 
+    <input type="checkbox" name="q[generate_pages_true]" value='1'  <%= @q.generate_pages_true  ? "checked" : "" %>>
+    generate_pages
   </div>
 
   <div class="column is-2">
-    <input type="checkbox" name="q[active_blank]" value='1'  <%= @q.active_blank  ? "checked" : "" %>>
-    not active 
+    <input type="checkbox" name="q[generate_pages_blank]" value='1'  <%= @q.generate_pages_blank  ? "checked" : "" %>>
+    not generate_pages
+  </div>
+
+  <div class="column is-1">
+    <input type="checkbox" name="q[is_closed_true]" value='1'  <%= @q.is_closed_true  ? "checked" : "" %>>
+    closed
   </div>
 
 
@@ -49,12 +54,13 @@
 
     <% grouped_tags = Tag.active.includes(:parent).order(:name).group_by(&:parent) %>
 
-    <div style="display:flex; flex-wrap:wrap; gap: 0.25rem 1.25rem;">
+    <div>
+    <!--<div style="display:flex; flex-wrap:wrap; gap: 0.25rem 1.25rem;">-->
       <% grouped_tags.each do |parent, children| %>
         <% group_has_selected = children.any? { |tag| @filter_tag_names.include?(tag.name) } %>
         <details style="flex: 0 0 auto;" <%= "open" if group_has_selected %>>
           <summary class="has-text-weight-semibold is-size-7" style="cursor:pointer;"><%= parent&.name || "—" %></summary>
-          <div class="pl-4 pt-1">
+          <div class="pl-4 py-3" style="max-width: 100%; overflow-x: auto;">
             <% children.each do |tag| %>
               <label class="checkbox mr-3 is-size-7 tag-filter-checkbox">
                 <input type="checkbox" name="tag_names[]" value="<%= tag.name %>" <%= "checked" if @filter_tag_names.include?(tag.name) %>>
@@ -211,6 +217,7 @@
   <div class="column is-3">
     <h6 class="title is-size-6 mt-2">Found/Total: <%= @entities_found.size %> / <%= Entity.all.size %></h6>
   </div>
+
 </div>
 
 <hr class="my-0">
@@ -227,9 +234,11 @@
   <table class="table is-size-7">
     <tr>
       <td></td>
+      <td>closed</td>
       <td>page</td>
       <td>web</td>
       <td>name</td>
+      <td>short</td>
       <td>schema</td>
       <td>address</td>
       <td>par</td>
@@ -244,7 +253,8 @@
   <% @entities.each do |entity| %>
 
     <tr>
-      <td><%= checkbox_in_place entity, :active %></td>
+      <td><%= checkbox_in_place entity, :generate_pages %></td>
+      <td><%= checkbox_in_place entity, :is_closed %></td>
       <td>
         <% if entity.page %>
           <a href='/admin/pages/<%= entity.page.id %>/edit-in-place'>page</a>
@@ -259,6 +269,7 @@
         <% end %>
       </td>
       <td width=300><%= input_in_place(entity, :name) %></td>
+      <td width=150><%= input_in_place(entity, :short) %></td>
       <% values = Schema.active.all.map{|schema| [schema.id, schema.name]}.to_h %>
       <td width=150><%= select_in_place(entity, :schema_id, values) %></td>
       <td width=250><%= input_in_place(entity, :address) %></td>
@@ -271,7 +282,7 @@
 
       <td>
         <a href="/admin/entities/<%= entity.id %>" class='button is-small'>show</a>
-        <a href="/admin/entities/<%= entity.id %>/edit" class='button is-small'>edit</a>
+        <a href="/admin/entities/<%= entity.id %>/edit_in_place" class='button is-small'>edit</a>
       </td>
     </tr>
 

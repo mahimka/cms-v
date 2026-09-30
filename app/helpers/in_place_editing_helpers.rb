@@ -103,11 +103,11 @@ module InPlaceEditingHelpers
       </script>
 
       <input class="#{css_class} #{object_name}_#{column}_#{object.id}" style="#{css_style}"
-             id="#{object_name}_#{column}_#{object.id}" 
-             name="#{object_name}_#{column}[#{object.id}]" 
+             id="#{object_name}_#{column}_#{object.id}"
+             name="#{object_name}_#{column}[#{object.id}]"
              placeholder="#{placeholder}"
-             type="text" 
-             value="#{object.send(column)}">
+             type="text"
+             value="#{Rack::Utils.escape_html(object.send(column).to_s)}">
     EOM
       
   end  
@@ -210,7 +210,8 @@ module InPlaceEditingHelpers
     css_style   = options[:style] 
     placeholder = options[:placeholder]    
     
-    object_name = object.class.name.parameterize
+    # object_name = object.class.name.parameterize
+    object_name = object.class.name #.parameterize
 
     ret = <<-EOM
 
@@ -345,8 +346,8 @@ module InPlaceEditingHelpers
       </script>
 
       <div class="control has-icons-right">
-        <select autocomplete="off" class="#{css_class} #{object_name}_#{column}_#{object.id}" id="#{object_name}_#{column}_#{object.id}" name="#{object_name}_#{column}[#{object.id}]" 
-        value="#{object.send(column)}" style="#{css_style}">
+        <select autocomplete="off" class="#{css_class} #{object_name}_#{column}_#{object.id}" id="#{object_name}_#{column}_#{object.id}" name="#{object_name}_#{column}[#{object.id}]"
+        value="#{Rack::Utils.escape_html(object.send(column).to_s)}" style="#{css_style}">
 
     EOM
 

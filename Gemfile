@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 gem "base64"       # your current problem
 gem "csv"          # very common in Rails/Jekyll apps
 gem "bigdecimal"   # appears in many money/decimal calculations
+gem "json", "~> 2.9"
 # gem "mutex_m"      # less common, but sometimes used
 # gem "ostruct"      # will be gone in Ruby 3.5/4.0
 

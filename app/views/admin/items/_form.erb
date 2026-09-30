@@ -38,12 +38,25 @@
 <div class="columns">
 
   <div class="column is-2">
-    <%= label(:item, :active, "active", options = {class: 'label'}) %>
+    <%= label(:item, :generate_pages, "generate_pages", options = {class: 'label'}) %>
   </div>
 
   <div class="column is-9">
-    <input type="hidden" name="item[active]" value="0">
-    <input type="checkbox" name="item[active]" value="1" <%= @item.active ? "checked" : "" %>>
+    <input type="hidden" name="item[generate_pages]" value="0">
+    <input type="checkbox" name="item[generate_pages]" value="1" <%= @item.generate_pages ? "checked" : "" %>>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:item, :is_closed, "is_closed", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="item[is_closed]" value="0">
+    <input type="checkbox" name="item[is_closed]" value="1" <%= @item.is_closed ? "checked" : "" %>>
   </div>
 
 </div>

@@ -46,6 +46,44 @@ class EventsController < App
 
     end
 
+    # Всё редактируется на месте (in_place_* хелперы + AJAX), без формы и
+    # без единой перезагрузки страницы — см. app/helpers/in_place_editing_helpers.rb
+    # и общий /admin/:table_name/:object_id/ajax в admin_controller.rb. Тот
+    # же паттерн, что у entities/edit_in_place — см. entities_controller.rb.
+    get '/events/:id/edit_in_place' do
+
+      @event = Event.find(params[:id])
+
+      erb :"/events/edit_in_place", layout: :"/layout/wide", views: settings.views_admin
+
+    end
+
+    # Отдаёт свежий HTML одной секции (details/links/profiles) без layout —
+    # event-edit-in-place.js подставляет это вместо своего <div> после
+    # AJAX-сохранения строки, вместо перезагрузки всей страницы.
+    get '/events/:id/fields/:section' do
+      halt 404 unless %w[details links profiles].include?(params[:section])
+
+      @event = Event.find(params[:id])
+      erb :"/events/_#{params[:section]}_fields", views: settings.views_admin, layout: false
+    end
+
+    # Тег — чекбоксом без формы (см. events/_tags_fields.erb на
+    # edit_in_place): один клик — сразу AJAX, без общего "Update Event".
+    post '/events/:id/tags/:tag_id/toggle' do
+      event = Event.find(params[:id])
+      tag_id = params[:tag_id].to_i
+
+      if params[:checked] == "true"
+        event.tag_ids |= [tag_id]
+      else
+        event.tag_ids -= [tag_id]
+      end
+
+      status 200
+      "ok"
+    end
+
     # update - step 2: остальные поля + tags (details теперь свои формы, см. DetailsController)
     patch '/events/:id' do
 

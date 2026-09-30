@@ -16,6 +16,16 @@ class GscRecord < ActiveRecord::Base
   establish_connection({ adapter: 'sqlite3', database: 'db/gsc.db' })
 end
 
+# Полная локальная копия geonames.org (db/geonames.db, ~160k строк) —
+# отдельная БД, отдельное подключение (тот же приём, что у GscRecord
+# выше). pages.geonames_id / tags.geonames_id (см. миграции
+# add_geonames_id_to_pages/tags) — это geonames.geonames.id ИЗ ЭТОЙ базы,
+# не наш auto-increment (в отличие от старой ads, которую снесли).
+class GeonamesRecord < ActiveRecord::Base
+  self.abstract_class = true
+  establish_connection({ adapter: 'sqlite3', database: 'db/geonames.db' })
+end
+
 
 
 class App < Sinatra::Base    
@@ -312,7 +322,7 @@ class App < Sinatra::Base
     end
   end
 
-  # Приём HTML со страниц профилей от Chrome-расширения (#profile в URL
+  # Приём HTML со страниц профилей от Chrome-расширения (#p в URL
   # включает отправку на стороне расширения, см.
   # tools/chrome-profile-parser). title/h1 достаём сразу — они универсальны
   # для любого сайта.
@@ -361,7 +371,7 @@ class App < Sinatra::Base
     if parse_result
       # html_content больше не нужен — то немногое, что было нужно
       # (rating/review_count/price), уже извлечено выше в profile.details.
-      # Не затираем, если попросили явно (#profile_html на стороне
+      # Не затираем, если попросили явно (#p_html на стороне
       # расширения, keep_html: true) или включён общий отладочный флаг
       # settings.keep_snap_shot_html_for_debugging (config/config.yml) —
       # на время обкатки парсеров под новые сайты нужны реальные образцы.

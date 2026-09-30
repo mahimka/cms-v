@@ -1,0 +1,5 @@
+class AddShortToEntities < ActiveRecord::Migration[6.1]
+  def change
+    add_column :entities, :short, :string
+  end
+end
