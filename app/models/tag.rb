@@ -15,6 +15,10 @@ class Tag < ActiveRecord::Base
   belongs_to :parent, class_name: "Tag", foreign_key: :parent_id, optional: true
   has_many :children, class_name: "Tag", foreign_key: :parent_id
 
+  # Geoname — отдельная БД (db/geonames.db, см. GeonamesRecord в app.rb).
+  # optional — у topical-тегов (Yoga Style и т.п.) geonames_id пустой.
+  belongs_to :geoname, foreign_key: :geonames_id, optional: true
+
 
   has_many :taggings, :dependent => :destroy
 
@@ -27,6 +31,7 @@ class Tag < ActiveRecord::Base
 
   validates_presence_of :name #, :position
   validates :name, uniqueness: true
+  validates :slug, uniqueness: true, allow_nil: true
 
   # Перевод name на язык страницы. Переводы вносятся вручную в админке
   # (translations — hash locale => строка), при отсутствии — фолбэк на name.

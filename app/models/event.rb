@@ -6,7 +6,7 @@ class Event < ActiveRecord::Base
   validates :name, presence: true
   validates :schema, presence: true
 
-  scope :active, -> { where(active: true) }
+  scope :generate_pages, -> { where(generate_pages: true) }
   scope :published, -> { where(published: true) }
   scope :upcoming, -> { where("start_at >= ?", Time.current) }
 

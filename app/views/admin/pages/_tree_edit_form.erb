@@ -51,7 +51,9 @@
             <a href='/admin/<%= @page.pageable_type.pluralize.parameterize %>/<%= @page.pageable_id %>/edit'><span class="tag is-light"><%= @page.pageable_type %> : <%= @page.pageable_id %></span></a>
           <% end %>
 
-
+          <% if @page.template_id %>
+            template: <a href='/admin/page_templates/<%= @page.template_id %>/edit'><span class="tag is-light"><%= @page.template_id %>: <%= @page.template.slug %></span></a>
+          <% end %>
 
 
 
@@ -191,6 +193,7 @@
   <div class="column is-3  ml-1">
 
       <%= label(:page, :layout, "layout:", options = {class: 'label is-small'}) %>
+      <%= page_field_lock(@page, "layout") %>
       <% values = (Dir.glob("**", base: File.join(settings.views_project, "layout")) + Dir.glob("**", base: File.join(settings.views, "layout")))
                     .delete_if{|file| file.starts_with?("_")}.uniq.sort.unshift("") %>
       <%= select(:page, :layout, values, options = {class: 'select input is-success is-size-7', value: @page.layout}) %>
@@ -199,6 +202,7 @@
   <div class="column is-3 ml-1">
 
       <%= label(:page, :view, "view:", options = {class: 'label is-small'}) %>
+      <%= page_field_lock(@page, "view") %>
       <% values = (Dir.glob("**", base: settings.views_project) + Dir.glob("**", base: settings.views))
                     .delete_if{|file| !file.ends_with?(".erb") || file.starts_with?("_")}.uniq.sort.unshift("") %>
       <%= select(:page, :view, values, options = {class: 'select input is-success is-size-7', value: @page.view}) %>
@@ -210,6 +214,7 @@
 
     <div class="column is-1">
       <label class="label is-small">slug</label>
+      <%= page_field_lock(@page, "slug") %>
     </div>
 
     <div class="column is-9">
@@ -686,7 +691,7 @@
     <div class="columns is-gapless my-2">
       <div class="column is-1">
         <label class="label is-small">title
-        <%= translate_field_button(@page, "title") %></label>
+        <%= translate_field_button(@page, "title") %> <%= page_field_lock(@page, "title") %></label>
       </div>
       <div class="column is-11">
         <input
@@ -701,7 +706,7 @@
     <div class="columns is-gapless my-2">
       <div class="column is-1">
         <label class="label is-small">h1
-        <%= translate_field_button(@page, "h1") %></label>
+        <%= translate_field_button(@page, "h1") %> <%= page_field_lock(@page, "h1") %></label>
       </div>
       <div class="column is-11">
         <input
@@ -716,7 +721,7 @@
     <div class="columns is-gapless my-2">
       <div class="column is-2">
         <label class="label is-small">subtitle
-        <%= translate_field_button(@page, "subtitle") %></label>
+        <%= translate_field_button(@page, "subtitle") %> <%= page_field_lock(@page, "subtitle") %></label>
       </div>
       <div class="column is-11">
         <input
@@ -739,20 +744,20 @@
             type="text"
             name="page[anchor_1]"
             value="<%= @page.anchor_1 %>"
-          ><%= translate_field_button(@page, "anchor_1") %>
+          ><%= translate_field_button(@page, "anchor_1") %> <%= page_field_lock(@page, "anchor_1") %>
       </div>
       <div class="column is-4">
-        
+
         <input
             class="input is-small ml-2"
             type="text"
             name="page[anchor_2]"
             value="<%= @page.anchor_2 %>"
           >
-          <%= translate_field_button(@page, "anchor_2") %>
+          <%= translate_field_button(@page, "anchor_2") %> <%= page_field_lock(@page, "anchor_2") %>
       </div>
       <div class="column is-4">
-        <%= translate_field_button(@page, "anchor_3") %>
+        <%= translate_field_button(@page, "anchor_3") %> <%= page_field_lock(@page, "anchor_3") %>
         <input
             class="input is-small ml-3"
             type="text"
@@ -765,7 +770,7 @@
 
     <div class="field">
       <label class="label is-small">meta_description
-      <%= translate_field_button(@page, "meta_description") %></label>
+      <%= translate_field_button(@page, "meta_description") %> <%= page_field_lock(@page, "meta_description") %></label>
       <div class="control">
         <textarea
           class="textarea autosize-textarea"
@@ -777,7 +782,7 @@
 
     <div class="field">
       <label class="label is-small">body
-      <%= translate_field_button(@page, "body") %></label>
+      <%= translate_field_button(@page, "body") %> <%= page_field_lock(@page, "body") %></label>
       <div class="control">
         <textarea
           class="textarea autosize-textarea"
@@ -790,7 +795,7 @@
 
     <div class="field">
       <label class="label is-small">faq</label>
-      <%= translate_field_button(@page, "faq") %>
+      <%= translate_field_button(@page, "faq") %> <%= page_field_lock(@page, "faq") %>
       <div class="control">
         <textarea
           class="textarea autosize-textarea"
@@ -803,6 +808,7 @@
 
     <div class="field">
       <label class="label is-small">schema</label>
+      <%= page_field_lock(@page, "schema") %>
       <div class="control">
         <textarea
           class="textarea autosize-textarea"
@@ -821,7 +827,7 @@
 
       <div class="field">
         <label class="label is-small"><%= column %></label>
-        <%= translate_field_button(@page, column) %>
+        <%= translate_field_button(@page, column) %> <%= page_field_lock(@page, column) %>
         <div class="control">
           <textarea
             class="textarea autosize-textarea"

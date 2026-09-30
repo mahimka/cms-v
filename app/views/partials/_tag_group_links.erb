@@ -1,0 +1,44 @@
+<%
+  # Ссылки на все ОПУБЛИКОВАННЫЕ страницы тегов группы group (например
+  # "addressCountry" -> /austria, /argentina, ...; "Yoga Style" ->
+  # /yoga-styles/ashtanga-yoga, /yoga-styles/hatha-yoga, ...) — со
+  # счётчиком объектов, тем же стилем, что и остальные списки ссылок
+  # (см. _page_link_with_count). В отличие от _page_children_by_url
+  # (произвольные дети страницы по url) — ищет через Tag/list_tag_id, то
+  # есть находит страницы независимо от того, где именно в дереве Page
+  # они лежат (достаточно, чтобы их сгенерировал List-template по этой
+  # группе, см. PageTemplateGenerator).
+  #
+  # group — обязательный local (имя корневой группы тегов), anchor —
+  # имя поля/метода Page для текста ссылки (по умолчанию 'anchor_1', с
+  # фолбэком на h1/title — см. _page_link_with_count).
+  #
+  # ВАЖНО: фильтруем по конкретному ВЕРХНЕУРОВНЕВОМУ template'у этой
+  # группы, а не просто по list_tag_id из тегов группы — одна и та же
+  # группа (например "Yoga Style") может быть группировкой И у
+  # верхнеуровневого List (template #5, /yoga-styles/ashtanga-yoga), И
+  # у вложенных facet-template'ов под country/region/locality (## 6, 17,
+  # 23 — /austria/ashtanga-yoga, /innsbruck/ashtanga-yoga, ...) — у них
+  # list_tag_id указывает на ТОТ ЖЕ тег "Ashtanga Yoga". Без этого фильтра
+  # партиал возвращал вперемешку страницы всех уровней (проверено:
+  # /sri-lanka/ananda-yoga, /addison/ananda-yoga лезли в список наравне
+  # с /yoga-styles/ananda-yoga).
+  anchor ||= 'anchor_1'
+
+  top_template = PageTemplate.where(template_type: 'List', parent_template_id: nil)
+    .find { |t| TemplateFieldRenderer.referenced_group(t.slug) == group }
+
+  pages = top_template ?
+    Page.where(template_id: top_template.id, published: true).to_a
+      .sort_by { |p| p.public_send(anchor).presence || p.h1.to_s } : []
+
+  counts = Page.batch_list_objects_counts(pages)
+%>
+
+<% if pages.any? %>
+  <div class="field is-grouped is-grouped-multiline">
+    <% pages.each do |p| %>
+      <%= partial '_page_link_with_count', target: p, label: p.public_send(anchor).presence || p.h1.presence || p.title, count: counts[p.id] %>
+    <% end %>
+  </div>
+<% end %>

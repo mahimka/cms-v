@@ -20,6 +20,11 @@ module SlugGenerator
 
     transliterated = name.to_s.downcase.each_char.map { |char| CYRILLIC_TO_LATIN[char] || char }.join
 
-    transliterated.parameterize
+    # parameterize сам по себе оставляет "_" как есть (не считает его
+    # разделителем) — а Page#slug это запрещает ("только строчные латинские
+    # буквы, цифры и дефисы"). Меняем на пробел ДО parameterize, чтобы он
+    # обошёлся с ним как с обычным разделителем слов (схлопнул с соседними
+    # дефисами/пробелами), а не просто заменил один на один.
+    transliterated.tr('_', ' ').parameterize
   end
 end

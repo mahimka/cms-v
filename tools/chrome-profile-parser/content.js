@@ -44,15 +44,15 @@
     // на сервере по самому url при парсинге, отдельный id не нужен.
     const cleanUrl = window.location.href
       .replace(/[?&]parse_profile=true/, '')
-      .replace(/#profile_local_html$/, '')
-      .replace(/#profile_local$/, '')
-      .replace(/#profile_html$/, '')
-      .replace(/#profile$/, '');
+      .replace(/#p_L_html$/, '')
+      .replace(/#p_L$/, '')
+      .replace(/#p_html$/, '')
+      .replace(/#p$/, '');
 
     const payload = {
       url: cleanUrl,
       html: document.documentElement.outerHTML,
-      // #profile_html вместо #profile — сервер не затирает html_content
+      // #p_html вместо #p — сервер не затирает html_content
       // после разбора, даже если для сайта есть детерминированный парсер
       // (см. keep_html в post '/api/parse', app.rb). Нужно для сбора
       // реальных образцов при обкатке новых парсеров в lib/parsers.
@@ -82,16 +82,16 @@
 
   // Четыре варианта маркера — независимо комбинируются keep_html (сохранить
   // html_content целиком) и local (слать на локальный дев-сервер вместо
-  // прода): #profile, #profile_html, #profile_local, #profile_local_html.
+  // прода): #p, #p_html, #p_L, #p_L_html.
   // Query-параметр (?parse_profile=true) некоторые сайты (например
   // TripAdvisor) обрезают редиректом на канонический URL раньше, чем
   // успеет отработать content script, поэтому его тоже проверяем — всегда
   // прод, без keep_html (для локальной отладки используйте hash-маркеры).
   const MARKERS = {
-    '#profile': { keepHtml: false, local: false },
-    '#profile_html': { keepHtml: true, local: false },
-    '#profile_local': { keepHtml: false, local: true },
-    '#profile_local_html': { keepHtml: true, local: true }
+    '#p': { keepHtml: false, local: false },
+    '#p_html': { keepHtml: true, local: false },
+    '#p_L': { keepHtml: false, local: true },
+    '#p_L_html': { keepHtml: true, local: true }
   };
 
   const searchParams = new URLSearchParams(window.location.search);

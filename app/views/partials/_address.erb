@@ -1,0 +1,42 @@
+<div class=''>
+
+
+    <%#= "#{@page_details['operator']} <br>" if @page_details['operator'] %>
+    <%#= "#{@page_details['streetAddress']} <br>" if !@page_details['streetAddress'].blank? %>
+    <%# if !@page_details['address'].blank? || !@page_details['postalCode'].blank? || !@page_details['addressLocality'].blank? || !@page_details['addressCountry'].blank? %>
+      <%#= svg_icon('map-pin') %>
+      <%#= "#{@page_details['address']} " if !@page_details['address'].blank? %>
+      <%#= "#{@page_details['postalCode']} " if !@page_details['postalCode'].blank? %>
+      <%#= "#{@page_details['addressLocality']} " if !@page_details['addressLocality'].blank? %>
+      <%#= "#{@page_details['addressCountry']}" if !@page_details['addressCountry'].blank? %>
+
+    <%# end %>
+
+    <% if @page_details['operator'] %>
+      <p><%= @page_details['operator'] %></p>
+    <% end %>
+
+
+    <p><span class="is-size-5 has-text-weight-semibold"><%= @page.h1 %></span>
+      <br><%= @page.pageable.address %>
+    </p>
+    
+    <% if @page.pageable.latitude.present? && @page.pageable.longitude.present? %>
+      <% @destination = "#{@page.pageable.latitude},#{@page.pageable.longitude}" %>
+    <% else %>
+      <% @destination = @page.pageable.address.presence || "" %>
+    <% end %>
+
+    <% if @destination.present? %>
+      <a href='http://maps.google.com/?saddr=My+Location&daddr=<%= @destination %>' target='_blank' class='button is-success is-medium'>
+        <%= label_by_lang('_how_to_get_there').capitalize %>?
+      </a>
+    <% end %>
+
+    <!--
+    <br>
+    <span class="is-size-7"><%= label_by_lang('_distance').capitalize %>: <%= @page_details['distance_to_diversorio'] %></span>
+    -->
+
+
+</div>

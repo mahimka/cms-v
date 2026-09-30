@@ -1,0 +1,37 @@
+<%
+  # Ссылки на страницы-сиблинги текущей facet-страницы — те же
+  # /parent/* -страницы, что сгенерированы ТЕМ ЖЕ вложенным List-
+  # template'ом под тем же родителем, просто по другому тегу группы:
+  # например у /innsbruck/ashtanga-yoga это /innsbruck/vinyasa-yoga,
+  # /innsbruck/hatha-yoga и т.д. (группа "Yoga Style").
+  #
+  # В отличие от _geo_sibling_links (там страницы "плоские" —
+  # /austria и /tirol физически НЕ предок/потомок в дереве страниц,
+  # связь только через теги объектов) — facet-страницы одного
+  # nested-template'а физически сиблинги в самом дереве Page: общий
+  # template_id и ancestry (см. PageTemplateGenerator#ensure_list_page
+  # — это ровно ключ, по которому там ищется "своя" страница), поэтому
+  # достаточно одного простого запроса по Page, без похода через теги.
+  #
+  # page = page || @page, anchor — имя поля/метода Page для текста
+  # ссылки (по умолчанию 'h1'; например 'anchor_1' — короткое имя без
+  # повтора родителя, "Hatha Yoga" вместо "Hatha Yoga in Innsbruck").
+  page = page || @page
+  anchor = anchor || 'h1'
+
+  sibling_pages = Page
+    .where(template_id: page.template_id, ancestry: page.ancestry, published: true)
+    .where.not(id: page.id)
+    .to_a
+    .sort_by { |p| p.public_send(anchor).presence || p.h1.presence || p.title.to_s }
+
+  counts = Page.batch_list_objects_counts(sibling_pages)
+%>
+
+<% if sibling_pages.any? %>
+  <div class="field is-grouped is-grouped-multiline">
+    <% sibling_pages.each do |sibling| %>
+      <%= partial '_page_link_with_count', target: sibling, label: sibling.public_send(anchor).presence || sibling.h1.presence || sibling.title, count: counts[sibling.id] %>
+    <% end %>
+  </div>
+<% end %>
