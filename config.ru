@@ -18,15 +18,16 @@ use MarkersController
 use TagsController
 use SchemasController
 use LabelsController
-use AdsController
 use LinksController
 use DetailsController
 use PicturesController
 use ItemsController
 use EntitiesController
 use EventsController
+use PageTemplatesController
 use PagesController
 use HistoriesController
+use LostUrlsController
 use SessionsController
 use UsersController
 use PublicPhotosController
@@ -35,6 +36,7 @@ use RoutesFirst
 use Routes
 use RoutesLast
 use RoutesHistory
+use RoutesLost
 
 # use GeonamesController
 

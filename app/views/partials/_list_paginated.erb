@@ -1,0 +1,39 @@
+<%
+  # locals (все необязательные):
+  #   objects       — коллекция для пагинации (по умолчанию @objects); должна
+  #                   быть ActiveRecord::Relation, а не Array — .page/.per
+  #                   от kaminari работает через SQL LIMIT/OFFSET, не в памяти
+  #   list_item     — имя партиала на карточку (по умолчанию '_card')
+  #   per           — сколько на страницу (по умолчанию 12)
+  #   anchor_suffix — довесок к тексту ссылки карточки (например
+  #                   region.erb раньше приписывал " review")
+  objects       ||= @objects
+  list_item     ||= '_card'
+  per           ||= 12
+  anchor_suffix ||= ''
+%>
+
+<% if objects %>
+  <%
+    # ListQuery#objects обычно отдаёт AR::Relation, но при conditions["details"]
+    # (см. list_query.rb) — уже смётанный в память Array, у него нет .page —
+    # заворачиваем через Kaminari.paginate_array, чтобы не падало.
+    paginatable = objects.respond_to?(:page) ? objects : Kaminari.paginate_array(objects.to_a)
+    paged_objects = paginatable.page(params[:page]).per(per)
+  %>
+
+  <div class="px-4 py-5 mt-4 mb-6 has-background-white-ter">
+    <%= paginate(paged_objects, base_path: @page&.uri) %>
+    
+    <div class="columns is-multiline">
+      <% paged_objects.each do |object| %>
+        <div class="column is-4">
+          <%= partial list_item, object: object, anchor: "#{object.short.presence || object.name}#{anchor_suffix}" %>
+        </div>
+      <% end %>
+    </div>
+
+    <%= paginate(paged_objects, base_path: @page&.uri) %>
+  </div>
+
+<% end %>

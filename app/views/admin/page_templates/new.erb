@@ -1,0 +1,17 @@
+<%= erb :'/layout/_flash', views: settings.views_admin %>
+
+<div class="content m-3">
+
+  <form method="POST" action="/admin/page_templates">
+
+    <%= erb :'/page_templates/_form', views: settings.views_admin %>
+
+    <div class="field is-grouped">
+      <div class="control">
+        <input type="submit" value="Create Page Template" class="button is-warning">
+      </div>
+    </div>
+
+  </form>
+
+</div>

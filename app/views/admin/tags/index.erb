@@ -10,6 +10,12 @@
     <input type="file" name="import_file" accept="application/json" required>
     <button type="submit" class="button is-link" title="файл, выгруженный кнопкой export у группы — ищет по name, существующие обновляет, новые создаёт">Import group</button>
   </form>
+  <% if ['/admin/tags/address', '/admin/tags/unsorted'].include?(request.path_info) %>
+    <a class="button is-info is-light" href="/admin/tags">&larr; All other tags</a>
+  <% else %>
+    <a class="button is-info is-light" href="/admin/tags/address">addressCountry / addressRegion / addressLocality / adm_2 &rarr;</a>
+    <a class="button is-info is-light" href="/admin/tags/unsorted">Unsorted &rarr;</a>
+  <% end %>
 </p>
 
 <style>
@@ -80,7 +86,7 @@
       <input type="submit" value="Filter" class="button is-warning">
     </div>
     <div class="column is-11">
-      Found/Total: <%= @tags_found %> / <%= SnapShot.all.size %> |
+      Found/Total: <%= @tags_found %> / <%= @tags_total %> |
       <%#= @tags.map{|tag| tag.response}.uniq.join(', ') %> |
       <%#= @tags.map{|tag| tag.parsed_at}.uniq.join(', ') %> 
     </div>
@@ -99,11 +105,16 @@
   <table class="table is-narrow is-size-7 ">
     <tr class="is-size-6 has-text-weight-semibold">
       <td></td>
-      <td>active</td>
-      <td title="запрещает менять name — на него ссылается List conditions (tags)">fixed 🔒</td>
-      <td>position</td>
+      <td>ae</td>
+      <td title="запрещает менять name — на него ссылается List conditions (tags)">f 🔒</td>
+      <td>pos</td>
       <td>icon</td>
+      <td>slug</td>
       <td>name</td>
+      <td>short</td>
+      <td>short_2</td>
+      <td>table</td>
+      <td>table_id</td>
       <td title="сколько объектов помечено этим тегом">used</td>
       <td>admin_notes</td>
       <td></td>
@@ -121,7 +132,13 @@
       <td><%= checkbox_in_place(group, :fixed) %></td>
       <td><%= group.position %></td>
       <td><span class="icon"><%= group.icon_svg %></span></td>
+      <td><%= group.slug %></td>
       <td class="has-text-weight-semibold"><%= group.name %></td>
+
+      <td><%= group.short %></td>
+      <td><%= group.short_2 %></td>
+      <td><%= group.table %></td>
+      <td><%= group.table_id %></td>
       <td><%= @tagging_counts_by_tag[group.id] || 0 %></td>
       <td><%= group.admin_notes %></td>
       <td>
@@ -144,24 +161,85 @@
       </td>
     </tr>
 
-    <% (tags_in_group - [group]).sort_by { |t| [t.position || 0, t.name.to_s] }.each do |tag| %>
+    <%
+      child_tags = tags_in_group - [group]
+      # На /admin/tags/unsorted интереснее видеть сначала часто
+      # используемые теги (их разбирать в первую очередь) — на
+      # остальных страницах сортировка по position/name сохраняется.
+      child_tags = if request.path_info == '/admin/tags/unsorted'
+        child_tags.sort_by { |t| -(@tagging_counts_by_tag[t.id] || 0) }
+      else
+        child_tags.sort_by { |t| [t.position || 0, t.name.to_s] }
+      end
+    %>
+    <% child_tags.each do |tag| %>
       <tr class="tag-group-child" data-group-id="<%= group.id %>" style="display:none;">
         <td></td>
         <td><%= checkbox_in_place(tag, :active) %></td>
         <td><%= checkbox_in_place(tag, :fixed) %></td>
         <td width=15><%= tag.position %><%#= input_in_place(tag, :position) %></td>
         <td><span class="icon"><%= tag.icon_svg %></span></td>
+        
         <td class="">
+          <% if tag.table == "ads" %>
+            <%= tag.slug %> <span class="tag is-info is-light is-small" title="данные из ads — редактируется только через перепривязку table_id"><a href="/admin/ads/<%= tag.table_id %>">ads 🔗</a></span>
+          <% elsif tag.fixed %>
+            <%= tag.slug %>
+          <% else %>
+            <%= tag.slug %>
+            <%#= input_in_place(tag, :slug) %><%#= tag.name %>
+          <% end %>
+        </td>
 
-          <% unless tag.fixed %>
-            <%= input_in_place(tag, :name) %><%#= tag.name %>
+        <td class="">
+          <% if tag.table == "ads" %>
+            <%= tag.name %>
+          <% elsif tag.fixed %>
+            <%= tag.name %>
           <% else %>
             <%= tag.name %>
-          <% end %>  
-
+            <%#= input_in_place(tag, :name) %><%#= tag.name %>
+          <% end %>
         </td>
+        
+        <td class="">
+          <% unless tag.fixed %>
+            <%= tag.short %>
+            <%#= input_in_place(tag, :short, style: "width:100px") %><%#= tag.name %>
+          <% else %>
+            <%= tag.short %>
+          <% end %>
+        </td>
+        
+        <td class="">
+          <% if tag.table == "ads" || tag.fixed %>
+            <%= tag.short_2 %>
+          <% else %>
+            <%= tag.short_2 %>
+            <%#= input_in_place(tag, :short_2, style: "width:50px") %><%#= tag.name %>
+          <% end %>
+        </td>
+        
+        <td class="">
+          <% unless tag.fixed %>
+            <%#= input_in_place(tag, :table, style: "width:100px") %><%#= tag.name %>
+            <%= tag.table %>
+          <% else %>
+            <%= tag.table %>
+          <% end %> 
+        </td>
+        
+        <td class="">
+          <% unless tag.fixed %>
+            <%= tag.table_id %>
+            <%#= input_in_place(tag, :table_id, style: "width:40px") %><%#= tag.name %>
+          <% else %>
+            <%= tag.table_id %>
+          <% end %>                                 
+        </td>
+
         <td><%= @tagging_counts_by_tag[tag.id] || 0 %></td>
-        <td><%= input_in_place(tag, :admin_notes) %></td>
+        <td><%#= input_in_place(tag, :admin_notes) %></td>
         <td>
           <a href="/admin/tags/<%= tag.id %>" class="button is-small" target='_blank'>tag</a>
           <a href="/admin/tags/<%= tag.id %>/edit" class="button is-small" target='_blank'>edit</a>
@@ -190,6 +268,6 @@
 </div>
 
 <script src="/javascripts/tag-group-toggle.js"></script>
-<script src="/javascripts/tag-merge.js"></script>
+<script src="/javascripts/tag-merge.js?v=<%= File.mtime(File.join(settings.public_folder, 'javascripts/tag-merge.js')).to_i %>"></script>
 <script src="/javascripts/taggable-translate.js"></script>
 

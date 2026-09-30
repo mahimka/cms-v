@@ -1,3 +1,5 @@
+require 'fileutils'
+
 class Picture < ActiveRecord::Base
   include Taggable
 
@@ -10,6 +12,18 @@ class Picture < ActiveRecord::Base
   belongs_to :user, optional: true
 
   validates :file, presence: true
+
+  # Запись без файла на диске (удалённого руками или потерянного при
+  # переносе) — не проблема, а сам файл без записи — мусор в public/images,
+  # который никогда не почистится сам. rm_f, а не rm, — не падать, если
+  # файла и так уже нет.
+  after_destroy :remove_file_from_disk
+
+  def remove_file_from_disk
+    return if file.blank?
+
+    FileUtils.rm_f(File.join(PUBLIC_FOLDER, file))
+  end
 
   def self.ransackable_attributes(auth_object = nil)
     ["active", "id", "imageable_type", "imageable_id", "file", "alt", "content_type", "width", "height", "ratio", "published", "position", "user_id", "latitude", "longitude", "taken_at", "created_at", "updated_at"]

@@ -1,0 +1,60 @@
+<div class="card">
+
+  <% if page %>
+    <a href="<%= page.uri %>">
+  <% end %>
+
+    <% if picture %>
+      <div class="card-image">
+        <figure class="image is-4by3">
+          <img src="<%= asset_path(picture.file) %>" loading="lazy" alt="<%= picture.translation(@page.lang) %>" style="object-fit: cover;">
+        </figure>
+      </div>
+    <% end %>
+
+  <% if page %>
+    </a>
+  <% end %>
+
+  <div class="card-content">
+    <p class="title is-size-6">
+      <% if page %>
+        <!--<a href="<%#= page.uri %>" title="<%#= page.h1 %> Review and how to get"><%#= page.anchor_1.presence || object.name %> </a> <%#= tags_by_group("addressLocality", page: page) %>-->
+        <a href="<%= page.uri %>" title="<%= page.h1 %> Review and how to get">
+          <%= anchor %>
+        </a> 
+
+        <br><%= tags_by_group("addressLocality", page: page) %>
+        
+      <% else %>
+        <%= object.name %>
+      <% end %>
+    </p>
+
+    <%#= detail_by_label('rate_high', page: page, only_value: true) %> <!-- € -->
+
+    <p class="subtitle mt-3 is-7 has-text-grey">
+      <%= page.pageable.address %>
+    </p>
+    <p>
+        <% page.pageable.profiles.each do |profile| %> 
+           <%= profile.site.icon_svg %> <span class="icon-text"><%= profile.rating %></span>
+        <% end %>
+    </p> 
+
+
+      <%#= tag_by_lang('Advanced Kitesurfing Lessons', page: page) %>
+      <%#= tag_by_lang('Motorhome', page: page) %>
+      <%#= tags_by_group("Lessons", page: page, limit: 3) %>
+      <%#= tags_by_group("Rentals", page: page, limit: 3) %>
+  </div>
+
+
+</div>
+
+
+
+
+
+
+

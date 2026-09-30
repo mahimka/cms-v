@@ -1,0 +1,74 @@
+<% content_for :head_extra do %>
+<% end %>
+
+<% content_for :hero_1 do %>
+<% end %> 
+
+<% content_for :hero_2 do %>
+<% end %> 
+
+<% content_for :hero_3 do %>
+  <div class="buttons">
+    <%= link_on_page('_regions') %>
+    <%= link_on_page('_options') %>
+    <%#= link_on_page('_gallery') unless @page.pageable.pictures.size == 0 %>
+    <%= link_on_page('_faq') unless @page.faq.blank? %>
+  </div>
+<% end %> 
+
+<% content_for :hero do %>
+  <%= partial "_hero_wild" %>
+<% end %> 
+
+<% content_for :sidebar do %>
+<% end %> <!-- end of content_for :sidebar -->
+
+<%= parse_erb_and_markdown @page.body if @page.body %>
+
+<% if @page.block_1.blank? %>
+  <%= partial '_list_paginated' %>
+<% else %>
+  <%= parse_erb_and_markdown @page.block_1 if @page.block_5 %>
+<% end %>
+
+<%#= partial '_map_stay22' %>
+
+<% if @page.block_5.blank? %>
+  <h2 class="title has-text-weight-medium" id="_regions"><%= @page.h1 %> by Region</h2>
+  <%= partial '_geo_sibling_links', child_group: 'addressRegion', anchor: 'anchor_1' %>
+<% else %>
+  <%= parse_erb_and_markdown @page.block_5 if @page.block_5 %>
+<% end %>
+  
+<% if @page.block_6.blank? %>
+  <h2 class="title has-text-weight-medium mt-6" id="_options">more options in <%= @page.anchor_1 %></h2>
+
+  <% Tag.where(parent_id: [nil, 0]).where.not(name: ['addressCountry', 'addressRegion', 'addressLocality', 'adm_2']).each do |t_g| %>
+    <% 
+      group_html = partial '_page_children_links_by_group', group: t_g.name, anchor: 'anchor_1'
+    %>
+    <% unless group_html.blank? %>
+      <article class="message">
+        <div class="message-body">
+          <h3 class="title is-size-5 has-text-weight-medium"><%= t_g.name %> <span class="tag"><%= @page.h1 %></span></h3>
+          <%= group_html %>
+        </div>
+      </article>
+    <% end %>
+  <% end %>
+
+<% else %>
+  <%= parse_erb_and_markdown @page.block_6 if @page.block_6 %>
+<% end %>
+
+<% content_for :schema_main_entity do %>
+<% end %>
+
+<% content_for :schema_webpage do %>
+<% end %>
+
+<% content_for :schema_breadcrumb do %>
+<% end %>
+
+<% content_for :schema_faq_page do %>
+<% end %>

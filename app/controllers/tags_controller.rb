@@ -7,26 +7,49 @@ class TagsController < App
   # переносил переводы и иконки, а не только базовые поля.
   TAG_IMPORT_FIELDS = %w[active short short_2 admin_notes fixed position translations icon_svg].freeze
 
+  # Гео-группы (geo:tag_from_ads) — на порядок больше тегов, чем все
+  # остальные группы вместе (2800+ ads-тегов против ~120 topical), из-за
+  # них /admin/tags тормозит. Обрабатываем их отдельно, на /admin/tags/address.
+  ADDRESS_GROUP_NAMES = %w[addressCountry addressLocality addressRegion adm_2].freeze
+
+  # Unsorted — свалка сырых markers-тегов с yogafinder.com (4000+ штук
+  # после слияний, было больше 5000), тот же принцип, что и с гео-
+  # группами: отдельная страница, чтобы не тормозить /admin/tags.
+  UNSORTED_GROUP_NAMES = %w[Unsorted].freeze
+
   namespace '/admin' do
 
-    get '/tags' do 
+    get '/tags' do
+      excluded_group_names = ADDRESS_GROUP_NAMES + UNSORTED_GROUP_NAMES
+      excluded_group_ids = Tag.where(name: excluded_group_names).pluck(:id)
+      # where.not(parent_id: ids) в SQL молча выкидывает и все строки с
+      # parent_id IS NULL (NULL NOT IN (...) -> NULL, не true) — это
+      # выкинуло бы вообще все root-теги, не только гео/unsorted. Поэтому
+      # считаем список исключаемых id явно (группы + их дети) и режем по id.
+      excluded_ids = excluded_group_ids | Tag.where(parent_id: excluded_group_ids).pluck(:id)
+      base_scope = Tag.where.not(id: excluded_ids)
 
-      @q = Tag.ransack(params[:q])
-      @tags_found = @q.result(distinct: true).size # for index.rb
-      # per(5000): группировка на странице собирается из @tags целиком (см.
-      # index.erb) — если родитель и дети разъедутся по разным страницам
-      # пагинации (легко происходит для новых групп с большим id, т.к.
-      # сортировка по parent_id — числовая, не по смыслу), группа рисуется
-      # "пустой". Тегов сильно меньше 5000, так что пагинация тут по факту
-      # не нужна — просто держим всё на одной странице.
-      @tags       = @q.result(distinct: true).includes(:parent).order(:parent_id, :position, :name).page(params[:page]).per(5000)
+      render_tags_index(base_scope)
+    end
 
-      # Один запрос на всю страницу вместо tag.usage_count на каждую строку.
-      @tagging_counts_by_tag = Tagging.group(:tag_id).count
+    # Только addressCountry/addressLocality/addressRegion/adm_2 — вынесено
+    # из /admin/tags как раз чтобы её не тормозить (см. ADDRESS_GROUP_NAMES).
+    get '/tags/address' do
+      address_group_ids = Tag.where(name: ADDRESS_GROUP_NAMES).pluck(:id)
+      base_scope = Tag.where(id: address_group_ids).or(Tag.where(parent_id: address_group_ids))
 
-      erb :"/tags/index", layout: :"/layout/wide", views: settings.views_admin
+      render_tags_index(base_scope)
+    end
 
-    end  
+    # Только Unsorted — вынесено из /admin/tags тем же приёмом, что и
+    # /tags/address (см. UNSORTED_GROUP_NAMES). До /tags/:id, иначе
+    # "unsorted" перехватится как :id.
+    get '/tags/unsorted' do
+      unsorted_group_ids = Tag.where(name: UNSORTED_GROUP_NAMES).pluck(:id)
+      base_scope = Tag.where(id: unsorted_group_ids).or(Tag.where(parent_id: unsorted_group_ids))
+
+      render_tags_index(base_scope)
+    end
 
     # Поиск тегов по имени для JS-автокомплита (см. markers/index.erb —
     # привязка Marker к Tag). До /tags/:id, иначе "search" перехватится
@@ -38,7 +61,26 @@ class TagsController < App
       halt 200, [].to_json if query.length < 2
 
       escaped = query.gsub(/[%_]/) { |c| "\\#{c}" }
-      tags = Tag.includes(:parent).where("name LIKE ? ESCAPE '\\'", "%#{escaped}%").order(:name).limit(20)
+      scope = Tag.includes(:parent).where("name LIKE ? ESCAPE '\\'", "%#{escaped}%")
+
+      # exclude_group — вызывающая сторона просит вообще не предлагать
+      # теги этой группы (см. tag-merge.js: сливать Unsorted-тег в другой
+      # Unsorted-тег бессмысленно — весь смысл merge из Unsorted в том,
+      # чтобы разложить его по нормальным категориям). Без параметра
+      # (например marker-tag-picker на /admin/markers) — старое
+      # поведение: Unsorted не убираем, просто оттесняем в конец (её
+      # результаты не мусор, просто обычно не то, что ищут первым делом).
+      if params[:exclude_group].present?
+        excluded_group_ids = Tag.where(name: params[:exclude_group]).pluck(:id)
+        scope = scope.where.not(parent_id: excluded_group_ids)
+      end
+
+      # Берём с запасом (100), а не сразу LIMIT 20 — иначе можно набрать
+      # 20 unsorted-тегов и не увидеть более релевантные из других групп,
+      # которые просто позже по алфавиту.
+      candidates = scope.order(:name).limit(100)
+      others, unsorted = candidates.partition { |t| t.parent&.name != 'Unsorted' }
+      tags = (others + unsorted).first(20)
 
       tags.map { |t| { id: t.id, name: t.name, parent: t.parent&.name, usage_count: t.usage_count } }.to_json
     end
@@ -254,6 +296,28 @@ class TagsController < App
 
     end
 
+  end
+
+  private
+
+  # Общий рендер для /tags и /tags/address — тот же index.erb, разница
+  # только в стартовом scope (см. вызовы выше).
+  def render_tags_index(scope)
+    @tags_total = scope.count # без учёта фильтра формы — для "Found/Total"
+    @q = scope.ransack(params[:q])
+    @tags_found = @q.result(distinct: true).size # for index.rb
+    # per(5000): группировка на странице собирается из @tags целиком (см.
+    # index.erb) — если родитель и дети разъедутся по разным страницам
+    # пагинации (легко происходит для новых групп с большим id, т.к.
+    # сортировка по parent_id — числовая, не по смыслу), группа рисуется
+    # "пустой". Тегов сильно меньше 5000, так что пагинация тут по факту
+    # не нужна — просто держим всё на одной странице.
+    @tags = @q.result(distinct: true).includes(:parent).order(:parent_id, :position, :name).page(params[:page]).per(5000)
+
+    # Один запрос на всю страницу вместо tag.usage_count на каждую строку.
+    @tagging_counts_by_tag = Tagging.group(:tag_id).count
+
+    erb :"/tags/index", layout: :"/layout/wide", views: settings.views_admin
   end
 
 end

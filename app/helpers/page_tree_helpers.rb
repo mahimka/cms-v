@@ -14,7 +14,12 @@ module PageTreeHelpers
   # Внутри каждой группы сохраняется порядок, в котором страницы
   # переданы в pages (ожидается — уже отсортированные по алфавиту).
   #
-  # Возвращает { rows: [{page:, has_children:}, ...], more: {count:, url:} | nil }
+  # Возвращает { rows: [{page:, has_children:}, ...], more: {count:, url:} | nil,
+  #   nested: true|false } — nested: true, когда это дочерний уровень
+  #   (parent задан), а не корень дерева — _tree_nodes.erb рисует по
+  #   нему "↳" у каждой строки: одного отступа/вертикальной линии от
+  #   ::before было визуально недостаточно, чтобы было сразу понятно,
+  #   что раскрытые после клика "+" строки — вложенные, а не соседние.
   def prepare_tree_rows(pages, parent: nil)
     no_group    = []
     list_group  = []
@@ -45,7 +50,7 @@ module PageTreeHelpers
         { count: hidden_pageable_count, url: tree_more_pageable_url(parent) }
       end
 
-    { rows: rows, more: more }
+    { rows: rows, more: more, nested: parent.present? }
   end
 
   # Ограничение на количество pageable-страниц, показываемых в дереве
@@ -98,6 +103,57 @@ module PageTreeHelpers
         data-page-translate-field data-field="#{field}" data-source-page-id="#{page.id}"
         title="#{Rack::Utils.escape_html(tooltip)}">✨</button>
     HTML
+  end
+
+  # Замочек рядом с полем, отредактированным вручную на странице,
+  # сгенерированной по PageTemplate — клик снимает защиту (Page#
+  # unmark_edited_field!), чтобы следующий force refresh снова мог
+  # перезаписать это поле. Пусто (ничего не рендерится), если страница
+  # не по template, поле не защищаемое, или прямо сейчас не защищено —
+  # замочек показываем только когда есть что снимать.
+  def page_field_lock(page, field)
+    field = field.to_s
+    return "" if page.template_id.blank?
+    return "" unless Page::PROTECTABLE_FIELDS.include?(field)
+    return "" unless page.edited_field?(field)
+
+    button_id = "unlock_field_#{page.id}_#{field}"
+
+    # НЕ <form> — этот хелпер вставляется внутри большой формы
+    # редактирования страницы (_tree_edit_form.erb), а вложенные <form>
+    # невалидны в HTML: браузер обрывает внешнюю форму раньше времени
+    # (см. историю с PageTemplate, тот же класс бага). Вместо формы —
+    # обычная кнопка + голый $.ajax GET, как у delete_in_place/
+    # checkbox_in_place в in_place_editing_helpers.rb.
+    <<~HTML
+      <button type="button" id="#{button_id}" class="button is-small is-warning is-light py-0 px-1"
+        title="Поле отредактировано вручную — защищено от force refresh шаблона. Клик снимет защиту.">🔒</button>
+      <script>
+        $(document).ready(function(){
+          $("##{button_id}").click(function(){
+            if (!confirm('Снять защиту с поля #{field}? Следующий force refresh шаблона сможет его перезаписать.')) return;
+            $.ajax({url: "/admin/pages/#{page.id}/unlock_field?field=#{field}", success: function(result){
+              $("##{button_id}").fadeOut(300);
+            }});
+          });
+        });
+      </script>
+    HTML
+  end
+
+  # Ссылка на форму редактирования объекта, к которому привязана
+  # detail-страница (Page#pageable) — у каждого pageable_type своя
+  # админка: у Entity есть отдельная edit_in_place-форма, у Item/Event —
+  # только обычный edit (свои edit_in_place для них ещё не делали).
+  # nil, если у страницы нет pageable (обычная/List-страница).
+  def pageable_edit_url(page)
+    return nil if page.pageable_id.blank?
+
+    case page.effective_pageable_type
+    when "Entity" then "/admin/entities/#{page.pageable_id}/edit_in_place"
+    when "Item" then "/admin/items/#{page.pageable_id}/edit"
+    when "Event" then "/admin/events/#{page.pageable_id}/edit"
+    end
   end
 
   private

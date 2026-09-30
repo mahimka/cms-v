@@ -1,0 +1,95 @@
+<%= erb :'/layout/_flash', views: settings.views_admin %>
+
+<p>
+  <form method="POST" action="/admin/lost_urls/import" style="display:inline;">
+    <button type="submit" class="button is-info" title="разобрать log/lost_urls.log и upsert в эту таблицу">Import from log file</button>
+  </form>
+</p>
+
+<form method="GET" action="/admin/lost_urls">
+
+<div class="columns mb-0 ">
+  <div class="column is-3">
+    <p class="help is-size-7 has-text-weight-bold mt-0">path_cont</p>
+    <%= input(:q, :path_cont, options = {class: 'input is-small', value: @q.path_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-2">
+    <p class="help is-size-7 has-text-weight-bold mt-0">referrer_cont</p>
+    <%= input(:q, :referrer_cont, options = {class: 'input is-small', value: @q.referrer_cont, placeholder: ""}) %>
+  </div>
+  <div class="column is-1">
+    <p class="help is-size-7 has-text-weight-bold mt-0">reviewed_eq</p>
+    <select name="q[reviewed_eq]" class="select input is-small">
+      <option value="">-</option>
+      <option value="false" <%= @q.reviewed_eq == false ? "selected" : "" %>>false</option>
+      <option value="true" <%= @q.reviewed_eq == true ? "selected" : "" %>>true</option>
+    </select>
+  </div>
+</div>
+
+<hr class="my-2">
+
+<div class="columns is-mobile is-variable is-1 mb-0 is-size-7">
+  <div class="column is-1">
+    <input type="submit" value="Filter" class="button is-warning">
+  </div>
+
+  <div class="column is-3">
+    <h6 class="title is-size-6 mt-2">Found/Total: <%= @lost_urls_found.size %> / <%= LostUrl.all.size %></h6>
+  </div>
+</div>
+
+<hr class="my-0">
+
+</form>
+
+<div class="content is-size-7">
+  <%= paginate(@lost_urls) %>
+</div>
+
+<div class="content">
+
+  <table class="table is-size-7">
+    <tr>
+      <td>path</td>
+      <td>hits</td>
+      <td>referrer</td>
+      <td>ip</td>
+      <td>first_seen_at</td>
+      <td>last_seen_at</td>
+      <td>reviewed</td>
+      <td></td>
+    </tr>
+
+  <% @lost_urls.each do |lost_url| %>
+
+    <tr>
+      <td><%= lost_url.path %></td>
+      <td><%= lost_url.hits_count %></td>
+      <td><%= lost_url.referrer %></td>
+      <td><%= lost_url.ip %></td>
+      <td><%= lost_url.first_seen_at %></td>
+      <td><%= lost_url.last_seen_at %></td>
+      <td><%= lost_url.reviewed %></td>
+      <td>
+        <a class="button is-small" target="_blank"
+           href="/admin/histories/new?history[old_uri]=<%= fast_escape_html(lost_url.path) %>">
+          Add History
+        </a>
+        <% unless lost_url.reviewed %>
+          <form method="POST" action="/admin/lost_urls/<%= lost_url.id %>/mark_reviewed" style="display:inline;">
+            <button type="submit" class="button is-small">Mark reviewed</button>
+          </form>
+        <% end %>
+        <form method="POST" action="/admin/lost_urls/<%= lost_url.id %>" style="display:inline;" onsubmit="return confirm('Delete?');">
+          <input type="hidden" name="_method" value="DELETE">
+          <button type="submit" class="button is-small is-danger is-light">Delete</button>
+        </form>
+      </td>
+    </tr>
+
+  <% end %>
+
+  </table>
+
+</div>

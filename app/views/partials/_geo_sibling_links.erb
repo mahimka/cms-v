@@ -1,0 +1,45 @@
+<%
+  # Ссылки на страницы geo-группы child_group, "дочерней" по смыслу
+  # текущей geo-странице (addressRegion для country, addressLocality для
+  # region) — НЕ через page.children (в этом проекте country/region/
+  # locality — плоская структура, не предки-потомки в дереве страниц),
+  # а через теги: какие ещё теги группы child_group встречаются у entity,
+  # уже помеченных текущим гео-тегом страницы (page.list_tag). Тот же
+  # приём, что PageTemplateGenerator#sibling_tags при генерации.
+  #
+  # page = page || @page, child_group — обязательный local (например
+  # "addressRegion"), anchor — имя поля/метода Page для текста ссылки
+  # (по умолчанию 'h1'; например 'anchor_1' — короткое имя места,
+  # "Tirol" вместо "Yoga in Tirol").
+  page = page || @page
+  anchor = anchor || 'h1'
+  current_tag = page.list_tag
+
+  child_pages = []
+  if current_tag
+    child_group_tag = Tag.find_by(name: child_group)
+    if child_group_tag
+      entity_ids = current_tag.taggings.where(taggable_type: 'Entity').select(:taggable_id)
+      child_tag_ids = Tag.joins(:taggings)
+        .where(taggings: { taggable_type: 'Entity', taggable_id: entity_ids })
+        .where(parent_id: child_group_tag.id)
+        .distinct
+        .pluck(:id)
+
+      # Один запрос на все child-страницы разом, а не find_by в цикле по
+      # тегам (было N+1 — см. #batch_counts_for ниже про ту же болезнь).
+      child_pages = Page.where(list_tag_id: child_tag_ids, published: true).to_a
+        .sort_by { |p| p.public_send(anchor).presence || p.h1.presence || p.title.to_s }
+    end
+  end
+
+  counts = Page.batch_list_objects_counts(child_pages)
+%>
+
+<% if child_pages.any? %>
+  <div class="field is-grouped is-grouped-multiline">
+    <% child_pages.each do |child_page| %>
+      <%= partial '_page_link_with_count', target: child_page, label: child_page.public_send(anchor).presence || child_page.h1.presence || child_page.title, count: counts[child_page.id] %>
+    <% end %>
+  </div>
+<% end %>

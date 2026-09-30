@@ -56,7 +56,7 @@
   </div>
 
   <div class="column is-9">
-    <% @venues_for_select = {"": ""}.merge(Entity.active.order(:name).to_h { |entity| [entity.id, entity.name] }) %>
+    <% @venues_for_select = {"": ""}.merge(Entity.generate_pages.order(:name).to_h { |entity| [entity.id, entity.name] }) %>
     <%= select(:event, :venue_id, @venues_for_select, options = {class: 'select input is-success', value: @event.venue_id}) %>
   </div>
 
@@ -115,12 +115,25 @@
 <div class="columns">
 
   <div class="column is-2">
-    <%= label(:event, :active, "active", options = {class: 'label'}) %>
+    <%= label(:event, :generate_pages, "generate_pages", options = {class: 'label'}) %>
   </div>
 
   <div class="column is-9">
-    <input type="hidden" name="event[active]" value="0">
-    <input type="checkbox" name="event[active]" value="1" <%= @event.active ? "checked" : "" %>>
+    <input type="hidden" name="event[generate_pages]" value="0">
+    <input type="checkbox" name="event[generate_pages]" value="1" <%= @event.generate_pages ? "checked" : "" %>>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:event, :is_closed, "is_closed", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="event[is_closed]" value="0">
+    <input type="checkbox" name="event[is_closed]" value="1" <%= @event.is_closed ? "checked" : "" %>>
   </div>
 
 </div>

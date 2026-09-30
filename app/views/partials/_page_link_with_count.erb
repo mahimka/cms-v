@@ -1,0 +1,33 @@
+<%
+  # Одна "таблетка" ссылки на страницу-список с визуально выделенным
+  # счётчиком объектов — общий кусок разметки для _facet_sibling_links,
+  # _geo_sibling_links и _page_children_links_by_group (там же и считается
+  # target.list_objects.count, здесь просто рендерится).
+  #
+  # target — обязательный local (Page), label — уже посчитанный текст
+  # ссылки (сам partial не решает, из какого поля его брать — anchor
+  # у каждого вызывающего partial свой), title — необязательный tooltip.
+  # count — необязательный local, посчитанный заранее ОДНИМ батч-запросом
+  # на весь список ссылок (Page.batch_list_objects_counts, см. вызывающие
+  # partial'ы) — раньше без него был N+1 (на каждую ссылку свой
+  # list_objects.count, на маленькой /philippines это давало 400+ SQL-
+  # запросов). Без count — фолбэк на поштучный count (партиал можно
+  # звать и вне списка), но вызывающие partial'ы всегда должны его давать.
+  #
+  # .control — обязательная обёртка: Bulma расставляет отступы/перенос
+  # строк между "таблетками" через .field.is-grouped.is-grouped-multiline
+  # > .control (см. вызывающие partial'ы), а не через .tags, как у
+  # обычного плоского списка .tag — .tags .tag-правила на вложенный
+  # .tags.has-addons не срабатывают (он сам не .tag), из-за чего
+  # последняя "таблетка" в строке съезжала ("уступ").
+  title_attr = defined?(title) && title.present? ? %( title="#{title}") : ''
+  object_count = defined?(count) && !count.nil? ? count : target.list_objects.count
+%>
+<div class="control">
+  <div class="tags has-addons">
+    <span class="tag is-light is-medium">
+      <a href="<%= target.uri %>"<%= title_attr %>><%= label %></a>
+    </span>
+    <span class="tag is-primary is-light is-medium"><%= object_count %></span>
+  </div>
+</div>

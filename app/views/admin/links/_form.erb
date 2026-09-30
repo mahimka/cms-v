@@ -80,12 +80,12 @@
 <div class="columns">
 
   <div class="column is-2">
-    <%= label(:link, :active, "active", options = {class: 'label'}) %>
+    <%= label(:link, :alive, "alive", options = {class: 'label'}) %>
   </div>
 
   <div class="column is-9">
-    <input type="hidden" name="link[active]" value="0">
-    <input type="checkbox" name="link[active]" value="1" <%= @link.active ? "checked" : "" %>>
+    <input type="hidden" name="link[alive]" value="0">
+    <input type="checkbox" name="link[alive]" value="1" <%= @link.alive ? "checked" : "" %>>
   </div>
 
 </div>
@@ -94,7 +94,7 @@
 
   <div class="column is-2">
     <%= label(:link, :response, "response", options = {class: 'label'}) %>
-    <p class="help">заполняется автоматической проверкой (пока — вручную)</p>
+    <p class="help">заполняется автоматически</p>
   </div>
 
   <div class="column is-9">
@@ -102,3 +102,33 @@
   </div>
 
 </div>
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :redirected, "redirected", options = {class: 'label'}) %>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="link[redirected]" value="0">
+    <input type="checkbox" name="link[redirected]" value="1" <%= @link.redirected ? "checked" : "" %>>
+  </div>
+
+</div>
+
+
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:link, :redirected_to, "redirected_to", options = {class: 'label'}) %>
+    <p class="help">заполняется автоматически</p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:link, :redirected_to, options = {class: 'input is-success', value: @link.redirected_to, placeholder: "url ....."}) %>
+  </div>
+
+</div>
+
+
+https://www.thesamamama.com/
