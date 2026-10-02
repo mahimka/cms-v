@@ -71,6 +71,34 @@
 #             (заполняются парсером) — тогда просто пусто, если_empty
 #             сработает только когда самого профиля с таким сайтом нет.
 #
+# Родитель (Entity#parent — например линия у судна). Те же два вида
+# плейсхолдеров, по одному правилу для каждого:
+#
+#   {parent.name}                — атрибут родителя
+#   {parent.details.passengers}  — detail родителя (как {details.email})
+#   {parent.page_url}            — uri master-страницы родителя ("" — если
+#                                  родителя или страницы у него нет)
+#   {parent.parent.name}         — родитель родителя; цепочку parent. можно
+#                                  повторять, но не глубже MAX_PARENT_DEPTH
+#   {page_url}                   — uri страницы самого объекта (то же, без parent.)
+#
+#   ["parent:link:website", col: "url", ...]
+#   ["parent:profile:cruisecritic.com", col: "rating", ...]
+#   ["parent:addressCountry", ...]
+#           — префикс "parent:" перед ЛЮБЫМ полным (в кавычках) блоком
+#             меняет источник на родителя, остальные опции (col/limit/
+#             delimiter/before/after/if_empty ...) работают как обычно.
+#             Префикс повторяется: "parent:parent:link:website". Нет
+#             родителя — выводится if_empty (по умолчанию пусто).
+#             Короткий синтаксис ([group.col]) для parent: не работает —
+#             там точка означает col, а не родителя (см. выше про link:/profile:).
+#
+# page_url берёт страницу, которая существует НА МОМЕНТ рендера (текст
+# сохраняется при генерации) — страницы родителя должны быть
+# сгенерированы раньше страниц потомков, иначе там будет пусто до
+# следующей генерации с force. При смене uri родителя старые ссылки
+# спасают редиректы из History.
+#
 # Блоки link:/profile: работают только когда pageable — Entity/Item/
 # Event (у Tag нет ни links, ни profiles) — иначе пусто (if_empty).
 #
@@ -90,6 +118,8 @@ class TemplateFieldRenderer
   TAG_FIELDS = %w[name slug short short_2 id].freeze
   LINK_FIELDS = %w[url].freeze
   PROFILE_FIELDS = %w[rating review_count url title h1 meta_description].freeze
+  PARENT_PREFIX = "parent:".freeze
+  MAX_PARENT_DEPTH = 5
 
   def initialize(pageable, extra_tags: [])
     @pageable = pageable
@@ -121,7 +151,7 @@ class TemplateFieldRenderer
 
     template.to_s.scan(TAG_BLOCK_RE) do |match|
       parsed = parse_tag_block(match[0])
-      return parsed[:group] if parsed
+      return parsed[:group] if parsed && !parsed[:group].start_with?(PARENT_PREFIX)
     end
 
     nil
@@ -141,7 +171,7 @@ class TemplateFieldRenderer
     template.to_s.scan(TAG_BLOCK_RE) do |match|
       parsed = parse_tag_block(match[0])
       next unless parsed
-      next if parsed[:group].start_with?("link:", "profile:")
+      next if parsed[:group].start_with?("link:", "profile:", PARENT_PREFIX)
 
       groups << parsed[:group]
     end
@@ -152,22 +182,80 @@ class TemplateFieldRenderer
   private
 
   def render_attribute(attr)
-    return render_detail(attr.sub("details.", "")) if attr.start_with?("details.")
+    target, rest = resolve_parent_chain(@pageable, attr)
+    return "" unless target
 
-    @pageable.respond_to?(attr) ? @pageable.public_send(attr).to_s : ""
+    if rest.start_with?("details.")
+      render_detail(target, rest.delete_prefix("details."))
+    elsif rest == "page_url"
+      render_page_url(target)
+    else
+      target.respond_to?(rest) ? target.public_send(rest).to_s : ""
+    end
+  end
+
+  # "parent.parent.name" -> [дедушка, "name"]; цепочка без родителя (или
+  # глубже MAX_PARENT_DEPTH) -> [nil, nil]. Путь без "parent." в начале
+  # возвращается как есть вместе с самим объектом.
+  def resolve_parent_chain(object, path)
+    depth = 0
+    while path.start_with?("parent.")
+      depth += 1
+      return [nil, nil] if depth > MAX_PARENT_DEPTH
+
+      object = object.respond_to?(:parent) ? object.parent : nil
+      return [nil, nil] unless object
+
+      path = path.delete_prefix("parent.")
+    end
+    [object, path]
   end
 
   # details — Hash {label.name => value} (см. Entity/Item/Event#details).
-  def render_detail(key)
-    return "" unless @pageable.respond_to?(:details)
+  def render_detail(target, key)
+    return "" unless target.respond_to?(:details)
 
-    @pageable.details[key].to_s
+    target.details[key].to_s
+  end
+
+  # Pageable#page — master-страница объекта; у Tag (и вообще у объектов
+  # без Pageable) страницы нет — пусто.
+  def render_page_url(target)
+    return "" unless target.respond_to?(:page)
+
+    target.page&.uri.to_s
   end
 
   def render_tag_block(content)
     parsed = self.class.parse_tag_block(content)
     return "[#{content}]" unless parsed # не похоже на наш формат — оставляем как в исходнике
 
+    return render_parent_block(parsed) if parsed[:group].start_with?(PARENT_PREFIX)
+
+    render_parsed_block(parsed)
+  end
+
+  # "parent:link:website" -> тот же блок ("link:website"), но источник —
+  # родитель (повторные "parent:" поднимаются выше). Нет родителя —
+  # if_empty, как у блока без значений.
+  def render_parent_block(parsed)
+    group = parsed[:group]
+    target = @pageable
+    depth = 0
+
+    while group.start_with?(PARENT_PREFIX)
+      group = group.delete_prefix(PARENT_PREFIX)
+      depth += 1
+      target = depth <= MAX_PARENT_DEPTH && target.respond_to?(:parent) ? target.parent : nil
+      return parsed[:if_empty].to_s unless target
+    end
+
+    self.class.new(target, extra_tags: @extra_tags).render_parsed_block(parsed.merge(group: group))
+  end
+
+  protected
+
+  def render_parsed_block(parsed)
     group = parsed[:group]
     items, fields, default_col =
       if group.start_with?("link:")
@@ -180,6 +268,8 @@ class TemplateFieldRenderer
 
     render_items(parsed, items, fields, default_col)
   end
+
+  private
 
   def render_items(parsed, items, fields, default_col)
     col = fields.include?(parsed[:col]) ? parsed[:col] : default_col
