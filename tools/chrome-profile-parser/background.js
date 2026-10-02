@@ -1,5 +1,4 @@
-importScripts('config.js'); // ENDPOINT_PROD / ENDPOINT_LOCAL — генерируется rake parser:extension из config/config.yml
-const API_KEY = 'prs_e64124a1c131393c88ef56bb5d84bd49'; // endpoint и ключ проверяются на сервере одинаково в обоих случаях (см. post '/api/parse' в app.rb, settings.api_key_for_parser)
+importScripts('config.js'); // ENDPOINT_PROD / ENDPOINT_LOCAL / API_KEY — генерируется rake parser:extension из config/config.yml и config/secret.yml (api_key_for_parser); сервер сверяет ключ в post '/api/parse' (app.rb, settings.api_key_for_parser)
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type !== 'PARSE_PROFILE') return;
