@@ -1,0 +1,3 @@
+# Генерируется rake parser:extension под конкретный сайт (domain/порт из config/config.yml)
+config.js
+manifest.json

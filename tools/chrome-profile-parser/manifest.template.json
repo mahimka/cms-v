@@ -1,20 +1,23 @@
 {
   "manifest_version": 3,
-  "name": "Diversorio Profile Parser",
+  "name": "Profile Parser",
   "version": "1.0",
   "description": "Sends the current page's HTML to the Sinatra /api/parse endpoint when the URL ends with #p, #p_html, #p_L or #p_L_html (or ?parse_profile=true).",
-  "permissions": ["webNavigation"],
-  "host_permissions": [
-    "http://127.0.0.1:9292/*",
-    "https://diversorio.com/*"
+  "permissions": [
+    "webNavigation"
   ],
+  "host_permissions": [],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ]

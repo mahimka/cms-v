@@ -1,5 +1,4 @@
-const ENDPOINT_PROD = 'https://diversorio.com/api/parse';
-const ENDPOINT_LOCAL = 'http://127.0.0.1:9292/api/parse'; // тоже в host_permissions manifest.json
+importScripts('config.js'); // ENDPOINT_PROD / ENDPOINT_LOCAL — генерируется rake parser:extension из config/config.yml
 const API_KEY = 'prs_e64124a1c131393c88ef56bb5d84bd49'; // endpoint и ключ проверяются на сервере одинаково в обоих случаях (см. post '/api/parse' в app.rb, settings.api_key_for_parser)
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

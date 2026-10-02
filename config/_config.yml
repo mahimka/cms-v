@@ -34,3 +34,7 @@ rss_ad_item_description:
 
 # # on updates
 # activate_new_objects: true
+
+# chrome-расширение tools/chrome-profile-parser (rake parser:extension):
+# домен берётся из domain выше, локальный порт — отсюда (по умолчанию 4567; 9292 для rackup)
+# parser_local_port: 4567
