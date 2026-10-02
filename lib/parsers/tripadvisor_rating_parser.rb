@@ -9,7 +9,7 @@ require_relative 'tripadvisor_shared'
 # по схеме заведения (rake snap_shots:parse_tripadvisor_restaurants/_hotels,
 # см. tasks/parse_profiles.rake) — не нужны при каждой периодической сверке
 # рейтинга.
-#
+
 # aggregateRating в JSON-LD одинаков для FoodEstablishment и
 # LodgingBusiness — этому парсеру, в отличие от тяжёлых, схема заведения не
 # нужна вообще, поэтому он один на весь tripadvisor.com (см.
