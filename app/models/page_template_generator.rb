@@ -40,6 +40,10 @@
 # parent_page_id дочернего template'а при этом игнорируется — родитель
 # всегда конкретная facet-страница, вычисленная для каждой группы отдельно.
 #
+# slug вложенного List без тег-блока (просто слова, "parking") — по одной
+# странице с этим slug под каждой страницей родительского template'а:
+# /ankaran/parking, /piran/parking. Поля рендерятся с тегом родителя.
+#
 # Каждая List-страница запоминает свой группирующий тег в
 # Page#list_tag_id. Это даёт вложенным child-template'ам доступ к
 # тегам ВСЕХ facet-предков (не только своей группы) — например
@@ -104,12 +108,24 @@ class PageTemplateGenerator
   def run_list(force)
     results = { created: [], updated: [], skipped: [] }
     list_targets.each do |parent_for_group, objects_scope|
-      group_tags(objects_scope).each do |tag|
+      list_group_tags(parent_for_group, objects_scope).each do |tag|
         page, status = ensure_list_page(tag, parent_for_group, objects_scope, force)
         results[status] << page
       end
     end
     results
+  end
+
+  # Группа тегов не задана в slug (slug — просто слова, например "parking"),
+  # а template вложенный: вместо по странице на значение группы делаем ОДНУ
+  # страницу на каждую родительскую — с тегом родителя в роли группирующего
+  # (/ankaran -> /ankaran/parking). Без вложенности такой slug по-прежнему
+  # ничего не создаёт — не из чего различать страницы.
+  def list_group_tags(parent_for_group, objects_scope)
+    return group_tags(objects_scope) if list_group.present?
+    return [] unless nested? && parent_for_group.list_tag_id.present?
+
+    Tag.where(id: parent_for_group.list_tag_id)
   end
 
   def nested?
