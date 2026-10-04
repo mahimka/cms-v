@@ -4,20 +4,6 @@
 # конвенция: ищем существующую через object.page). slug/title/...
 # рендерятся TemplateFieldRenderer, привязанным к самому объекту.
 #
-# "Profile" с page_uri (PageTemplate#path_mode?) — страница по ПОЛНОМУ пути,
-# например "/[addressLocality.slug]/beaches/{name}": каждый сегмент
-# рендерится TemplateFieldRenderer'ом ОТДЕЛЬНО (слэш внутри {name} не
-# расщепит путь) и прогоняется через SlugGenerator. Последний сегмент —
-# slug страницы, остальные — путь к уже существующей родительской странице:
-# идём от корня языка вниз и на каждом уровне ищем ребёнка по Page#slug
-# (а не по uri — он может быть с любым префиксом). Неважно, как создан
-# родитель: вручную, List-шаблоном или Profile-шаблоном. Нет родителя /
-# пустой сегмент (у объекта нет тега группы) — страница НЕ создаётся,
-# объект попадает в results[:failed] с причиной. parent_page_id и slug
-# самого template'а в этом режиме не используются. Уже существующая
-# страница и без force переезжает под нового родителя (объект сменил
-# город) — Page сам каскадит uri потомков и пишет History.
-#
 # "List" — не по одной странице на объект, а по одной странице на
 # КАЖДОЕ РАЗЛИЧНОЕ значение группы тегов, встреченное среди объектов
 # выборки (та же выборка, что у Profile — см. #matching_objects; группа
@@ -57,24 +43,6 @@
 # slug вложенного List без тег-блока (просто слова, "parking") — по одной
 # странице с этим slug под каждой страницей родительского template'а:
 # /ankaran/parking, /piran/parking. Поля рендерятся с тегом родителя.
-#
-# only_marked_tags (чекбокс в форме) — страницы "на значение группы" создаются
-# только для тегов с tags.generate_pages: осознанный выбор, какие значения
-# группы (например какие addressLocality) получают страницу. Выключено — как
-# раньше, для каждого встреченного значения. На подчинённый List с slug-словом
-# (страница на каждую родительскую) не влияет — там решение принято на
-# уровне родителя.
-#
-# Вложенный List может быть подчинён и Profile-шаблону (PageTemplate#
-# parent_tag_group): страницы Profile (города Ankaran, Izola...) — это
-# страницы объектов, у них нет Page#list_tag_id, поэтому тег для каждой
-# берём так: Tag из группы parent_tag_group (например "addressLocality") с
-# Tag#slug == Page#slug страницы-родителя. Нет такого тега — страница
-# пропускается, причина в results[:failed]. Дальше тег родителя играет роль
-# группирующего (как при slug без тег-блока), а в conditions автоматически
-# AND'ится slug этого тега. Список объектов для такого родителя НЕ требует,
-# чтобы у объектов уже были опубликованные страницы (иначе /izola/beaches
-# не создать раньше самих пляжей) — достаточно generate_pages.
 #
 # Каждая List-страница запоминает свой группирующий тег в
 # Page#list_tag_id. Это даёт вложенным child-template'ам доступ к
@@ -117,39 +85,31 @@ class PageTemplateGenerator
     block_1 block_2 block_3 block_4 block_5 block_6
   ].freeze
 
-  # Возвращает {created: [...], updated: [...], skipped: [...], failed: [...]}.
-  # failed — [{object:, reason:}], только режим "по пути" (page_uri): объекты,
-  # для которых страницу не удалось построить (нет родителя, нет тега).
+  # Возвращает {created: [...], updated: [...], skipped: [...]}.
   def run(force: false)
     case @page_template.template_type
     when "Profile" then run_profile(force)
     when "List" then run_list(force)
-    else { created: [], updated: [], skipped: [], failed: [] }
+    else { created: [], updated: [], skipped: [] }
     end
   end
 
   private
 
   def run_profile(force)
-    results = { created: [], updated: [], skipped: [], failed: [] }
+    results = { created: [], updated: [], skipped: [] }
     matching_objects.find_each do |object|
-      if @page_template.path_mode?
-        page, status = ensure_page_by_path(object, force)
-        status == :failed ? results[:failed] << { object: object, reason: page } : results[status] << page
-      else
-        page, status = ensure_page(object, force)
-        results[status] << page
-      end
+      page, status = ensure_page(object, force)
+      results[status] << page
     end
     results
   end
 
   def run_list(force)
-    results = { created: [], updated: [], skipped: [], failed: [] }
-    @failures = results[:failed]
-    list_targets.each do |parent_for_group, objects_scope, parent_tag|
-      list_group_tags(parent_for_group, objects_scope, parent_tag).each do |tag|
-        page, status = ensure_list_page(tag, parent_for_group, objects_scope, force, parent_tag)
+    results = { created: [], updated: [], skipped: [] }
+    list_targets.each do |parent_for_group, objects_scope|
+      list_group_tags(parent_for_group, objects_scope).each do |tag|
+        page, status = ensure_list_page(tag, parent_for_group, objects_scope, force)
         results[status] << page
       end
     end
@@ -161,17 +121,15 @@ class PageTemplateGenerator
   # страницу на каждую родительскую — с тегом родителя в роли группирующего
   # (/ankaran -> /ankaran/parking). Без вложенности такой slug по-прежнему
   # ничего не создаёт — не из чего различать страницы.
-  def list_group_tags(parent_for_group, objects_scope, parent_tag = nil)
+  def list_group_tags(parent_for_group, objects_scope)
     return group_tags(objects_scope) if list_group.present?
-    return [] unless nested?
-    return Tag.where(id: parent_tag.id) if parent_tag
-    return [] if parent_for_group.list_tag_id.blank?
+    return [] unless nested? && parent_for_group.list_tag_id.present?
 
     Tag.where(id: parent_for_group.list_tag_id)
   end
 
   def nested?
-    @page_template.parent_template.present?
+    @page_template.parent_template.present? && @page_template.parent_template.template_type == "List"
   end
 
   # [[parent_page, objects_scope], ...] — на каждый элемент одна пачка
@@ -193,7 +151,6 @@ class PageTemplateGenerator
   # схеме (их в реальных данных сейчас нет).
   def list_targets
     return [[parent_page, matching_objects]] unless nested?
-    return profile_parent_targets if @page_template.parent_template.template_type == "Profile"
 
     klass = @page_template.pageable_type.to_s.constantize
     parent_pages = Page.where(template_id: @page_template.parent_template_id).to_a
@@ -235,34 +192,6 @@ class PageTemplateGenerator
     end
 
     targets
-  end
-
-  # Родитель — Profile-шаблон: [[страница_родителя, объекты_с_его_тегом, тег], ...].
-  # См. class-comment. Тег — в группе parent_tag_group по slug страницы.
-  def profile_parent_targets
-    klass = @page_template.pageable_type.to_s.constantize
-    group = @page_template.parent_tag_group
-
-    Page.where(template_id: @page_template.parent_template_id).order(:id).filter_map do |parent|
-      tag = parent_page_tag(group, parent)
-      unless tag
-        @failures << { object: parent, reason: "#{parent.uri}: нет тега «#{parent.slug}» (по slug или name) в группе #{group}" }
-        next
-      end
-
-      ids = Tagging.where(tag_id: tag.id, taggable_type: klass.name, taggable_id: matching_objects.select(:id)).pluck(:taggable_id)
-      next if ids.empty?
-
-      [parent, klass.where(id: ids), tag]
-    end
-  end
-
-  # Тег страницы-родителя: по Tag#slug, а если у тега slug ещё не заведён
-  # (бывает у тегов без sync с geonames) — по slug от name, так же как
-  # TagExpression откатывается с slug на name.
-  def parent_page_tag(group, parent)
-    tags = Tag.joins(:parent).where(parent: { name: group })
-    tags.find_by(slug: parent.slug) || tags.detect { |tag| SlugGenerator.call(tag.name) == parent.slug }
   end
 
   def matching_objects
@@ -317,66 +246,6 @@ class PageTemplateGenerator
     save_page(existing, attrs, force, object)
   end
 
-  # Profile в режиме page_uri (см. class-comment). Возвращает [page, status]
-  # или [причина_строкой, :failed].
-  def ensure_page_by_path(object, force)
-    renderer = TemplateFieldRenderer.new(object)
-    segments = path_segments(@page_template.page_uri).map { |segment| SlugGenerator.call(renderer.render(segment)) }
-    label = "#{object.class.name} ##{object.id} #{object.try(:name)}".strip
-    path = "/" + segments.join("/")
-
-    return ["#{label}: пустой сегмент в #{path} (у объекта нет нужного тега?)", :failed] if segments.size < 2 || segments.any?(&:blank?)
-
-    parent = find_parent_by_slugs(segments[0...-1])
-    return ["#{label}: нет страницы-родителя для #{path}", :failed] unless parent
-
-    existing = object.respond_to?(:page) ? object.page : nil
-
-    if existing && !force
-      return [existing, :skipped] if existing.parent == parent
-
-      existing.update!(parent: parent)
-      return [existing, :updated]
-    end
-
-    attrs = base_attrs(renderer, parent, slug: segments.last).merge(
-      pageable_type: @page_template.pageable_type,
-      pageable_id: object.id
-    )
-    save_page(existing, attrs, force, object)
-  rescue ActiveRecord::RecordInvalid => e
-    ["#{label}: #{e.message}", :failed]
-  end
-
-  # "/[addressLocality.slug]/beaches/{name}" -> ["[addressLocality.slug]", "beaches", "{name}"].
-  # Делим по "/" только вне [...] и {...}.
-  def path_segments(template)
-    segments = [+""]
-    depth = 0
-    template.to_s.sub(%r{\A/}, "").each_char do |char|
-      depth += 1 if char == "[" || char == "{"
-      depth -= 1 if (char == "]" || char == "}") && depth.positive?
-      if char == "/" && depth.zero?
-        segments << +""
-      else
-        segments.last << char
-      end
-    end
-    segments
-  end
-
-  # От корня языка template вниз по Page#slug. Корень "/" — master без
-  # ancestry; дети ищутся по child_ancestry (как в #ensure_list_page).
-  def find_parent_by_slugs(slugs)
-    node = Page.masters.roots.find_by(lang: @page_template.lang)
-    slugs.each do |slug|
-      return nil unless node
-
-      node = Page.find_by(ancestry: node.child_ancestry, slug: slug)
-    end
-    node
-  end
-
   # Группа тегов, по которой строится List — берётся из первого
   # тег-блока в slug (см. class-comment). Без неё List строить не из
   # чего — каждая "страница" схлопнулась бы в одну без явного различия.
@@ -396,14 +265,12 @@ class PageTemplateGenerator
       .joins(:parent, :taggings)
       .where(parent: { name: group })
       .where(taggings: { taggable_type: klass.name, taggable_id: objects_scope.select(:id) })
-      .merge(@page_template.only_marked_tags? ? Tag.where(generate_pages: true) : Tag.all)
       .distinct
       .order(:position, :name)
   end
 
-  def ensure_list_page(tag, parent_for_group, objects_scope, force, parent_tag = nil)
+  def ensure_list_page(tag, parent_for_group, objects_scope, force)
     extra = ancestor_tags(parent_for_group) + sibling_tags(tag, objects_scope)
-    extra << parent_tag if parent_tag && parent_tag != tag
     renderer = TemplateFieldRenderer.new(tag, extra_tags: extra)
     slug = SlugGenerator.call(renderer.render(@page_template.slug))
 
@@ -420,7 +287,7 @@ class PageTemplateGenerator
     attrs = base_attrs(renderer, parent_for_group).merge(
       slug: slug,
       list_tag_id: tag.id,
-      conditions: conditions_hash(renderer, parent_for_group, parent_tag)
+      conditions: conditions_hash(renderer, parent_for_group)
     )
 
     save_page(existing, attrs, force, tag)
@@ -476,16 +343,9 @@ class PageTemplateGenerator
   # AND'ится с "tags" родительской facet-страницы: без этого не выразить
   # "то же, что у родителя" в статичном тексте поля — у каждой группы
   # родителя (egypt/oman/...) свой тег, а шаблон один на все.
-  def conditions_hash(renderer, parent_for_group, parent_tag = nil)
+  def conditions_hash(renderer, parent_for_group)
     own_tags = parse_ast(renderer.render(@page_template.conditions))
-    # Profile-родитель: у его страницы нет своих conditions — "родительский" тег это parent_tag
-    tags =
-      if !nested?
-        own_tags
-      else
-        parent_tags = parent_tag ? (parent_tag.slug.presence || parent_tag.name) : parent_for_group.effective_conditions["tags"]
-        combine_tags(parent_tags, own_tags)
-      end
+    tags = nested? ? combine_tags(parent_for_group.effective_conditions["tags"], own_tags) : own_tags
 
     hash = { "object" => @page_template.pageable_type, "tags" => tags }
     hash["schema"] = [@page_template.filter_schema.name] if @page_template.schema_id.present?
@@ -499,11 +359,11 @@ class PageTemplateGenerator
     ["and", parent_tags, own_tags]
   end
 
-  def base_attrs(renderer, parent, slug: nil)
+  def base_attrs(renderer, parent)
     attrs = {
       lang: @page_template.lang,
       parent: parent,
-      slug: slug || SlugGenerator.call(renderer.render(@page_template.slug)),
+      slug: SlugGenerator.call(renderer.render(@page_template.slug)),
       template_id: @page_template.id,
       view: @page_template.view,
       layout: @page_template.layout

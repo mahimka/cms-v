@@ -5,7 +5,7 @@ class TagsController < App
   # из файла). translations/icon_svg — как у LABEL_IMPORT_FIELDS
   # (см. labels_controller.rb), чтобы экспорт/импорт между проектами
   # переносил переводы и иконки, а не только базовые поля.
-  TAG_IMPORT_FIELDS = %w[active short short_2 admin_notes fixed generate_pages position translations icon_svg].freeze
+  TAG_IMPORT_FIELDS = %w[active short short_2 admin_notes fixed position translations icon_svg].freeze
 
   # Гео-группы (geo:tag_from_ads) — на порядок больше тегов, чем все
   # остальные группы вместе (2800+ ads-тегов против ~120 topical), из-за

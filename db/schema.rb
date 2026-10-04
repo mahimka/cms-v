@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_10_04_130000) do
+ActiveRecord::Schema.define(version: 2026_09_25_121000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -194,9 +194,6 @@ ActiveRecord::Schema.define(version: 2026_10_04_130000) do
     t.integer "schema_id"
     t.integer "parent_template_id"
     t.boolean "active", default: false
-    t.string "page_uri"
-    t.string "parent_tag_group"
-    t.boolean "only_marked_tags", default: false
   end
 
   create_table "pages", force: :cascade do |t|
@@ -399,7 +396,6 @@ ActiveRecord::Schema.define(version: 2026_10_04_130000) do
     t.string "table"
     t.integer "table_id"
     t.integer "geonames_id"
-    t.boolean "generate_pages", default: false
     t.index ["geonames_id"], name: "index_tags_on_geonames_id"
     t.index ["parent_id"], name: "index_tags_on_parent_id"
     t.index ["slug"], name: "index_tags_on_slug", unique: true
