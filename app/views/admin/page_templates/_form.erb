@@ -49,6 +49,19 @@
 
 </div>
 
+<div data-for-type="Profile" class="notification is-light py-2 px-3 mb-4">
+  <b>Profile</b> — страница на каждый объект выборки (pageable_type + template_conditions + schema_id).
+  Адрес задаётся одним из способов: <code>parent_page_id</code> + <code>slug</code> (все под одним родителем) или
+  <code>page_uri</code> — полный путь, например <code>/[addressLocality.slug]/beaches/{name}</code>
+  (родитель — уже существующая страница <code>/ankaran/beaches</code>, ищется от корня по slug).
+</div>
+<div data-for-type="List" class="notification is-light py-2 px-3 mb-4">
+  <b>List</b> — страница-список, а не страница объекта. По одной на значение группы тегов
+  (<code>slug</code> = <code>[addressLocality.slug]</code>) или, для подчинённого template'а, по одной под каждой
+  страницей родителя (<code>slug</code> = <code>beaches</code> → <code>/ankaran/beaches</code>).
+  Что показывает список — <code>conditions</code> + pageable_type/schema_id.
+</div>
+
 <div class="columns">
 
   <div class="column is-2">
@@ -95,8 +108,9 @@
     @nesting_parent_pages = @nesting_parent_template ? Page.where(template_id: @nesting_parent_template.id).order(:uri) : Page.none
   %>
   <div class="notification is-info is-light py-2 px-3 mb-4">
-    Вложенный template — facet-страницы создаются ПОД КАЖДОЙ страницей родительского template'а
-    #<%= @nesting_parent_template&.id %>, slug: <code><%= @nesting_parent_template&.slug %></code>.
+    Вложенный template — страницы создаются ПОД КАЖДОЙ страницей родительского <%= @nesting_parent_template&.template_type %>-template'а
+    #<%= @nesting_parent_template&.id %>, <%= @nesting_parent_template&.template_type == "Profile" ? "page_uri" : "slug" %>:
+    <code><%= @nesting_parent_template&.template_type == "Profile" ? (@nesting_parent_template.page_uri.presence || @nesting_parent_template.slug) : @nesting_parent_template&.slug %></code>.
     <% if @nesting_parent_pages.any? %>
       Уже создано (<%= @nesting_parent_pages.size %>), например:
       <%= @nesting_parent_pages.first(5).map(&:uri).join(", ") %><%= @nesting_parent_pages.size > 5 ? ", ..." : "" %>.
@@ -134,14 +148,21 @@
 
   <div class="column is-2">
     <%= label(:page_template, :parent_template_id, "parent_template_id", options = {class: 'label'}) %>
-    <p class="help">только для List — если задан, страницы генерируются ПОД КАЖДОЙ страницей выбранного (тоже List) template'а вместо parent_page_id (тот тогда игнорируется). Пусто — обычный List/Profile с одним общим parent_page_id</p>
+    <p class="help">
+      только для List. Если задан — страницы создаются ПОД КАЖДОЙ страницей выбранного template'а, а не под одной
+      parent_page_id (она тогда игнорируется).<br>
+      • родитель <b>List</b> — под каждой его страницей (по её тегу);<br>
+      • родитель <b>Profile</b> — под каждой страницей объекта (например город Ankaran → <code>/ankaran/beaches</code>);
+      тег родителя ищется в группе из поля ниже.<br>
+      Пусто — обычный List под parent_page_id.
+    </p>
   </div>
 
   <div class="column is-9">
     <%
       @parent_templates_for_select = {"": ""}.merge(
-        PageTemplate.where(template_type: "List").where.not(id: @page_template.id).order(:id)
-          .to_h { |template| [template.id.to_s, "##{template.id} — #{template.title.presence || template.slug}"] }
+        PageTemplate.where(template_type: %w[List Profile]).where.not(id: @page_template.id).order(:id)
+          .to_h { |template| [template.id.to_s, "##{template.id} [#{template.template_type}] — #{template.title.presence || template.page_uri.presence || template.slug}"] }
       )
     %>
     <%= select(:page_template, :parent_template_id, @parent_templates_for_select, options = {class: 'select input is-success', value: @page_template.parent_template_id.to_s}) %>
@@ -149,6 +170,30 @@
 
 </div>
 
+</div>
+
+<div data-for-type="List">
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :parent_tag_group, "parent_tag_group", options = {class: 'label'}) %>
+    <p class="help">
+      обязательно, если родитель — Profile. Группа тегов, в которой лежит тег страницы-родителя, например
+      <code>addressLocality</code>: тег ищется по совпадению slug (или имени) тега со slug страницы-родителя
+      (страница Ankaran со slug <code>ankaran</code> → тег Ankaran). Нет такого тега — страница не создаётся,
+      причина покажется после генерации. Этот тег потом становится «группирующим» тегом новой страницы и
+      автоматически попадает в её conditions.
+    </p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:page_template, :parent_tag_group, options = {class: 'input is-success', value: @page_template.parent_tag_group, placeholder: "addressLocality", list: "tag-groups"}) %>
+    <datalist id="tag-groups">
+      <% Tag.parenttags.order(:name).pluck(:name).each do |group_name| %><option value="<%= group_name %>"><% end %>
+    </datalist>
+  </div>
+
+</div>
 </div>
 
 <div data-for-type="Profile">
@@ -175,6 +220,12 @@
 
   <div class="column is-2">
     <%= label(:page_template, :slug, "slug", options = {class: 'label'}) %>
+    <p class="help">
+      <b>Profile</b>: slug страницы объекта, обычно <code>{name}</code> (игнорируется, если задан page_uri).<br>
+      <b>List</b>: плейсхолдер группы, например <code>[addressLocality.slug]</code> — по странице на каждое значение группы;
+      либо <b>просто слово</b> (<code>beaches</code>) — одна страница под каждой страницей родителя, только для
+      подчинённого template'а (parent_template_id).
+    </p>
   </div>
 
   <div class="column is-9">

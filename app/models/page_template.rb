@@ -7,9 +7,8 @@ class PageTemplate < ActiveRecord::Base
   # Вложенный List (см. PageTemplateGenerator class-comment): facet-
   # страницы этого template'а генерируются ПОД КАЖДОЙ страницей
   # parent_template, а не под одним статичным parent_page (тот тогда
-  # игнорируется). Родитель обязательно тоже "List" — у не-List
-  # template'а сгенерированные страницы не Page#list_objects-совместимы
-  # (нет conditions), вкладываться под них нечем.
+  # игнорируется). Родитель — "List" или "Profile" (во втором случае
+  # нужен parent_tag_group, см. валидацию ниже).
   belongs_to :parent_template, class_name: "PageTemplate", optional: true
   has_many :child_templates, class_name: "PageTemplate", foreign_key: :parent_template_id, dependent: :nullify
 
@@ -83,10 +82,15 @@ class PageTemplate < ActiveRecord::Base
     errors.add(:page_uri, "должен начинаться с / и содержать минимум 2 сегмента, например /[addressLocality.slug]/beaches/{name}") unless page_uri.match?(%r{\A/[^/]+/[^/]}) 
   end
 
+  # Родитель — List (facet-страницы под каждой его страницей, по list_tag_id)
+  # или Profile (страницы объектов, например города: List "beaches" под каждой
+  # из них; тег родителя ищется в группе parent_tag_group по slug страницы).
   def parent_template_must_be_list_and_not_self
     return if parent_template.blank?
 
     errors.add(:parent_template, "не может быть самим этим template") if parent_template_id == id
-    errors.add(:parent_template, "должен быть типа List") unless parent_template.template_type == "List"
+    errors.add(:template_type, "— подчинять другому template можно только List") unless template_type == "List"
+    errors.add(:parent_template, "должен быть типа List или Profile") unless %w[List Profile].include?(parent_template.template_type)
+    errors.add(:parent_tag_group, "обязательна, если родитель — Profile (в какой группе тегов искать тег страницы-родителя)") if parent_template.template_type == "Profile" && parent_tag_group.blank?
   end
 end

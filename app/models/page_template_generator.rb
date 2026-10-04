@@ -58,6 +58,17 @@
 # странице с этим slug под каждой страницей родительского template'а:
 # /ankaran/parking, /piran/parking. Поля рендерятся с тегом родителя.
 #
+# Вложенный List может быть подчинён и Profile-шаблону (PageTemplate#
+# parent_tag_group): страницы Profile (города Ankaran, Izola...) — это
+# страницы объектов, у них нет Page#list_tag_id, поэтому тег для каждой
+# берём так: Tag из группы parent_tag_group (например "addressLocality") с
+# Tag#slug == Page#slug страницы-родителя. Нет такого тега — страница
+# пропускается, причина в results[:failed]. Дальше тег родителя играет роль
+# группирующего (как при slug без тег-блока), а в conditions автоматически
+# AND'ится slug этого тега. Список объектов для такого родителя НЕ требует,
+# чтобы у объектов уже были опубликованные страницы (иначе /izola/beaches
+# не создать раньше самих пляжей) — достаточно generate_pages.
+#
 # Каждая List-страница запоминает свой группирующий тег в
 # Page#list_tag_id. Это даёт вложенным child-template'ам доступ к
 # тегам ВСЕХ facet-предков (не только своей группы) — например
@@ -128,9 +139,10 @@ class PageTemplateGenerator
 
   def run_list(force)
     results = { created: [], updated: [], skipped: [], failed: [] }
-    list_targets.each do |parent_for_group, objects_scope|
-      list_group_tags(parent_for_group, objects_scope).each do |tag|
-        page, status = ensure_list_page(tag, parent_for_group, objects_scope, force)
+    @failures = results[:failed]
+    list_targets.each do |parent_for_group, objects_scope, parent_tag|
+      list_group_tags(parent_for_group, objects_scope, parent_tag).each do |tag|
+        page, status = ensure_list_page(tag, parent_for_group, objects_scope, force, parent_tag)
         results[status] << page
       end
     end
@@ -142,15 +154,17 @@ class PageTemplateGenerator
   # страницу на каждую родительскую — с тегом родителя в роли группирующего
   # (/ankaran -> /ankaran/parking). Без вложенности такой slug по-прежнему
   # ничего не создаёт — не из чего различать страницы.
-  def list_group_tags(parent_for_group, objects_scope)
+  def list_group_tags(parent_for_group, objects_scope, parent_tag = nil)
     return group_tags(objects_scope) if list_group.present?
-    return [] unless nested? && parent_for_group.list_tag_id.present?
+    return [] unless nested?
+    return Tag.where(id: parent_tag.id) if parent_tag
+    return [] if parent_for_group.list_tag_id.blank?
 
     Tag.where(id: parent_for_group.list_tag_id)
   end
 
   def nested?
-    @page_template.parent_template.present? && @page_template.parent_template.template_type == "List"
+    @page_template.parent_template.present?
   end
 
   # [[parent_page, objects_scope], ...] — на каждый элемент одна пачка
@@ -172,6 +186,7 @@ class PageTemplateGenerator
   # схеме (их в реальных данных сейчас нет).
   def list_targets
     return [[parent_page, matching_objects]] unless nested?
+    return profile_parent_targets if @page_template.parent_template.template_type == "Profile"
 
     klass = @page_template.pageable_type.to_s.constantize
     parent_pages = Page.where(template_id: @page_template.parent_template_id).to_a
@@ -213,6 +228,34 @@ class PageTemplateGenerator
     end
 
     targets
+  end
+
+  # Родитель — Profile-шаблон: [[страница_родителя, объекты_с_его_тегом, тег], ...].
+  # См. class-comment. Тег — в группе parent_tag_group по slug страницы.
+  def profile_parent_targets
+    klass = @page_template.pageable_type.to_s.constantize
+    group = @page_template.parent_tag_group
+
+    Page.where(template_id: @page_template.parent_template_id).order(:id).filter_map do |parent|
+      tag = parent_page_tag(group, parent)
+      unless tag
+        @failures << { object: parent, reason: "#{parent.uri}: нет тега «#{parent.slug}» (по slug или name) в группе #{group}" }
+        next
+      end
+
+      ids = Tagging.where(tag_id: tag.id, taggable_type: klass.name, taggable_id: matching_objects.select(:id)).pluck(:taggable_id)
+      next if ids.empty?
+
+      [parent, klass.where(id: ids), tag]
+    end
+  end
+
+  # Тег страницы-родителя: по Tag#slug, а если у тега slug ещё не заведён
+  # (бывает у тегов без sync с geonames) — по slug от name, так же как
+  # TagExpression откатывается с slug на name.
+  def parent_page_tag(group, parent)
+    tags = Tag.joins(:parent).where(parent: { name: group })
+    tags.find_by(slug: parent.slug) || tags.detect { |tag| SlugGenerator.call(tag.name) == parent.slug }
   end
 
   def matching_objects
@@ -350,8 +393,9 @@ class PageTemplateGenerator
       .order(:position, :name)
   end
 
-  def ensure_list_page(tag, parent_for_group, objects_scope, force)
+  def ensure_list_page(tag, parent_for_group, objects_scope, force, parent_tag = nil)
     extra = ancestor_tags(parent_for_group) + sibling_tags(tag, objects_scope)
+    extra << parent_tag if parent_tag && parent_tag != tag
     renderer = TemplateFieldRenderer.new(tag, extra_tags: extra)
     slug = SlugGenerator.call(renderer.render(@page_template.slug))
 
@@ -368,7 +412,7 @@ class PageTemplateGenerator
     attrs = base_attrs(renderer, parent_for_group).merge(
       slug: slug,
       list_tag_id: tag.id,
-      conditions: conditions_hash(renderer, parent_for_group)
+      conditions: conditions_hash(renderer, parent_for_group, parent_tag)
     )
 
     save_page(existing, attrs, force, tag)
@@ -424,9 +468,11 @@ class PageTemplateGenerator
   # AND'ится с "tags" родительской facet-страницы: без этого не выразить
   # "то же, что у родителя" в статичном тексте поля — у каждой группы
   # родителя (egypt/oman/...) свой тег, а шаблон один на все.
-  def conditions_hash(renderer, parent_for_group)
+  def conditions_hash(renderer, parent_for_group, parent_tag = nil)
     own_tags = parse_ast(renderer.render(@page_template.conditions))
-    tags = nested? ? combine_tags(parent_for_group.effective_conditions["tags"], own_tags) : own_tags
+    # Profile-родитель: у его страницы нет своих conditions — "родительский" тег это parent_tag
+    parent_tags = parent_tag ? (parent_tag.slug.presence || parent_tag.name) : parent_for_group.effective_conditions["tags"]
+    tags = nested? ? combine_tags(parent_tags, own_tags) : own_tags
 
     hash = { "object" => @page_template.pageable_type, "tags" => tags }
     hash["schema"] = [@page_template.filter_schema.name] if @page_template.schema_id.present?
