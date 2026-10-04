@@ -196,6 +196,30 @@
 </div>
 </div>
 
+<div data-for-type="List">
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :only_marked_tags, "only_marked_tags", options = {class: 'label'}) %>
+    <p class="help">
+      Для slug с группой тегов (<code>[addressLocality.slug]</code>): создавать страницы только для тегов, у которых
+      включён <code>generate_pages</code> (чекбокс <b>gp</b> в /admin/tags). Так вы сами решаете, какие значения группы
+      получают страницу. Выключено — страница на каждое значение, встреченное у объектов. На шаблон со slug-словом
+      (<code>beaches</code>) под родителем не влияет.
+    </p>
+  </div>
+
+  <div class="column is-9">
+    <label class="checkbox">
+      <input type="hidden" name="page_template[only_marked_tags]" value="0">
+      <input type="checkbox" name="page_template[only_marked_tags]" value="1" <%= @page_template.only_marked_tags ? "checked" : "" %>>
+      только теги с generate_pages
+    </label>
+  </div>
+
+</div>
+</div>
+
 <div data-for-type="Profile">
 <div class="columns">
 

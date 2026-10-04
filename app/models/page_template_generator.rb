@@ -58,6 +58,13 @@
 # странице с этим slug под каждой страницей родительского template'а:
 # /ankaran/parking, /piran/parking. Поля рендерятся с тегом родителя.
 #
+# only_marked_tags (чекбокс в форме) — страницы "на значение группы" создаются
+# только для тегов с tags.generate_pages: осознанный выбор, какие значения
+# группы (например какие addressLocality) получают страницу. Выключено — как
+# раньше, для каждого встреченного значения. На подчинённый List с slug-словом
+# (страница на каждую родительскую) не влияет — там решение принято на
+# уровне родителя.
+#
 # Вложенный List может быть подчинён и Profile-шаблону (PageTemplate#
 # parent_tag_group): страницы Profile (города Ankaran, Izola...) — это
 # страницы объектов, у них нет Page#list_tag_id, поэтому тег для каждой
@@ -389,6 +396,7 @@ class PageTemplateGenerator
       .joins(:parent, :taggings)
       .where(parent: { name: group })
       .where(taggings: { taggable_type: klass.name, taggable_id: objects_scope.select(:id) })
+      .merge(@page_template.only_marked_tags? ? Tag.where(generate_pages: true) : Tag.all)
       .distinct
       .order(:position, :name)
   end
@@ -471,8 +479,13 @@ class PageTemplateGenerator
   def conditions_hash(renderer, parent_for_group, parent_tag = nil)
     own_tags = parse_ast(renderer.render(@page_template.conditions))
     # Profile-родитель: у его страницы нет своих conditions — "родительский" тег это parent_tag
-    parent_tags = parent_tag ? (parent_tag.slug.presence || parent_tag.name) : parent_for_group.effective_conditions["tags"]
-    tags = nested? ? combine_tags(parent_tags, own_tags) : own_tags
+    tags =
+      if !nested?
+        own_tags
+      else
+        parent_tags = parent_tag ? (parent_tag.slug.presence || parent_tag.name) : parent_for_group.effective_conditions["tags"]
+        combine_tags(parent_tags, own_tags)
+      end
 
     hash = { "object" => @page_template.pageable_type, "tags" => tags }
     hash["schema"] = [@page_template.filter_schema.name] if @page_template.schema_id.present?
