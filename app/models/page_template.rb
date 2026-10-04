@@ -33,6 +33,7 @@ class PageTemplate < ActiveRecord::Base
   validates :template_type, inclusion: { in: TEMPLATE_TYPES }, allow_blank: true
   validates :pageable_type, inclusion: { in: PAGEABLE_TYPES }, allow_blank: true
   validate :parent_template_must_be_list_and_not_self
+  validate :page_uri_only_for_profile_and_well_formed
 
   def self.ransackable_attributes(auth_object = nil)
     %w[id active template_type pageable_type schema_id slug lang view layout page_ready page_published parent_template_id created_at updated_at]
@@ -67,7 +68,20 @@ class PageTemplate < ActiveRecord::Base
     [ordered, depths]
   end
 
+  # Режим "по пути" у Profile: страница строится по полному uri, а не по
+  # parent_page_id + slug (те тогда игнорируются). См. PageTemplateGenerator.
+  def path_mode?
+    template_type == "Profile" && page_uri.present?
+  end
+
   private
+
+  def page_uri_only_for_profile_and_well_formed
+    return if page_uri.blank?
+
+    errors.add(:page_uri, "задаётся только для template_type Profile") unless template_type == "Profile"
+    errors.add(:page_uri, "должен начинаться с / и содержать минимум 2 сегмента, например /[addressLocality.slug]/beaches/{name}") unless page_uri.match?(%r{\A/[^/]+/[^/]}) 
+  end
 
   def parent_template_must_be_list_and_not_self
     return if parent_template.blank?

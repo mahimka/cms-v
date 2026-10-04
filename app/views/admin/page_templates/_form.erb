@@ -88,6 +88,7 @@
 
 </div>
 
+<div data-for-type="List">
 <% if @page_template.parent_template_id.present? %>
   <%
     @nesting_parent_template = PageTemplate.find_by(id: @page_template.parent_template_id)
@@ -104,6 +105,7 @@
     <% end %>
   </div>
 <% end %>
+</div>
 
 <% unless @page_template.parent_template_id.present? %>
   <div class="columns">
@@ -127,6 +129,7 @@
   </div>
 <% end %>
 
+<div data-for-type="List">
 <div class="columns">
 
   <div class="column is-2">
@@ -146,6 +149,28 @@
 
 </div>
 
+</div>
+
+<div data-for-type="Profile">
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :page_uri, "page_uri", options = {class: 'label'}) %>
+    <p class="help">
+      Полный путь страницы вместо parent_page_id + slug (те тогда игнорируются), например
+      <code>/[addressLocality.slug]/beaches/{name}</code>. Каждый сегмент — обычные плейсхолдеры, последний станет slug
+      страницы, остальные — путь к уже существующей странице-родителю (ищется от корня по slug). Нет родителя или тега —
+      страница не создаётся, причина покажется после генерации. Пусто — режим parent_page_id + slug.
+    </p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:page_template, :page_uri, options = {class: 'input is-success is-family-monospace', value: @page_template.page_uri, placeholder: "/[addressLocality.slug]/beaches/{name}"}) %>
+  </div>
+
+</div>
+</div>
+
 <div class="columns">
 
   <div class="column is-2">
@@ -158,6 +183,7 @@
 
 </div>
 
+<div data-for-type="List">
 <div class="columns">
 
   <div class="column is-2">
@@ -174,6 +200,8 @@
   <div class="column is-9">
     <textarea name="page_template[conditions]" class="textarea autosize-textarea is-family-monospace" rows="3"><%= @page_template.conditions %></textarea>
   </div>
+
+</div>
 
 </div>
 
@@ -333,3 +361,18 @@
 
   </div>
 <% end %>
+
+<script>
+  // Две формы в одной: блоки data-for-type показываются только для выбранного template_type
+  (function() {
+    var select = document.querySelector("[name=\"page_template[template_type]\"]");
+    if (!select) return;
+    function apply() {
+      document.querySelectorAll("[data-for-type]").forEach(function(el) {
+        el.style.display = (!select.value || el.getAttribute("data-for-type") === select.value) ? "" : "none";
+      });
+    }
+    select.addEventListener("change", apply);
+    apply();
+  })();
+</script>
