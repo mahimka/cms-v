@@ -147,6 +147,20 @@
 <div class="columns">
 
   <div class="column is-2">
+    <%= label(:tag, :generate_pages, "generate_pages", options = {class: 'label'}) %>
+    <p class="help">тег участвует в генерации страниц</p>
+  </div>
+
+  <div class="column is-9">
+    <input type="hidden" name="tag[generate_pages]" value="0">
+    <input type="checkbox" name="tag[generate_pages]" value="1" <%= @tag.generate_pages ? "checked" : "" %>>
+  </div>
+
+</div>
+
+<div class="columns">
+
+  <div class="column is-2">
     <%= label(:tag, :admin_notes, "notes", options = {class: 'label'}) %>
   </div>
 

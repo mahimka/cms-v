@@ -6,7 +6,7 @@ class Tag < ActiveRecord::Base
   serialize :translations, JSON
 
   def self.ransackable_attributes(auth_object = nil)
-    ["created_at", "id", "name", "admin_notes", "parent_id", "position", "short", "updated_at"]
+    ["created_at", "id", "name", "admin_notes", "parent_id", "position", "short", "updated_at", "generate_pages"]
   end
 
   scope :active, -> { where(active: true) }

@@ -107,6 +107,7 @@
       <td></td>
       <td>ae</td>
       <td title="запрещает менять name — на него ссылается List conditions (tags)">f 🔒</td>
+      <td title="generate_pages: тег участвует в генерации страниц">gp</td>
       <td>pos</td>
       <td>icon</td>
       <td>slug</td>
@@ -130,6 +131,7 @@
       </td>
       <td><%= checkbox_in_place(group, :active) %></td>
       <td><%= checkbox_in_place(group, :fixed) %></td>
+      <td><%= checkbox_in_place(group, :generate_pages) %></td>
       <td><%= group.position %></td>
       <td><span class="icon"><%= group.icon_svg %></span></td>
       <td><%= group.slug %></td>
@@ -177,6 +179,7 @@
         <td></td>
         <td><%= checkbox_in_place(tag, :active) %></td>
         <td><%= checkbox_in_place(tag, :fixed) %></td>
+        <td><%= checkbox_in_place(tag, :generate_pages) %></td>
         <td width=15><%= tag.position %><%#= input_in_place(tag, :position) %></td>
         <td><span class="icon"><%= tag.icon_svg %></span></td>
         
