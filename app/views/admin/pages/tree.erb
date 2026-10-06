@@ -44,22 +44,20 @@
 <script src="/admin/javascripts/pages-tree.js"></script>
 <script src="/admin/javascripts/page-body-mentions.js"></script>
 
-<style>  
+<style>
 .pages-workspace {
   display: grid;
-  grid-template-columns: minmax(160px, 18%) minmax(0, 1fr);
+  grid-template-columns: minmax(200px, 22%) minmax(0, 1fr);
   min-height: 600px;
-  border: 1px solid var(--pico-muted-border-color);
-  border-radius: var(--pico-border-radius);
-  background: var(--pico-background-color);
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
 }
 
 .pages-tree-panel {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  border-right: 1px solid var(--pico-muted-border-color);
-  background: var(--pico-card-background-color);
+  border-right: 1px solid #dbdbdb;
 }
 
 .pages-tree-header {
@@ -67,17 +65,17 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem;
-  border-bottom: 1px solid var(--pico-muted-border-color);
+  padding: 0.75rem;
+}
+
+.pages-tree-header:empty,
+.pages-tree-header:not(:has(*)) {
+  display: none;
 }
 
 .pages-tree-header h1 {
   margin: 0;
   font-size: 1.1rem;
-}
-
-.pages-tree-header small {
-  color: var(--pico-muted-color);
 }
 
 .tree-new-page {
@@ -87,164 +85,91 @@
 .pages-tree-scroll {
   flex: 1;
   padding: 0.75rem;
+  overflow: auto;
+  max-height: 90vh;
 }
 
 .page-tree,
-.page-tree ul {
+.page-tree-children {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* ul.page-tree-children, а не просто .page-tree-children — специфичность
-   (класс+тег) должна быть не ниже, чем у ".page-tree ul" выше (тоже
-   класс+тег): иначе margin-left/padding-left тут молча перебиваются
-   тем сбросом в margin:0/padding:0 (специфичность выше вопреки более
-   позднему месту в файле) — реального отступа вложенности не было
-   вообще, дерево держалось только на тонкой линии-коннекторе снизу. */
 ul.page-tree-children {
-  position: relative;
   margin-left: 0.85rem;
-  padding-left: 1.15rem;
+  padding-left: 0.6rem;
+  border-left: 1px solid #dbdbdb;
 }
 
-.page-tree-children::before {
-  position: absolute;
-  top: 0;
-  bottom: 0.8rem;
-  left: 0.35rem;
-  width: 1px;
-  background: var(--pico-muted-border-color);
-  content: "";
-}
-
-.page-tree-node {
-  position: relative;
-}
-
-.page-tree-children > .page-tree-node::before {
-  position: absolute;
-  top: 1.1rem;
-  left: -0.8rem;
-  width: 0.8rem;
-  height: 1px;
-  background: var(--pico-muted-border-color);
-  content: "";
+ul.page-tree-children[hidden] {
+  display: none;
 }
 
 .page-tree-row {
   display: grid;
-  grid-template-columns: 1.7rem 1.4rem minmax(0, 1fr) 0.7rem;
+  grid-template-columns: 1.5rem 1.2rem minmax(0, 1fr) 0.7rem;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
   min-height: 1.8rem;
 }
 
-/* Строка на дочернем уровне (раскрыта кликом по "+") — "↳" вынесен
-   ИЗ грида строки (иначе для вложенных строк пришлось бы менять
-   grid-template-columns, что ломает выравнивание с корневыми строками)
-   и спозиционирован абсолютно в отступе-«коридоре» слева, который уже
-   даёт .page-tree-children (margin-left 0.85rem + padding-left 1.15rem
-   = 2rem). left подобран так, чтобы "↳" оказался визуально под "+"/"−"
-   родительской строки (первая колонка её грида шириной 1.7rem).
-   .page-tree-node уже position: relative — родитель для позиционирования. */
-.page-tree-nested-arrow {
-  position: absolute;
-  top: 50%;
-  left: -1.58rem;
-  transform: translateY(-50%);
-  color: var(--pico-muted-color);
-  font-size: 0.85rem;
-  line-height: 1;
-  pointer-events: none;
-}
-
 .page-tree-type {
-  display: inline-flex;
-  width: 1.4rem;
-  height: 1.4rem;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
+  text-align: center;
   font-size: 0.7rem;
-  line-height: 1;
-  text-transform: none;
-}
-
-.page-tree-more {
-  padding: 0.2rem 0 0.2rem 3.1rem;
-}
-
-.page-tree-more-link {
-  color: var(--pico-muted-color);
-  font-style: italic;
+  height: 1.2rem;
+  padding: 0 0.3rem;
 }
 
 .page-tree-toggle,
 .page-tree-toggle-placeholder {
-  display: inline-flex;
-  width: 1.55rem;
-  height: 1.55rem;
-  align-items: center;
-  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
 }
 
 .page-tree-toggle {
-  margin: 0;
   padding: 0;
-  border: 1px solid var(--pico-muted-border-color);
-  border-radius: 0.25rem;
+  border: 1px solid #dbdbdb;
+  border-radius: 3px;
   background: transparent;
   color: inherit;
-  font-size: 1rem;
+  cursor: pointer;
   line-height: 1;
 }
 
 .page-tree-toggle:hover {
-  background: var(--pico-secondary-background);
+  background: #f5f5f5;
 }
 
 .page-tree-toggle.is-loading {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .page-tree-link {
-  display: grid;
-  min-width: 0;
   margin: 0;
-  padding: 0.2rem 0.55rem;
+  padding: 0.15rem 0.4rem;
   border: 0;
-  border-radius: 0.35rem;
+  border-radius: 3px;
   background: transparent;
   color: inherit;
   text-align: left;
-}
-
-.page-tree-link:hover,
-.page-tree-link.is-selected {
-  background: var(--pico-secondary-background);
-}
-
-.page-tree-link.is-selected {
-  box-shadow: inset 3px 0 0 var(--pico-primary);
-}
-
-.page-tree-slug {
+  cursor: pointer;
   overflow: hidden;
-  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.page-tree-uri {
-  overflow: hidden;
-  color: var(--pico-muted-color);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.page-tree-link:hover {
+  background: #f5f5f5;
+}
+
+.page-tree-link.is-selected {
+  background: #eef6fc;
+  box-shadow: inset 3px 0 0 #3273dc;
+  font-weight: 700;
 }
 
 .page-tree-status {
-  display: block;
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 50%;
@@ -255,8 +180,16 @@ ul.page-tree-children {
 }
 
 .page-tree-status.is-draft {
-  border: 1px solid var(--pico-muted-color);
-  background: transparent;
+  border: 1px solid #b5b5b5;
+}
+
+.page-tree-more {
+  padding: 0.2rem 0 0.2rem 3rem;
+  font-style: italic;
+}
+
+.page-tree-more-link {
+  color: inherit;
 }
 
 .page-editor-panel {
@@ -312,7 +245,7 @@ ul.page-tree-children {
   .pages-tree-panel {
     max-height: 45vh;
     border-right: 0;
-    border-bottom: 1px solid var(--pico-muted-border-color);
+    border-bottom: 1px solid #dbdbdb;
   }
 
   .page-editor-panel {

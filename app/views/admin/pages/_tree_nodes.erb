@@ -7,10 +7,6 @@
     class="page-tree-node"
     data-page-id="<%= page.id %>"
   >
-    <% if @tree_rows[:nested] %>
-      <span class="page-tree-nested-arrow" title="Вложенная страница">↳</span>
-    <% end %>
-
     <div class="page-tree-row">
       <% if has_children %>
         <button
@@ -25,19 +21,18 @@
         <span class="page-tree-toggle-placeholder"></span>
       <% end %>
 
-      <span class="page-tree-type<%= " tag" if type_letter %><%= " is-warning" if type_letter == "p" %><%= " is-link" if type_letter == "l" %>"><%= type_letter %></span>
+      <span class="page-tree-type<%= " tag" if type_letter %><%= " is-warning" if type_letter == "p" %><%= " is-link" if type_letter == "l" %><%= " is-light" if type_letter == "t" %>"><%= type_letter %></span>
 
       <button
         type="button"
         class="page-tree-link"
         data-page-open
+        title="id: <%= page.id %> | <%= Rack::Utils.escape_html(page.uri) %><%= " | template ##{page.template_id}" if page.template_id.to_i.positive? %>"
       >
-        <% if page.root? %>
-          <span class="page-tree-slug-text is-lang-root tag is-info"><%= page.uri %></span>
-        <% else %>
-          <span class="page-tree-slug-text">/<%= page.effective_slug %></span>
-        <% end %>
+        <span class="page-tree-label<%= " tag is-info is-light" if page.root? %>"><%= Rack::Utils.escape_html(tree_label(page)) %></span>
       </button>
+
+      <span class="page-tree-status <%= page.published ? "is-published" : "is-draft" %>"></span>
     </div>
 
     <% if has_children %>

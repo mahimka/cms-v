@@ -474,65 +474,20 @@ $(function () {
   }
 
   /*
-   * Снимает выделение с активной страницы и подсветку её ветки.
+   * Снимает выделение с активной страницы (стиль — только в CSS:
+   * .page-tree-link.is-selected).
    */
   function deactivateSelection() {
-    const $prevLink = $(".page-tree-link.is-selected");
-
-    $prevLink.removeClass("is-selected has-text-weight-bold");
-    unmarkActiveSlug($prevLink);
-
-    $(".page-tree-children.is-active-branch").each(function () {
-      const $ul = $(this);
-      $ul.removeClass("is-active-branch");
-
-      const $ownToggle = $ul
-        .closest(".page-tree-node")
-        .children(".page-tree-row")
-        .find("[data-tree-toggle]");
-
-      if ($ownToggle.attr("aria-expanded") !== "true") {
-        $ul.removeClass("has-background-grey-lighter");
-      }
-    });
+    $(".page-tree-link.is-selected").removeClass("is-selected");
   }
 
   /*
-   * Отмечает страницу активной: жирный текст, tag is-info на слаге
-   * и фоновая подсветка has-background-grey-lighter на всей ветке
-   * предков (активной ветке дерева).
+   * Отмечает страницу активной.
    */
   function activateTreeLink($link) {
     deactivateSelection();
 
-    $link.addClass("is-selected has-text-weight-bold");
-    markActiveSlug($link);
-
-    $link
-      .closest(".page-tree-node")
-      .parents("[data-tree-children]")
-      .addClass("is-active-branch has-background-grey-lighter");
-  }
-
-  /*
-   * Выделяет слаг активной страницы бейджем tag is-info.
-   */
-  function markActiveSlug($link) {
-    $link
-      .find(".page-tree-slug-text")
-      .addClass("tag is-info");
-  }
-
-  /*
-   * Снимает бейдж tag is-info со слага — кроме языковых корней,
-   * у которых это постоянное обозначение (см. is-lang-root).
-   */
-  function unmarkActiveSlug($link) {
-    const $slug = $link.find(".page-tree-slug-text");
-
-    if (!$slug.hasClass("is-lang-root")) {
-      $slug.removeClass("tag is-info");
-    }
+    $link.addClass("is-selected");
   }
 
   /*
@@ -541,8 +496,7 @@ $(function () {
   function expandNode($button, $children) {
     $children
       .prop("hidden", false)
-      .show()
-      .addClass("has-background-grey-lighter");
+      .show();
 
     $button
       .attr("aria-expanded", "true")
@@ -560,8 +514,7 @@ $(function () {
   function collapseNode($button, $children) {
     $children
       .prop("hidden", true)
-      .hide()
-      .removeClass("has-background-grey-lighter");
+      .hide();
 
     $button
       .attr("aria-expanded", "false")
@@ -611,8 +564,9 @@ $(function () {
       method: "GET",
       dataType: "html"
     })
-      .done(function (html) {
+      .done(function (html, status, xhr) {
         $editor.html(html);
+        revealPageInTree(pageId, xhr.getResponseHeader("X-Page-Ancestors"));
       })
       .fail(function (xhr) {
         console.error(
@@ -625,6 +579,29 @@ $(function () {
           "Не удалось загрузить форму страницы."
         );
       });
+  }
+
+  /*
+   * Если открытой страницы ещё нет в DOM дерева (открыли по ссылке, а не
+   * кликом по узлу) — раскрываем путь к ней по предкам из заголовка
+   * X-Page-Ancestors (родители раньше потомков) и подсвечиваем её.
+   */
+  function revealPageInTree(pageId, ancestorsHeader) {
+    if (!$tree.length) return;
+
+    const selector = `.page-tree-node[data-page-id="${pageId}"]`;
+    if ($tree.find(selector).length) return;
+
+    const ancestorIds = (ancestorsHeader || "").split(",").filter(Boolean).map(Number);
+    if (!ancestorIds.length) return;
+
+    restoreExpandedPageIds(ancestorIds).always(function () {
+      const $node = $tree.find(selector);
+
+      if ($node.length) {
+        activateTreeLink($node.children(".page-tree-row").find("[data-page-open]"));
+      }
+    });
   }
 
   /*

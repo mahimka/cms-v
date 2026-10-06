@@ -2,55 +2,37 @@ module PageTreeHelpers
 
   DEFAULT_TREE_PAGEABLE_LIMIT = 50
 
-  # Готовит строки дерева для одного уровня (дети одного родителя,
-  # либо корневые страницы).
+  # Строки одного уровня дерева: дети parent, либо корни при parent == nil.
   #
-  # Порядок вывода:
-  #   1. страницы без conditions и без pageable — по алфавиту
-  #   2. страницы с заданными conditions — по алфавиту
-  #   3. страницы с заданным pageable — не более tree_pageable_limit,
-  #      дальше — ссылка "more" на отфильтрованный список в /admin/pages
+  # Порядок: 1) обычные страницы, 2) страницы-списки (effective_conditions),
+  # 3) pageable-страницы — не более tree_pageable_limit (лимит и порядок
+  # считает БД, остальные сворачиваются в ссылку "more" на отфильтрованный
+  # /admin/pages). Внутри уровня — по uri; корни — основной сайт, затем
+  # языки в порядке settings.languages (sort_root_pages).
   #
-  # Внутри каждой группы сохраняется порядок, в котором страницы
-  # переданы в pages (ожидается — уже отсортированные по алфавиту).
-  #
-  # Возвращает { rows: [{page:, has_children:}, ...], more: {count:, url:} | nil,
-  #   nested: true|false } — nested: true, когда это дочерний уровень
-  #   (parent задан), а не корень дерева — _tree_nodes.erb рисует по
-  #   нему "↳" у каждой строки: одного отступа/вертикальной линии от
-  #   ::before было визуально недостаточно, чтобы было сразу понятно,
-  #   что раскрытые после клика "+" строки — вложенные, а не соседние.
-  def prepare_tree_rows(pages, parent: nil)
-    no_group    = []
-    list_group  = []
-    pageable_group = []
+  # Возвращает { rows: [{page:, has_children:}, ...], more: {count:, url:} | nil }
+  def prepare_tree_rows(parent = nil)
+    scope = parent ? parent.children.order(:uri) : Page.roots
+    pageable_scope = scope.where.not(pageable_id: nil)
 
-    pages.each do |page|
-      if page.effective_conditions.present?
-        list_group << page
-      elsif page.pageable_id.present?
-        pageable_group << page
-      else
-        no_group << page
-      end
-    end
+    # master подгружаем заранее: effective_conditions у перевода берёт
+    # conditions мастера (source_page) — иначе по запросу на каждый перевод.
+    regular_pages = scope.where(pageable_id: nil).includes(:master).to_a
+    regular_pages = sort_root_pages(regular_pages) if parent.nil?
+    lists, plain = regular_pages.partition { |page| page.effective_conditions.present? }
 
-    limit = tree_pageable_limit
-    visible_pageable = pageable_group.first(limit)
-    hidden_pageable_count = pageable_group.length - visible_pageable.length
+    visible = pageable_scope.limit(tree_pageable_limit).to_a
+    hidden_count = pageable_scope.count - visible.length
 
-    ordered_pages = no_group + list_group + visible_pageable
+    pages = plain + lists + visible
 
-    rows = ordered_pages.map do |page|
-      { page: page, has_children: page.children.exists? }
-    end
+    # один запрос на весь уровень вместо page.children.exists? для каждой строки
+    parents_with_children = Page.where(ancestry: pages.map(&:child_ancestry)).distinct.pluck(:ancestry).to_set
 
-    more =
-      if hidden_pageable_count.positive?
-        { count: hidden_pageable_count, url: tree_more_pageable_url(parent) }
-      end
+    rows = pages.map { |page| { page: page, has_children: parents_with_children.include?(page.child_ancestry) } }
+    more = { count: hidden_count, url: tree_more_pageable_url(parent) } if hidden_count.positive?
 
-    { rows: rows, more: more, nested: parent.present? }
+    { rows: rows, more: more }
   end
 
   # Ограничение на количество pageable-страниц, показываемых в дереве
@@ -63,12 +45,21 @@ module PageTreeHelpers
   end
 
   # 'p' — у страницы задан pageable, 'l' — заданы conditions (список),
-  # nil — обычная страница.
+  # 't' — страница создана по PageTemplate, nil — обычная страница.
   def tree_type_letter(page)
     return "p" if page.pageable_id.present?
     return "l" if page.effective_conditions.present?
+    return "t" if page.template_id.to_i.positive?
 
     nil
+  end
+
+  # Подпись узла: у корней — uri, у остальных — "/slug". У переводов slug
+  # пустой (его хранит мастер), поэтому берём последний сегмент uri.
+  def tree_label(page)
+    return page.uri if page.root?
+
+    "/" + (page.slug.presence || page.effective_slug.presence || page.uri.to_s.chomp("/").split("/").last.to_s)
   end
 
   # Кнопка "перевести поле через Gemini" рядом с полем в форме страницы.
