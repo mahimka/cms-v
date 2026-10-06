@@ -94,7 +94,80 @@ class PageTemplateGenerator
     end
   end
 
+  # Привязывает УЖЕ СУЩЕСТВУЮЩИЕ страницы (Profile и List) к template'у, ничего
+  # не перезаписывая: ставит template_id и вносит в edited_columns те
+  # поля, чьё текущее значение отличается от того, что template
+  # сгенерировал бы сейчас (PROTECTABLE_FIELDS) — после этого
+  # force-регенерация их не затрёт. Страницы с другим template_id
+  # пропускаются (rebind: true — перепривязать и их). Контент, uri,
+  # ready/published не трогаются. Возвращает
+  # {adopted: [[page, fields]], unchanged: [...], skipped: [...]}.
+  def adopt(rebind: false)
+    results = { adopted: [], unchanged: [], skipped: [] }
+
+    case @page_template.template_type
+    when "Profile" then adopt_profile(results, rebind)
+    when "List" then adopt_list(results, rebind)
+    else raise ArgumentError, "adopt поддерживает только Profile и List"
+    end
+
+    results
+  end
+
   private
+
+  def adopt_profile(results, rebind)
+    matching_objects.find_each do |object|
+      page = object.page
+      next unless page
+
+      expected = base_attrs(TemplateFieldRenderer.new(object), parent_page)
+      adopt_page(page, expected, results, rebind)
+    end
+  end
+
+  # List: страница ищется по тому же адресу, что создал бы генератор —
+  # (parent, slug) — у существующей страницы ещё нет ни template_id, ни
+  # list_tag_id, по которым её находит ensure_list_page. Привязка ставит
+  # оба. Теги — те же, что у generate (group_tags: generate_pages).
+  # conditions не трогается и в edited_columns не попадает — это не
+  # PROTECTABLE-поле, force его перезапишет.
+  def adopt_list(results, rebind)
+    list_targets.each do |parent_for_group, objects_scope|
+      list_group_tags(parent_for_group, objects_scope).each do |tag|
+        extra = ancestor_tags(parent_for_group) + sibling_tags(tag, objects_scope)
+        expected = base_attrs(TemplateFieldRenderer.new(tag, extra_tags: extra), parent_for_group)
+
+        page = Page.find_by(ancestry: parent_for_group.child_ancestry, slug: expected[:slug], master_id: nil)
+        next unless page
+
+        adopt_page(page, expected, results, rebind, list_tag_id: tag.id)
+      end
+    end
+  end
+
+  def adopt_page(page, expected, results, rebind, extra_changes = {})
+    if page.template_id.present? && page.template_id != @page_template.id && !rebind
+      results[:skipped] << page
+      return
+    end
+
+    differing = Page::PROTECTABLE_FIELDS.select do |field|
+      expected[field.to_sym].to_s.strip != page.public_send(field).to_s.strip
+    end
+
+    fields = Array(page.edited_columns) | differing
+    changes = extra_changes.reject { |column, value| page.public_send(column) == value }
+    changes[:template_id] = @page_template.id if page.template_id != @page_template.id
+    changes[:edited_columns] = fields if fields != Array(page.edited_columns)
+
+    if changes.empty?
+      results[:unchanged] << page
+    else
+      page.update_columns(changes)
+      results[:adopted] << [page, differing]
+    end
+  end
 
   def run_profile(force)
     results = { created: [], updated: [], skipped: [] }
@@ -264,6 +337,7 @@ class PageTemplateGenerator
     Tag
       .joins(:parent, :taggings)
       .where(parent: { name: group })
+      .where(generate_pages: true)
       .where(taggings: { taggable_type: klass.name, taggable_id: objects_scope.select(:id) })
       .distinct
       .order(:position, :name)
@@ -272,7 +346,7 @@ class PageTemplateGenerator
   def ensure_list_page(tag, parent_for_group, objects_scope, force)
     extra = ancestor_tags(parent_for_group) + sibling_tags(tag, objects_scope)
     renderer = TemplateFieldRenderer.new(tag, extra_tags: extra)
-    slug = SlugGenerator.call(renderer.render(@page_template.slug))
+    slug = SlugGenerator.call(renderer.render(@page_template.slug, slug: true))
 
     # has_ancestry — parent_id не колонка, ищем через ancestry (см.
     # Ancestry#child_ancestry — то значение ancestry, которое было бы
@@ -363,7 +437,7 @@ class PageTemplateGenerator
     attrs = {
       lang: @page_template.lang,
       parent: parent,
-      slug: SlugGenerator.call(renderer.render(@page_template.slug)),
+      slug: SlugGenerator.call(renderer.render(@page_template.slug, slug: true)),
       template_id: @page_template.id,
       view: @page_template.view,
       layout: @page_template.layout

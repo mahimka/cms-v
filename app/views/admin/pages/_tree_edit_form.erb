@@ -291,7 +291,7 @@
               objectTypes: ListQuery::ALLOWED_OBJECT_TYPES,
               schemas: conditions_schemas.map { |s| { id: s.id, name: s.name, depth: s.depth } },
               schemaTagIds: conditions_schema_tag_ids,
-              tags: conditions_tags.map { |t| { id: t.id, name: t.name, group: t.parent&.name } }
+              tags: conditions_tags.map { |t| { id: t.id, name: t.name, slug: t.slug, group: t.parent&.name } }
             }
           %>
           <%= conditions_data.to_json.gsub("</", '<\/') %>
@@ -419,6 +419,28 @@
           // оператор явно — распознаём обе формы при разборе.
           function isFlatStringList(node) {
             return Array.isArray(node) && node.length > 0 && node.every(function (n) { return typeof n === 'string'; });
+          }
+
+          // Генератор шаблонов пишет в conditions slug тега ("korte"), а
+          // чекбоксы отмечаются по name ("Korte"). Без приведения тег не
+          // находился, а следующая синхронизация конструктора молча
+          // стирала tags. Точное совпадение name — приоритет; затем slug
+          // или name без учёта регистра; неизвестное значение остаётся как есть.
+          function canonicalTagName(value) {
+            var lower = String(value).toLowerCase();
+            var exact = data.tags.find(function (tag) { return tag.name === value; });
+            if (exact) return exact.name;
+            var loose = data.tags.find(function (tag) { return (tag.slug && tag.slug.toLowerCase() === lower) || tag.name.toLowerCase() === lower; });
+            return loose ? loose.name : value;
+          }
+
+          function canonicalizeTagState(state) {
+            if (!state) return state;
+            return {
+              includeOp: state.includeOp,
+              includeNames: state.includeNames.map(canonicalTagName),
+              excludeNames: state.excludeNames.map(canonicalTagName)
+            };
           }
 
           function parseSimpleTags(node) {
@@ -641,7 +663,7 @@
             var unsupportedKeys = Object.keys(parsed).filter(function (key) { return ['object', 'tags'].indexOf(key) === -1; });
             if (unsupportedKeys.length > 0) return false;
 
-            var state = parseSimpleTags(parsed.tags);
+            var state = canonicalizeTagState(parseSimpleTags(parsed.tags));
             if (state === null) return false;
 
             applyState(parsed.object, state);

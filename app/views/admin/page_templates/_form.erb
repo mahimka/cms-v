@@ -110,7 +110,7 @@
 
     <div class="column is-2">
       <%= label(:page_template, :parent_page_id, "parent_page_id", options = {class: 'label'}) %>
-      <p class="help">родитель для генерируемых страниц — только страницы, не созданные по template</p>
+      <p class="help">родитель для генерируемых страниц — только master-страницы, созданные вручную (не по template и не pageable)</p>
     </div>
 
     <div class="column is-9">
@@ -119,7 +119,13 @@
         # без приведения типов ("360" == 360 -> false) — ключи хэша тоже
         # приводим к строке, иначе нужный option никогда не помечается
         # selected и форма при сохранении тихо стирает значение.
-        @parent_pages_for_select = {"": ""}.merge(Page.where(template_id: [nil, 0]).order(:uri).to_h { |page| [page.id.to_s, page.uri] })
+        #
+        # Только master-страницы, созданные вручную: без template_id и без
+        # pageable_type. Уже выбранный родитель добавляем в любом случае,
+        # даже если он под фильтр не подходит — иначе форма его сотрёт.
+        @parent_pages_scope = Page.masters.where(template_id: [nil, 0], pageable_type: [nil, ""])
+        @parent_pages_scope = @parent_pages_scope.or(Page.where(id: @page_template.parent_page_id)) if @page_template.parent_page_id.present?
+        @parent_pages_for_select = {"": ""}.merge(@parent_pages_scope.order(:uri).to_h { |page| [page.id.to_s, page.uri] })
       %>
       <%= select(:page_template, :parent_page_id, @parent_pages_for_select, options = {class: 'select input is-success', value: @page_template.parent_page_id}) %>
     </div>

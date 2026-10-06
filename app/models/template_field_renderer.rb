@@ -126,8 +126,20 @@ class TemplateFieldRenderer
     @extra_tags = extra_tags
   end
 
-  def render(template)
+  # slug: true — поле slug: тег-блоки видят только теги с generate_pages
+  # (только такие теги можно использовать для генерации slug). В остальных
+  # полях — только активные теги (active).
+  def render(template, slug: false)
     return "" if template.blank?
+
+    previous_slug_mode = @slug_mode
+    @slug_mode = slug
+    render_template(template)
+  ensure
+    @slug_mode = previous_slug_mode
+  end
+
+  def render_template(template)
 
     result = template
       .gsub(TAG_BLOCK_RE) { render_tag_block(Regexp.last_match(1)) }
@@ -250,10 +262,12 @@ class TemplateFieldRenderer
       return parsed[:if_empty].to_s unless target
     end
 
-    self.class.new(target, extra_tags: @extra_tags).render_parsed_block(parsed.merge(group: group))
+    self.class.new(target, extra_tags: @extra_tags).tap { |renderer| renderer.slug_mode = @slug_mode }.render_parsed_block(parsed.merge(group: group))
   end
 
   protected
+
+  attr_writer :slug_mode
 
   def render_parsed_block(parsed)
     group = parsed[:group]
@@ -333,7 +347,9 @@ class TemplateFieldRenderer
       extra = @extra_tags.find { |tag| tag.parent&.name == group }
       extra ? Tag.where(id: extra.id) : Tag.none
     else
-      @pageable.tags.joins(:parent).where(parent: { name: group }).order(:position, :name)
+      tags = @pageable.tags.joins(:parent).where(parent: { name: group })
+      tags = @slug_mode ? tags.where(tags: { generate_pages: true }) : tags.where(tags: { active: true })
+      tags.order(:position, :name)
     end
   end
 

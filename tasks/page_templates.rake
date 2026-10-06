@@ -62,4 +62,26 @@ namespace :page_templates do
 
     puts dry_run ? "DRY RUN — откачено, ничего не сохранено" : "Готово"
   end
+
+  desc "Привязать уже созданные страницы (Profile и List) к PageTemplate, не затирая отличающиеся поля (rake page_templates:adopt id=1 [rebind=true] [dry_run=true])"
+  task :adopt do
+    id = ENV['id']
+    raise "Укажи id=<page_template id> (rake page_templates:adopt id=1)" if id.blank?
+
+    page_template = PageTemplate.find(id)
+    dry_run = ENV['dry_run'] == 'true'
+
+    result = nil
+    ActiveRecord::Base.transaction do
+      result = PageTemplateGenerator.new(page_template).adopt(rebind: ENV['rebind'] == 'true')
+      raise ActiveRecord::Rollback if dry_run
+    end
+
+    result[:adopted].each do |page, differing|
+      puts "#{page.uri}: template_id=#{page_template.id}, отличаются: #{differing.empty? ? '-' : differing.join(', ')}"
+    end
+    puts "##{page_template.id} (#{page_template.slug.inspect}): привязано #{result[:adopted].size}, " \
+         "без изменений #{result[:unchanged].size}, пропущено (другой template) #{result[:skipped].size}"
+    puts dry_run ? "DRY RUN — откачено, ничего не сохранено" : "Готово"
+  end
 end
