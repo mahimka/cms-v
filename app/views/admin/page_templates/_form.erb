@@ -88,6 +88,7 @@
 
 </div>
 
+<div data-for-type="List">
 <% if @page_template.parent_template_id.present? %>
   <%
     @nesting_parent_template = PageTemplate.find_by(id: @page_template.parent_template_id)
@@ -104,7 +105,9 @@
     <% end %>
   </div>
 <% end %>
+</div>
 
+<div data-for-type="Profile List">
 <% unless @page_template.parent_template_id.present? %>
   <div class="columns">
 
@@ -132,7 +135,28 @@
 
   </div>
 <% end %>
+</div>
 
+<div data-for-type="ProfileUri">
+<div class="columns">
+
+  <div class="column is-2">
+    <%= label(:page_template, :parent_page_uri, "parent_page_uri", options = {class: 'label'}) %>
+    <p class="help">
+      uri страницы-родителя, например <code>/[addressLocality.slug]/beaches</code>. Каждый сегмент — обычные плейсхолдеры
+      (тег-блоки видят только теги с generate_pages), родитель ищется от корня по slug. Нет родителя или тега — страница
+      не создаётся, причина покажется после генерации. Объекты и slug — как у Profile.
+    </p>
+  </div>
+
+  <div class="column is-9">
+    <%= input(:page_template, :parent_page_uri, options = {class: 'input is-success is-family-monospace', value: @page_template.parent_page_uri, placeholder: "/[addressLocality.slug]/beaches"}) %>
+  </div>
+
+</div>
+</div>
+
+<div data-for-type="List">
 <div class="columns">
 
   <div class="column is-2">
@@ -150,6 +174,7 @@
     <%= select(:page_template, :parent_template_id, @parent_templates_for_select, options = {class: 'select input is-success', value: @page_template.parent_template_id.to_s}) %>
   </div>
 
+</div>
 </div>
 
 <div class="columns">
@@ -339,3 +364,20 @@
 
   </div>
 <% end %>
+
+<script>
+  // Одна форма на все типы: блоки data-for-type (через пробел — несколько
+  // типов) показываются только для выбранного template_type
+  (function() {
+    var select = document.querySelector("[name=\"page_template[template_type]\"]");
+    if (!select) return;
+    function apply() {
+      document.querySelectorAll("[data-for-type]").forEach(function(el) {
+        var types = el.getAttribute("data-for-type").split(" ");
+        el.style.display = (!select.value || types.indexOf(select.value) !== -1) ? "" : "none";
+      });
+    }
+    select.addEventListener("change", apply);
+    apply();
+  })();
+</script>

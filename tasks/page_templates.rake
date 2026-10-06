@@ -3,6 +3,16 @@
 # admin POST /page_templates/:id/generate (один template за раз, только
 # из браузера) либо ad-hoc `bundle exec ruby -e`. Задачи ниже — то же
 # самое, но воспроизводимо и с dry_run.
+# Объекты, для которых страницу не удалось построить (ProfileUri: нет родителя
+# или тега) — первые 15 причин.
+def print_failed(failed)
+  return if failed.blank?
+
+  puts "  не создано #{failed.size}:"
+  failed.first(15).each { |failure| puts "    - #{failure[:reason]}" }
+  puts "    … и ещё #{failed.size - 15}" if failed.size > 15
+end
+
 namespace :page_templates do
   desc "Сгенерировать страницы по одному PageTemplate (rake page_templates:generate id=1 [force=true] [dry_run=true])"
   task :generate do
@@ -17,6 +27,7 @@ namespace :page_templates do
       result = PageTemplateGenerator.run(page_template, force: force)
       puts "##{page_template.id} (#{page_template.template_type}, #{page_template.slug.inspect}): " \
            "создано #{result[:created].size}, обновлено #{result[:updated].size}, пропущено #{result[:skipped].size}"
+      print_failed(result[:failed])
 
       raise ActiveRecord::Rollback if dry_run
     end
@@ -82,6 +93,8 @@ namespace :page_templates do
     end
     puts "##{page_template.id} (#{page_template.slug.inspect}): привязано #{result[:adopted].size}, " \
          "без изменений #{result[:unchanged].size}, пропущено (другой template) #{result[:skipped].size}"
+    result[:mismatched].each { |m| puts "  ! родитель не совпадает, не привязана: #{m[:page].uri} (по шаблону родитель #{m[:expected]})" }
+    print_failed(result[:failed])
     puts dry_run ? "DRY RUN — откачено, ничего не сохранено" : "Готово"
   end
 end

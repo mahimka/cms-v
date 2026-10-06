@@ -89,6 +89,13 @@ class PageTemplatesController < App
       result = PageTemplateGenerator.run(page_template, force: force)
       flash[:notice] = "Template ##{page_template.id}: создано #{result[:created].size}, обновлено #{result[:updated].size}, пропущено (уже есть) #{result[:skipped].size}"
 
+      # ProfileUri: объекты, для которых не нашёлся родитель/тег — страница не
+      # создана, причины показываем (первые 10).
+      if result[:failed].present?
+        flash[:error_title] = "Template ##{page_template.id}: не создано #{result[:failed].size}"
+        flash[:errors] = result[:failed].first(10).map { |failure| failure[:reason] } + (result[:failed].size > 10 ? ["… и ещё #{result[:failed].size - 10}"] : [])
+      end
+
       # только относительный /admin/... — не open redirect на чужой хост
       safe_redirect = params[:redirect_to].to_s.start_with?("/admin/") ? params[:redirect_to] : nil
       redirect safe_redirect || "/admin/page_templates/#{page_template.id}/edit"

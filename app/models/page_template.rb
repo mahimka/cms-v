@@ -1,5 +1,5 @@
 class PageTemplate < ActiveRecord::Base
-  TEMPLATE_TYPES = %w[Profile List].freeze
+  TEMPLATE_TYPES = %w[Profile ProfileUri List].freeze
   PAGEABLE_TYPES = %w[Entity Item Event Picture].freeze
 
   belongs_to :parent_page, class_name: "Page", foreign_key: :parent_page_id, optional: true
@@ -33,6 +33,7 @@ class PageTemplate < ActiveRecord::Base
   validates :template_type, inclusion: { in: TEMPLATE_TYPES }, allow_blank: true
   validates :pageable_type, inclusion: { in: PAGEABLE_TYPES }, allow_blank: true
   validate :parent_template_must_be_list_and_not_self
+  validate :parent_page_uri_well_formed
 
   def self.ransackable_attributes(auth_object = nil)
     %w[id active template_type pageable_type schema_id slug lang view layout page_ready page_published parent_template_id created_at updated_at]
@@ -67,7 +68,23 @@ class PageTemplate < ActiveRecord::Base
     [ordered, depths]
   end
 
+  # Profile и ProfileUri генерируют по странице на объект выборки; ProfileUri
+  # отличается тем, что родитель задан строкой parent_page_uri (а не
+  # parent_page_id) и ищется по slug от корня.
+  def profile_like?
+    %w[Profile ProfileUri].include?(template_type)
+  end
+
   private
+
+  def parent_page_uri_well_formed
+    if template_type == "ProfileUri"
+      errors.add(:parent_page_uri, "обязателен для ProfileUri, например /[addressLocality.slug]/beaches") if parent_page_uri.blank?
+      errors.add(:parent_page_uri, "должен начинаться с /") if parent_page_uri.present? && !parent_page_uri.start_with?("/")
+    elsif parent_page_uri.present?
+      errors.add(:parent_page_uri, "задаётся только для template_type ProfileUri")
+    end
+  end
 
   def parent_template_must_be_list_and_not_self
     return if parent_template.blank?

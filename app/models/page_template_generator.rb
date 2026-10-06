@@ -4,6 +4,17 @@
 # конвенция: ищем существующую через object.page). slug/title/...
 # рендерятся TemplateFieldRenderer, привязанным к самому объекту.
 #
+# "ProfileUri" — как Profile (та же выборка объектов, slug рендерится
+# тем же TemplateFieldRenderer), но родитель задан не parent_page_id, а
+# строкой parent_page_uri, например "/[addressLocality.slug]/beaches".
+# Каждый сегмент рендерится ОТДЕЛЬНО (тег-блоки видят только теги с
+# generate_pages, как в slug) и прогоняется через SlugGenerator, затем
+# родитель ищется от корня языка template'а вниз по Page#slug — неважно,
+# как создана страница-родитель (вручную или List-шаблоном). Нет родителя
+# или пустой сегмент (у объекта нет тега) — страница НЕ создаётся, объект
+# попадает в results[:failed] с причиной. Существующая страница без force
+# не трогается (и не переезжает под другого родителя).
+#
 # "List" — не по одной странице на объект, а по одной странице на
 # КАЖДОЕ РАЗЛИЧНОЕ значение группы тегов, встреченное среди объектов
 # выборки (та же выборка, что у Profile — см. #matching_objects; группа
@@ -89,8 +100,9 @@ class PageTemplateGenerator
   def run(force: false)
     case @page_template.template_type
     when "Profile" then run_profile(force)
+    when "ProfileUri" then run_profile_uri(force)
     when "List" then run_list(force)
-    else { created: [], updated: [], skipped: [] }
+    else { created: [], updated: [], skipped: [], failed: [] }
     end
   end
 
@@ -103,12 +115,13 @@ class PageTemplateGenerator
   # ready/published не трогаются. Возвращает
   # {adopted: [[page, fields]], unchanged: [...], skipped: [...]}.
   def adopt(rebind: false)
-    results = { adopted: [], unchanged: [], skipped: [] }
+    results = { adopted: [], unchanged: [], skipped: [], mismatched: [], failed: [] }
 
     case @page_template.template_type
     when "Profile" then adopt_profile(results, rebind)
+    when "ProfileUri" then adopt_profile_uri(results, rebind)
     when "List" then adopt_list(results, rebind)
-    else raise ArgumentError, "adopt поддерживает только Profile и List"
+    else raise ArgumentError, "adopt поддерживает только Profile, ProfileUri и List"
     end
 
     results
@@ -146,6 +159,94 @@ class PageTemplateGenerator
     end
   end
 
+  # ProfileUri: страницы уже существуют, поэтому, кроме полей, сверяем
+  # родителя — если он не совпадает с parent_page_uri, страница НЕ
+  # привязывается (force тогда переместил бы её) и попадает в
+  # results[:mismatched]. Не нашёлся ожидаемый родитель — results[:failed].
+  def adopt_profile_uri(results, rebind)
+    matching_objects.find_each do |object|
+      page = object.page
+      next unless page
+
+      renderer = TemplateFieldRenderer.new(object)
+      parent, error = resolve_parent_by_uri(renderer, object)
+      if error
+        results[:failed] << { object: object, reason: error }
+        next
+      end
+
+      if page.parent != parent
+        results[:mismatched] << { page: page, expected: parent.uri }
+        next
+      end
+
+      adopt_page(page, base_attrs(renderer, parent), results, rebind)
+    end
+  end
+
+  # [parent, nil] или [nil, причина_строкой].
+  def resolve_parent_by_uri(renderer, object)
+    label = "#{object.class.name} ##{object.id} #{object.try(:name)}".strip
+    segments = path_segments(@page_template.parent_page_uri).map { |segment| SlugGenerator.call(renderer.render(segment, slug: true)) }
+    path = "/" + segments.join("/")
+
+    return [nil, "#{label}: пустой сегмент в #{path} (у объекта нет нужного тега с generate_pages?)"] if segments.empty? || segments.any?(&:blank?)
+
+    parent = find_parent_by_slugs(segments)
+    parent ? [parent, nil] : [nil, "#{label}: нет страницы-родителя для #{path}"]
+  end
+
+  # Возвращает [page, status] или [причина_строкой, :failed].
+  def ensure_page_by_uri(object, force)
+    existing = object.respond_to?(:page) ? object.page : nil
+    return [existing, :skipped] if existing && !force
+
+    renderer = TemplateFieldRenderer.new(object)
+    parent, error = resolve_parent_by_uri(renderer, object)
+    return [error, :failed] if error
+
+    attrs = base_attrs(renderer, parent).merge(
+      pageable_type: @page_template.pageable_type,
+      pageable_id: object.id
+    )
+
+    save_page(existing, attrs, force, object)
+  rescue ActiveRecord::RecordInvalid => e
+    ["#{object.class.name} ##{object.id} #{object.try(:name)}: #{e.message}", :failed]
+  end
+
+  # "/[addressLocality.slug]/beaches" -> ["[addressLocality.slug]", "beaches"].
+  # Делим по "/" только вне [...] и {...}.
+  def path_segments(template)
+    segments = [+""]
+    depth = 0
+    template.to_s.sub(%r{\A/}, "").each_char do |char|
+      depth += 1 if char == "[" || char == "{"
+      depth -= 1 if (char == "]" || char == "}") && depth.positive?
+      if char == "/" && depth.zero?
+        segments << +""
+      else
+        segments.last << char
+      end
+    end
+    segments.reject(&:empty?)
+  end
+
+  # От корня языка template'а вниз по Page#slug (master-страницы). Корень "/" —
+  # master без ancestry; дети ищутся по child_ancestry, как в #ensure_list_page.
+  def find_parent_by_slugs(slugs)
+    @parent_cache ||= {}
+    @parent_cache.fetch(slugs) do
+      node = Page.masters.roots.find_by(lang: @page_template.lang)
+      slugs.each do |slug|
+        break node = nil unless node
+
+        node = Page.masters.find_by(ancestry: node.child_ancestry, slug: slug)
+      end
+      @parent_cache[slugs] = node
+    end
+  end
+
   def adopt_page(page, expected, results, rebind, extra_changes = {})
     if page.template_id.present? && page.template_id != @page_template.id && !rebind
       results[:skipped] << page
@@ -170,7 +271,7 @@ class PageTemplateGenerator
   end
 
   def run_profile(force)
-    results = { created: [], updated: [], skipped: [] }
+    results = { created: [], updated: [], skipped: [], failed: [] }
     matching_objects.find_each do |object|
       page, status = ensure_page(object, force)
       results[status] << page
@@ -178,8 +279,17 @@ class PageTemplateGenerator
     results
   end
 
+  def run_profile_uri(force)
+    results = { created: [], updated: [], skipped: [], failed: [] }
+    matching_objects.find_each do |object|
+      page, status = ensure_page_by_uri(object, force)
+      status == :failed ? results[:failed] << { object: object, reason: page } : results[status] << page
+    end
+    results
+  end
+
   def run_list(force)
-    results = { created: [], updated: [], skipped: [] }
+    results = { created: [], updated: [], skipped: [], failed: [] }
     list_targets.each do |parent_for_group, objects_scope|
       list_group_tags(parent_for_group, objects_scope).each do |tag|
         page, status = ensure_list_page(tag, parent_for_group, objects_scope, force)

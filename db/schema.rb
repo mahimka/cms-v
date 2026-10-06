@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_10_04_100000) do
+ActiveRecord::Schema.define(version: 2026_10_06_100000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -194,6 +194,7 @@ ActiveRecord::Schema.define(version: 2026_10_04_100000) do
     t.integer "schema_id"
     t.integer "parent_template_id"
     t.boolean "active", default: false
+    t.string "parent_page_uri"
   end
 
   create_table "pages", force: :cascade do |t|

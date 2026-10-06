@@ -10,6 +10,8 @@
 #
 # Два вида плейсхолдеров:
 #
+#   {short|name} — первое непустое: short, а если пусто — name (запасные
+#                   варианты через |, любое число)
 #   {name}  — object.public_send(:name) (любой публичный атрибут/метод
 #             объекта, не только name)
 #
@@ -106,7 +108,7 @@
 # (template — админский, но лишний eval на пользовательский текст ни к
 # чему).
 class TemplateFieldRenderer
-  ATTRIBUTE_RE = /\{([\w.]+)\}/.freeze
+  ATTRIBUTE_RE = /\{([\w.]+(?:\|[\w.]+)*)\}/.freeze
   TAG_BLOCK_RE = /\[([^\[\]]*)\]/m.freeze
   TAG_GROUP_RE = /\A\s*"((?:[^"\\]|\\.)*)"\s*(?:,\s*(.*))?\z/m.freeze
   OPTION_RE = /(\w+)\s*:\s*(?:"((?:[^"\\]|\\.)*)"|(-?\d+))\s*,?/.freeze
@@ -193,7 +195,14 @@ class TemplateFieldRenderer
 
   private
 
+  # {short|name} — первое непустое из перечисленных (запасной вариант через |).
   def render_attribute(attr)
+    return attr.split("|").lazy.map { |single| render_single_attribute(single) }.find(&:present?).to_s if attr.include?("|")
+
+    render_single_attribute(attr)
+  end
+
+  def render_single_attribute(attr)
     target, rest = resolve_parent_chain(@pageable, attr)
     return "" unless target
 

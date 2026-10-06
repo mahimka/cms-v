@@ -91,7 +91,7 @@
                title="Создать вложенный template — facet-страницы под каждой страницей этого template'а">+n</a>
           <% end %>
 
-          <% if %w[Profile List].include?(page_template.template_type) %>
+          <% if %w[Profile ProfileUri List].include?(page_template.template_type) %>
             <form method="POST" action="/admin/page_templates/<%= page_template.id %>/generate" style="display:inline;"
                   onsubmit="return confirm('Найти объекты <%= page_template.pageable_type %> по template_conditions и создать недостающие страницы? Уже существующие не трогает.')">
               <input type="hidden" name="redirect_to" value="<%= request.fullpath %>">
