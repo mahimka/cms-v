@@ -84,6 +84,65 @@ namespace :upload do
 	  end
 	end
 
+  # Односторонняя синхронизация local -> remote через sqlite3_rsync (только изменённые страницы).
+  # Реплика на сервере становится точной копией локальной базы, всё что менялось на ремоуте — теряется.
+  # Защита: после синхронизации на ремоуте сохраняется mtime main.db (db/main.db.last_sync_mtime).
+  # Если перед следующей синхронизацией mtime другой — база на сервере менялась после нас, задача останавливается.
+  #
+  #   rake upload:main_db_sync            # обычный запуск
+  #   rake upload:main_db_sync FORCE=1    # перезаписать, даже если ремоут менялся (и первый запуск)
+  #   LOCAL_DB=x.db REMOTE_DB=_test.db ... # другие файлы (для проверок)
+  desc "Syncs db/main.db to remote with sqlite3_rsync (one-way, with remote-changed guard)"
+  task :main_db_sync do
+    require 'shellwords'
+
+    local_db   = ENV['LOCAL_DB'] || 'db/main.db'
+    abort "no such file: #{local_db}".red unless File.exist?(local_db)
+
+    host       = "#{@user}@#{@domain}"
+    remote_dir = "#{@deploy_to || "/home/#{@user}/#{@app_name}"}/db"
+    remote_db  = "#{remote_dir}/#{ENV['REMOTE_DB'] || 'main.db'}"
+    marker     = "#{remote_db}.last_sync_mtime"
+    rsync_bin  = [File.expand_path('~/bin/sqlite3_rsync'), 'sqlite3_rsync'].find { |b| system("command -v #{b} >/dev/null 2>&1") }
+    abort "sqlite3_rsync not found locally (~/bin or PATH)".red unless rsync_bin
+
+    remote = lambda do |cmd|
+      out = `ssh -o BatchMode=yes #{host} #{Shellwords.escape(cmd)} 2>&1`
+      [$?.success?, out.strip]
+    end
+
+    # 1. защита: менялся ли ремоут после прошлой синхронизации
+    ok, out = remote.call("stat -c %Y #{remote_db} 2>/dev/null || echo none; cat #{marker} 2>/dev/null || echo none")
+    abort "ssh to #{host} failed (key set up?):\n#{out}".red unless ok
+    remote_mtime, last_sync = out.lines.map(&:strip).last(2)
+
+    if remote_mtime != 'none'
+      problem =
+        if last_sync == 'none'
+          "no sync record on remote (first run, or the file was never synced from here)"
+        elsif remote_mtime != last_sync
+          "remote #{File.basename(remote_db)} changed after the last sync " \
+          "(synced #{Time.at(last_sync.to_i)}, now #{Time.at(remote_mtime.to_i)})"
+        end
+
+      if problem
+        if ENV['FORCE'] == '1'
+          puts "FORCE=1: overwriting anyway -- #{problem}".white.on_red
+        else
+          abort "STOP: #{problem}\nRemote data would be lost. Check it, then rerun with FORCE=1.".white.on_red
+        end
+      end
+    end
+
+    # 2. синхронизация
+    puts "sqlite3_rsync #{local_db} -> #{host}:#{remote_db}".white.on_green
+    ok = system(rsync_bin, local_db, "#{host}:#{remote_db}", '--exe', "/home/#{@user}/bin/sqlite3_rsync", '-v')
+    abort "sqlite3_rsync failed, remote marker not updated".red unless ok
+
+    # 3. запоминаем mtime, который получила реплика
+    ok, out = remote.call("stat -c %Y #{remote_db} > #{marker} && cat #{marker}")
+    abort "synced, but could not write marker: #{out}".red unless ok
+    puts ".. OK! synced, remote mtime #{Time.at(out.to_i)}".yellow
+  end
+
 end
-
-
