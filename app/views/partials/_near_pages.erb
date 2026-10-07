@@ -13,10 +13,14 @@
 
 <% closest_entities = @closest_entities & Entity.tagged_with(tags, match: match) %>
 
+<%# ссылаемся только на опубликованные страницы (черновики дают 404); limit считаем уже по ним %>
+<% shown = 0 %>
 <ul class='mt-2'>
-  <% (closest_entities || Entity.none).first(limit).each do |nearby_entity| %>
-    <% nearby_page = nearby_entity.pages.find_by(lang: @page.lang) %>
+  <% (closest_entities || Entity.none).each do |nearby_entity| %>
+    <% nearby_page = nearby_entity.pages.find_by(lang: @page.lang, published: true) %>
     <% next unless nearby_page %>
     <li><a href="<%= nearby_page.uri %>"><%= nearby_page.send(anchor) %></a> - <%= nearby_entity.distance.round(2) %> km</li>
+    <% shown += 1 %>
+    <% break if shown >= limit %>
   <% end %>
 </ul>
