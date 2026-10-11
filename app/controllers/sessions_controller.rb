@@ -38,6 +38,12 @@ class SessionsController < App
   end
 
   post '/register' do
+    # Тот же путь использует android-приложение (AJPES, см. RoutesFirst):
+    # запросы с API-ключом или JSON отдаём туда, а не в форму регистрации.
+    pass if request.env['HTTP_X_API_KEY'] ||
+            request.env['HTTP_AUTHORIZATION'].to_s.start_with?('Bearer ') ||
+            request.media_type == 'application/json'
+
     @user = User.new(
       name: params[:name].to_s.strip,
       email: params[:email].to_s.strip.downcase,
