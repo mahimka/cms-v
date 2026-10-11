@@ -396,7 +396,18 @@ module MiscHelpers
     sid ? "#{url}&sid=#{Rack::Utils.escape(sid)}" : url
   end
 
-
-
+  # Последние опубликованные страницы (published: true) языка lang — для
+  # блоков "новое на сайте". Только страницы сущностей (pageable_id задан),
+  # без hub-страниц и списков; exclude — чтобы не показывать саму себя.
+  # Отдельного published_at нет, поэтому порядок по updated_at: задача
+  # pages:publish_ready его обновляет при публикации (а правка уже
+  # опубликованной страницы поднимет её тоже).
+  def latest_published_pages(limit: 6, lang: @page&.lang, exclude: @page, only_pageable: true)
+    scope = Page.where(published: true)
+    scope = scope.where(lang: lang) if lang
+    scope = scope.where.not(pageable_id: nil) if only_pageable
+    scope = scope.where.not(id: exclude.id) if exclude
+    scope.order(updated_at: :desc).limit(limit)
+  end
 
 end

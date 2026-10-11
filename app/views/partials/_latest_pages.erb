@@ -1,0 +1,42 @@
+<%
+  # Последние опубликованные страницы текущего языка карточками с картинкой.
+  # Параметры (все необязательные): limit: (6), title:, columns: css-класс
+  # колонки ('is-4'), only_pageable: (true) — см. latest_published_pages.
+  limit         ||= 6
+  title         ||= nil
+  columns       ||= 'is-4'
+  only_pageable   = true if only_pageable.nil?
+
+  latest_pages = latest_published_pages(limit: limit, only_pageable: only_pageable)
+%>
+
+<% if latest_pages.any? %>
+  <section class="latest-pages">
+    <% if title.present? %>
+      <h2 class="title is-4"><%= title %></h2>
+    <% end %>
+
+    <div class="columns is-multiline">
+      <% latest_pages.each do |latest_page| %>
+        <%
+          pageable = latest_page.pageable
+          picture  = pageable.respond_to?(:pictures) ? pageable.pictures.published.order(:position).first : nil
+        %>
+        <div class="column <%= columns %>">
+          <a href="<%= latest_page.uri %>" class="card" style="display:block;">
+            <% if picture %>
+              <div class="card-image">
+                <figure class="image is-4by3">
+                  <img src="<%= picture.file %>" loading="lazy" alt="<%= picture.translation(latest_page.lang) %>" style="object-fit: cover;">
+                </figure>
+              </div>
+            <% end %>
+            <div class="card-content">
+              <p class="title is-size-6"><%= latest_page.h1.presence || latest_page.title %></p>
+            </div>
+          </a>
+        </div>
+      <% end %>
+    </div>
+  </section>
+<% end %>
