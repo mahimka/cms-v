@@ -82,7 +82,7 @@
             </span>
           <% end %>
         </td>
-        <td>
+        <td nowrap>
           <a href="/admin/page_templates/<%= page_template.id %>/edit" class="button is-small">e</a>
           <a href="/admin/page_templates/new?copy_from=<%= page_template.id %>" class="button is-small"
              title="Создать новый template, предзаполненный данными этого">c</a>
@@ -105,7 +105,7 @@
             </form>
           <% end %>
         </td>
-        <td>
+        <td nowrap>
           <%= checkbox_in_place page_template, :page_ready %> | <%= checkbox_in_place page_template, :page_published %>
           <%#= page_template.page_ready ? "✓" : "—" %>  <%#= page_template.page_published ? "✓" : "—" %>
         </td>

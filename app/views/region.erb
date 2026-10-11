@@ -23,7 +23,9 @@
 <% content_for :sidebar do %>
 <% end %> <!-- end of content_for :sidebar -->
 
-<%= parse_erb_and_markdown @page.body if @page.body %>
+<div class="content">
+  <%= parse_erb_and_markdown @page.body if @page.body %>
+</div>
 
 <% if @page.block_1.blank? %>
   <%= partial '_list_paginated', anchor_suffix: ' review' %>

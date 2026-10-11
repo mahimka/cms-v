@@ -78,7 +78,9 @@
   <%= parse_erb_and_markdown(@page.block_1, options = {}) %>
 <% end %>
 
-<%= parse_erb_and_markdown @page.body %>
+<div class="content">
+  <%= parse_erb_and_markdown @page.body %>
+</div>
 
 <%#= parse_erb_and_markdown(@page.block_2)%>
 
@@ -91,13 +93,7 @@
     <h2 id="_list" class="title is-4 mt-6"><%= label_by_lang('_parkings').capitalize %> : <%= label_by_lang('_all') %></h2>
   <% end %>
 
-  <div class="columns is-multiline">
-    <% @objects.each do |object| %>
-      <div class="column is-4">
-        <%= partial '_card', object: object %>
-      </div>
-    <% end %>
-  </div>
+  <%= partial '_list_paginated' %>
 
 <% else %>
   <%= parse_erb_and_markdown(@page.block_2, options = {}) %>
@@ -119,6 +115,9 @@
 <% else %>
   <%= parse_erb_and_markdown(@page.block_4, options = {}) %>
 <% end %>
+
+<h2 class="title is-4 mt-6" id="_by_country"><%= @page.h1 %> by Country</h2>
+<%= partial '_tag_by_geo_links', geo_view: 'country_tag.erb' %>
 
 
 <% content_for :schema_main_entity do %>

@@ -49,6 +49,9 @@
     <% unless @page.published? %>
       <span class="tag is-small is-light" title="Ссылка выше может вести на 404 — страница ещё не опубликована">draft</span>
     <% end %>
+    <a href='/admin/histories/new?history[old_uri]=<%= fast_escape_html(@page.uri) %>' class="button is-light is-small" title="Создать редирект со старого uri этой страницы">
+      <i class="fas fa-history" aria-hidden="true"></i> History
+    </a>
   </div>
 
   <% if @page.template.present? %>

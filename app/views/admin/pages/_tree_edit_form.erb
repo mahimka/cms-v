@@ -101,6 +101,10 @@
       <% end %>
       <a href='/admin/pages/<%= @page.id %>/edit-in-place' class="button is-light is-small">Edit in Place</a>
 
+      <a href='/admin/histories/new?history[old_uri]=<%= fast_escape_html(@page.uri) %>' class="button is-light is-small" title="Создать редирект со старого uri этой страницы">
+        <i class="fas fa-history" aria-hidden="true"></i> H
+      </a>
+
     </div>
 
   </div>

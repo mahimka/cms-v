@@ -1,0 +1,34 @@
+<%
+  # Ссылки на facet-страницы ТОГО ЖЕ тега (page.list_tag_id), вложенные
+  # под geo-template geo_view (например "country_tag.erb") — то есть
+  # "этот стиль йоги в разрезе стран": со страницы /kundalini-yoga —
+  # ссылки на /argentina/kundalini-yoga, /austria/kundalini-yoga, ... со
+  # счётчиком объектов. Это "зеркало" _facet_sibling_links: там один
+  # родитель — разные теги, здесь один тег — разные родители, поэтому
+  # label берём не у самой facet-страницы (её anchor_1 — короткое имя
+  # ТЕГА, бесполезно в списке, где тег уже известен из контекста), а у
+  # её гео-родителя (anchor страны/региона/города).
+  #
+  # page = page || @page, geo_view — обязательный local (view вложенного
+  # geo-template'а: "country_tag.erb" / "region_tag.erb" /
+  # "locality_tag.erb"), anchor — поле РОДИТЕЛЬСКОЙ geo-страницы для
+  # текста ссылки (по умолчанию 'anchor_1').
+  page = page || @page
+  anchor = anchor || 'anchor_1'
+  current_tag_id = page.list_tag_id
+
+  geo_pages = current_tag_id && geo_view.present? ?
+    Page.where(list_tag_id: current_tag_id, view: geo_view, published: true).to_a
+      .select { |p| p.parent.present? }
+      .sort_by { |p| p.parent.public_send(anchor).presence || p.parent.h1.to_s } : []
+
+  counts = Page.batch_list_objects_counts(geo_pages)
+%>
+
+<% if geo_pages.any? %>
+  <div class="field is-grouped is-grouped-multiline">
+    <% geo_pages.each do |p| %>
+      <%= partial '_page_link_with_count', target: p, label: p.parent.public_send(anchor).presence || p.parent.h1.presence || p.parent.title, count: counts[p.id] %>
+    <% end %>
+  </div>
+<% end %>
