@@ -212,14 +212,26 @@ module MiscHelpers
   # === end of view rendering helpers ===
 
 
+  # Ссылка на страницу сайта по uri (строка) или id (число).
+  #
+  #   link_to '/izola/beaches'                          # текст = h1, title = title страницы
+  #   link_to '/izola/beaches', anchor: ':anchor_1'     # текст = колонка anchor_1 (пуста -> h1)
+  #   link_to '/izola/beaches', anchor: 'Пляжи'         # текст дословно
+  #   link_to '/izola/beaches', title: ':meta_description'
+  #   link_to '/izola/beaches', title: 'Все пляжи'
+  #
+  # anchor / title: не указано -> умолчание (h1 / title); ':имя' -> колонка страницы
+  # (на языке lang); любая другая строка -> этот текст. Другие опции: lang (по умолчанию
+  # язык текущей страницы), css_class.
+  # Старые опции anchor_text: / anchor_column: ещё встречаются в body страниц и работают
+  # как синонимы anchor: 'текст' / anchor: ':колонка'.
   def link_to(schema_id, options={})
-    anchor_text   = options[:anchor_text] || ''
-    anchor_column = options[:anchor_column] || 'h1'
+    anchor_spec   = options[:anchor].presence || options[:anchor_text].presence ||
+                    (options[:anchor_column].present? ? ":#{options[:anchor_column]}" : nil)
+    title_spec    = options[:title]
     lang          = options[:lang] || @page.lang
     css_class     = options[:css_class] || ''
-    # title ссылки: по умолчанию page.title целевой страницы (ниже, когда она найдена)
-    title         = options[:title]
-    
+
     begin
       # schema_id — uri мастер-страницы (например '/rooms/1', всегда lang
       # мастера, обычно sl), НЕ конкретной языковой версии — искать нужно
@@ -232,16 +244,10 @@ module MiscHelpers
       page = page&.version_for(lang)
 
       if page
-        if anchor_text.blank?
-          # если выбранная колонка (например anchor_1) пуста — берём h1
-          anchor = page.send(anchor_column).presence || page.h1
-        else
-          anchor = anchor_text 
-        end
+        anchor = link_text_for(page, anchor_spec, 'h1')
+        title  = ERB::Util.html_escape(link_text_for(page, title_spec, 'title'))
 
-        title_attr = ERB::Util.html_escape(title || page.title)
-
-        "<a href=\"#{page.uri}\" class=\"#{css_class} is-underlined\" title=\"#{title_attr}\">#{anchor}</a>"
+        "<a href=\"#{page.uri}\" class=\"#{css_class} is-underlined\" title=\"#{title}\">#{anchor}</a>"
 
       else
         "<!--page is not found-->"
@@ -253,6 +259,17 @@ module MiscHelpers
 
     end
 
+  end
+
+  # spec: nil/'' -> колонка default_column; ':имя' -> колонка page.имя; иначе сам текст.
+  # Пустая или неизвестная колонка -> default_column (для anchor это h1, для title — title).
+  def link_text_for(page, spec, default_column)
+    return page[default_column].to_s if spec.blank?
+    return spec.to_s unless spec.to_s.start_with?(':')
+
+    column = spec.to_s[1..]
+    value  = page.has_attribute?(column) ? page[column] : nil
+    value.presence || page[default_column].to_s
   end
 
   # Рейтинг звёздочками через SVG-иконку Lucide (у Bulma нет своего
