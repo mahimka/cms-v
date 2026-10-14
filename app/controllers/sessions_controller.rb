@@ -50,7 +50,7 @@ class SessionsController < App
       password: params[:password].to_s
     )
 
-    if @user.save
+    if @user.save(context: :register)
       session[:user_id] = @user.id
       redirect safe_redirect_target
     else

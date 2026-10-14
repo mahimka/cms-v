@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход — <%= settings.site_name %></title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/versions/bulma-no-dark-mode.min.css">
+</head>
+<body>
+  <section class="section">
+    <div class="container" style="max-width: 420px;">
+      <h1 class="title is-4">Вход</h1>
+
+      <% if flash.has?(:error_title) %>
+        <div class="notification is-warning"><%= Rack::Utils.escape_html(flash[:error_title]) %></div>
+      <% end %>
+      <% if flash.has?(:notice) %>
+        <div class="notification is-success"><%= Rack::Utils.escape_html(flash[:notice]) %></div>
+      <% end %>
+
+      <% if AuthController::GOOGLE_ENABLED %>
+        <form method="POST" action="/auth/google" class="mb-4">
+          <input type="hidden" name="authenticity_token" value="<%= csrf_token %>">
+          <button type="submit" class="button is-fullwidth">Войти через Google</button>
+        </form>
+        <p class="has-text-centered mb-4">или</p>
+      <% end %>
+
+      <form method="POST" action="/auth/email">
+        <input type="hidden" name="authenticity_token" value="<%= csrf_token %>">
+        <div class="field">
+          <label class="label">Email</label>
+          <div class="control">
+            <input class="input" type="email" name="email" required autofocus>
+          </div>
+          <p class="help">Отправим ссылку для входа, пароль не нужен.</p>
+        </div>
+        <button type="submit" class="button is-link">Получить ссылку</button>
+      </form>
+    </div>
+  </section>
+</body>
+</html>

@@ -92,3 +92,7 @@ end
 # gem 'bcrypt', require: 'bcrypt'
 # gem 'pundit', require: 'pundit'
 # gem 'sinatra-pundit', require: 'sinatra/pundit'
+# Вход посетителей (community.db): Google OAuth + письмо со ссылкой
+gem 'omniauth', '~> 2.1'
+gem 'omniauth-google-oauth2'
+gem 'mail'

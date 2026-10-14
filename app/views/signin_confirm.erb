@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Подтверждение входа — <%= settings.site_name %></title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/versions/bulma-no-dark-mode.min.css">
+</head>
+<body>
+  <section class="section">
+    <div class="container" style="max-width: 420px;">
+      <h1 class="title is-4">Подтвердите вход</h1>
+      <form method="POST" action="/auth/email/confirm">
+        <input type="hidden" name="authenticity_token" value="<%= csrf_token %>">
+        <input type="hidden" name="token" value="<%= Rack::Utils.escape_html(@token) %>">
+        <button type="submit" class="button is-link">Войти</button>
+      </form>
+    </div>
+  </section>
+</body>
+</html>

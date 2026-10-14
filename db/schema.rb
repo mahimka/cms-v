@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_10_06_100000) do
+ActiveRecord::Schema.define(version: 2026_10_13_090000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -75,6 +75,17 @@ ActiveRecord::Schema.define(version: 2026_10_06_100000) do
     t.index ["page_id"], name: "index_histories_on_page_id"
   end
 
+  create_table "identities", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "provider", null: false
+    t.string "uid", null: false
+    t.string "email"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["provider", "uid"], name: "index_identities_on_provider_and_uid", unique: true
+    t.index ["user_id"], name: "index_identities_on_user_id"
+  end
+
   create_table "items", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
@@ -122,6 +133,19 @@ ActiveRecord::Schema.define(version: 2026_10_06_100000) do
     t.string "redirected_to"
     t.index ["label_id"], name: "index_links_on_label_id"
     t.index ["linkable_type", "linkable_id"], name: "index_links_on_linkable_type_and_linkable_id"
+  end
+
+  create_table "login_tokens", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "email", null: false
+    t.string "ip"
+    t.string "token_digest", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "used_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["token_digest"], name: "index_login_tokens_on_token_digest", unique: true
+    t.index ["user_id"], name: "index_login_tokens_on_user_id"
   end
 
   create_table "lost_urls", force: :cascade do |t|
@@ -410,6 +434,10 @@ ActiveRecord::Schema.define(version: 2026_10_06_100000) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "admin", default: false, null: false
+    t.datetime "email_verified_at"
+    t.string "avatar_url"
+    t.string "status", default: "active", null: false
+    t.datetime "last_login_at"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -417,7 +445,9 @@ ActiveRecord::Schema.define(version: 2026_10_06_100000) do
   add_foreign_key "events", "entities", column: "venue_id"
   add_foreign_key "events", "schemas"
   add_foreign_key "histories", "pages"
+  add_foreign_key "identities", "users"
   add_foreign_key "items", "schemas"
+  add_foreign_key "login_tokens", "users"
   add_foreign_key "pages", "pages", column: "master_id"
   add_foreign_key "schema_labels", "labels"
   add_foreign_key "schema_labels", "schemas"

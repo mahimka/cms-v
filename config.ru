@@ -29,6 +29,7 @@ use PagesController
 use HistoriesController
 use LostUrlsController
 use SessionsController
+use AuthController
 use UsersController
 use PublicPhotosController
 
