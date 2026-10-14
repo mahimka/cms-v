@@ -38,3 +38,27 @@ rss_ad_item_description:
 # chrome-расширение tools/chrome-profile-parser (rake parser:extension):
 # домен берётся из domain выше, локальный порт — отсюда (по умолчанию 4567; 9292 для rackup)
 # parser_local_port: 4567
+
+
+# rake db:content — копия db/main.db без лишних таблиц -> db/content.db (в git не попадает, *.db в .gitignore).
+# В копию попадают ТОЛЬКО перечисленные таблицы; все остальные (users, identities, login_tokens,
+# snap_shots, lost_urls, histories, items, events) не включаются.
+content_db_tables:
+  - ar_internal_metadata
+  - schema_migrations
+  - sites
+  - pages
+  - page_templates
+  - profiles
+  - profile_markers
+  - markers
+  - entities
+  - details
+  - links
+  - pictures
+  - tags
+  - taggings
+  - labels
+  - schemas
+  - schema_tags
+  - schema_labels

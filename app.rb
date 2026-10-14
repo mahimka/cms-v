@@ -178,6 +178,25 @@ class App < Sinatra::Base
     ActiveRecord::Base.clear_active_connections!
   end 
 
+  # Скачивание content.db (копия main.db без части таблиц, см. lib/content_db.rb).
+  # Ключ — заголовок X-Access-Key, значение content_db_key в config/secret.yml.
+  # Если запрос пришёл через nginx (он ставит X-Accel-Support: 1), файл отдаёт сам nginx
+  # (X-Accel-Redirect -> internal location /_content_db), иначе — send_file.
+  get '/content.db' do
+    key = settings.respond_to?(:content_db_key) ? settings.content_db_key.to_s : ''
+    given = request.env['HTTP_X_ACCESS_KEY'].to_s
+    halt 403 if key.empty? || !Rack::Utils.secure_compare(given, key)
+
+    path = ContentDb.refresh!(settings.content_db_tables)
+    content_type 'application/x-sqlite3'
+    if request.env['HTTP_X_ACCEL_SUPPORT'] == '1'
+      headers 'X-Accel-Redirect' => '/_content_db/content.db'
+      body ''
+    else
+      send_file path, type: 'application/x-sqlite3'
+    end
+  end
+
   get '/admin/javascripts/pages-tree.js' do
     content_type 'application/javascript'
     send_file File.dirname(__FILE__) + '/app/javascripts/pages-tree.js'

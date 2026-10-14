@@ -45,3 +45,6 @@ public/stylesheets/*
 !public/stylesheets/.gitkeep 
 #
 
+
+db/content.db.lock
+db/content.db.tmp-*

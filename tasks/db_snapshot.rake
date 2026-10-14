@@ -11,3 +11,16 @@ namespace :db do
     puts "Snapshot written to #{path}"
   end
 end
+
+namespace :db do
+  desc "Копия db/main.db без лишних таблиц -> db/content.db; список таблиц — content_db_tables в config/config.yml (rake db:content)"
+  task :content do
+    keep = Array(App.settings.content_db_tables)
+    abort "content_db_tables пуст в config/config.yml" if keep.empty?
+
+    result = ContentDb.build(keep)
+    warn "В main.db нет таблиц из content_db_tables: #{result[:missing].join(', ')}" if result[:missing].any?
+    puts "Content DB written to #{ContentDb::TARGET} (#{(File.size(ContentDb::TARGET) / 1048576.0).round(1)} MB), " \
+         "tables: #{result[:kept].size}, dropped: #{result[:dropped].join(', ')}"
+  end
+end
