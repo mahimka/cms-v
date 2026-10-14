@@ -214,10 +214,11 @@ module MiscHelpers
 
   def link_to(schema_id, options={})
     anchor_text   = options[:anchor_text] || ''
-    anchor_column = options[:anchor_column] || 'anchor_1' #h1
+    anchor_column = options[:anchor_column] || 'h1'
     lang          = options[:lang] || @page.lang
     css_class     = options[:css_class] || ''
-    title         = options[:title] || 'title'
+    # title ссылки: по умолчанию page.title целевой страницы (ниже, когда она найдена)
+    title         = options[:title]
     
     begin
       # schema_id — uri мастер-страницы (например '/rooms/1', всегда lang
@@ -232,12 +233,15 @@ module MiscHelpers
 
       if page
         if anchor_text.blank?
-          anchor = page.send(anchor_column) 
+          # если выбранная колонка (например anchor_1) пуста — берём h1
+          anchor = page.send(anchor_column).presence || page.h1
         else
           anchor = anchor_text 
         end
 
-        "<a href=\"#{page.uri}\" class=\"#{css_class} is-underlined\" title=\"#{title}\">#{anchor}</a>"
+        title_attr = ERB::Util.html_escape(title || page.title)
+
+        "<a href=\"#{page.uri}\" class=\"#{css_class} is-underlined\" title=\"#{title_attr}\">#{anchor}</a>"
 
       else
         "<!--page is not found-->"
