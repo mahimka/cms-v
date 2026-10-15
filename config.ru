@@ -23,6 +23,7 @@ use DetailsController
 use PicturesController
 use ItemsController
 use EntitiesController
+use EntityImportsController
 use EventsController
 use PageTemplatesController
 use PagesController

@@ -1,0 +1,109 @@
+<%= erb :'/layout/_flash', views: settings.views_admin %>
+
+<% badge = { create: 'is-success', update: 'is-info', unchanged: 'is-light', error: 'is-danger' } %>
+<% label = { create: 'create', update: 'update', unchanged: 'no changes', error: 'rejected' } %>
+
+<div class="content m-3">
+
+  <h1 class="title">Import entities from JSON</h1>
+  <p class="subtitle is-6">
+    Step 1: upload a file and check it (nothing is written). Step 2: apply — all in one transaction.
+  </p>
+
+  <% unless @report && @report.applied %>
+    <form method="POST" action="/admin/import/entities/check" enctype="multipart/form-data" class="mb-5">
+      <div class="field has-addons">
+        <div class="control">
+          <input type="file" name="import_file" accept=".json,application/json" class="input" required>
+        </div>
+        <div class="control">
+          <input type="submit" value="Check (dry run)" class="button is-warning">
+        </div>
+      </div>
+    </form>
+
+    <details class="mb-5">
+      <summary>File format</summary>
+      <pre>[
+  {
+    "entity_id": 1,            // найден -> правка; null или нет ключа -> создание (нужны name и schema)
+    "name": "La Lanterna (Pedocin)", "short": "Pedocin", "schema": "Beach",
+    "address": "...", "latitude": 45.64, "longitude": 13.75,
+    "plus_code": "...", "parent_id": 5, "is_closed": false, "generate_pages": true,
+    "details":  { "beach_length": 200, "email": "a@b.it", "old_label": null },
+    "links":    { "facebook": "https://...", "webcam": ["https://a", "https://b"], "youtube": null },
+    "profiles": ["https://www.facebook.com/x"],
+    "tags":        ["public shower", "childFriendly"],
+    "tags_remove": ["paid entrance"]
+  }
+]
+Ключа нет — не трогаем; null — удаляем. Комментарии // в настоящем файле недопустимы.</pre>
+    </details>
+  <% end %>
+
+  <% if @report %>
+    <% if @report.fatal %>
+      <div class="notification is-danger"><%= Rack::Utils.escape_html(@report.fatal) %></div>
+    <% else %>
+      <% counts = @report.counts %>
+      <div class="notification <%= @report.applied ? 'is-success' : 'is-light' %>">
+        <strong><%= @report.applied ? 'Applied' : 'Dry run' %></strong>
+        <% if @filename.present? %> — <%= Rack::Utils.escape_html(@filename) %><% end %>:
+        <%= @report.records.size %> records —
+        <% label.each do |k, text| %>
+          <span class="tag <%= badge[k] %>"><%= text %>: <%= counts[k] || 0 %></span>
+        <% end %>
+      </div>
+
+      <% if @token %>
+        <% appliable = (counts[:create] || 0) + (counts[:update] || 0) %>
+        <form method="POST" action="/admin/import/entities/apply" class="mb-5">
+          <input type="hidden" name="token" value="<%= @token %>">
+          <input type="hidden" name="filename" value="<%= Rack::Utils.escape_html(@filename.to_s) %>">
+          <input type="submit" value="Apply <%= appliable %> record(s)<%= ", skip #{counts[:error]} rejected" if counts[:error] %>" class="button is-danger">
+          <a href="/admin/import/entities" class="button is-light">Cancel</a>
+        </form>
+      <% elsif @report.applied %>
+        <p class="mb-5"><a href="/admin/import/entities" class="button">Import another file</a></p>
+      <% end %>
+
+      <% @report.records.each do |r| %>
+        <div class="box">
+          <p>
+            <span class="tag <%= badge[r[:action]] %>"><%= label[r[:action]] %></span>
+            <strong>#<%= r[:index] %></strong>
+            <% if r[:entity_id] && !(r[:action] == :create && !@report.applied) %>
+              <a href="/admin/entities/<%= r[:entity_id] %>/edit">entity <%= r[:entity_id] %></a>
+            <% elsif r[:action] == :create %>
+              <em>new entity</em>
+            <% end %>
+            <%= Rack::Utils.escape_html(r[:name].to_s) %>
+          </p>
+
+          <% r[:errors].each do |e| %>
+            <p class="has-text-danger">✕ <%= Rack::Utils.escape_html(e) %></p>
+          <% end %>
+          <% r[:warnings].each do |w| %>
+            <p class="has-text-warning-dark">⚠ <%= Rack::Utils.escape_html(w) %></p>
+          <% end %>
+
+          <% if r[:changes].any? %>
+            <table class="table is-narrow is-fullwidth mt-2">
+              <thead><tr><th>field</th><th>was</th><th>becomes</th></tr></thead>
+              <tbody>
+                <% r[:changes].each do |c| %>
+                  <tr>
+                    <td><code><%= Rack::Utils.escape_html(c[:field]) %></code></td>
+                    <td><%= Rack::Utils.escape_html(c[:from].to_s) %></td>
+                    <td><%= Rack::Utils.escape_html(c[:to].to_s) %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+
+</div>
