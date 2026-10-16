@@ -107,7 +107,7 @@
 <% end %>
 
 <div class="tags mt-1 is-light">
-  <%= (@page.pageable&.tags_of_group_localized('beach features', @page.lang) || []).collect{|tag| "<span class='tag is-size-7'>#{tag}</span> "}.join(' ') %>
+  <%= (@page.pageable&.tags_of_group_localized('beach_features', @page.lang) || []).collect{|tag| "<span class='tag is-size-7'>#{tag}</span> "}.join(' ') %>
 </div>
 
 <%= partial '_sidebar_links' %>
@@ -193,7 +193,7 @@
     },
     <% end %>
 
-    <% amenity_tags = Tag.active.joins(:parent).where(parent: { name: 'beach features' }) %>
+    <% amenity_tags = Tag.active.joins(:parent).where(parent: { name: 'beach_features' }) %>
     <% present_amenities = @page.pageable ? amenity_tags.select { |tag| @page.pageable.tags.include?(tag) } : [] %>
     <% unless present_amenities.empty? %>
     "amenityFeature": [

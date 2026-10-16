@@ -530,7 +530,7 @@
     "currenciesAccepted": "EUR",
     "paymentAccepted": [<%= payment_methods.map { |p| "\"#{json_escape(p)}\"" }.join(', ') %>],
     <% end %>
-    <% amenity_tags = Tag.active.joins(:parent).where(parent: { name: 'parking features' }) %>
+    <% amenity_tags = Tag.active.joins(:parent).where(parent: { name: 'parking_features' }) %>
     <% present_amenities = @page.pageable ? amenity_tags.select { |tag| @page.pageable.tags.include?(tag) } : [] %>
     <% unless present_amenities.empty? %>
     "amenityFeature": [

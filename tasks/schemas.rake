@@ -50,4 +50,49 @@ namespace :schemas do
 
     puts dry_run ? "DRY RUN — откачено, ничего не сохранено" : "Готово"
   end
+
+  desc "Удалить схемы с active: false, на которые ничего не ссылается (entities/items/events/page_templates, нет детей, которые остаются). schema_tags/schema_labels уходят вместе со схемой (rake schemas:delete_unused [dry_run=true])"
+  task :delete_unused do
+    dry_run = ENV['dry_run'] == 'true'
+
+    used_by = lambda do |schema|
+      refs = { 'entities' => Entity, 'items' => Item, 'events' => Event, 'page_templates' => PageTemplate }
+      refs.filter_map { |label, model| (n = model.where(schema_id: schema.id).count) > 0 ? "#{label}: #{n}" : nil }
+    end
+
+    candidates = Schema.where(active: false).to_a.select { |s| used_by.call(s).empty? }
+    kept = Schema.where(active: false).to_a - candidates
+
+    # схема с потомками, которые останутся (активные или используемые), остаётся сама —
+    # иначе ancestry удалил бы потомков вместе с ней
+    loop do
+      ids = candidates.map(&:id)
+      blocked = candidates.select { |s| s.descendants.any? { |d| !ids.include?(d.id) } }
+      break if blocked.empty?
+
+      candidates -= blocked
+      kept += blocked
+    end
+
+    puts "Неактивных схем: #{candidates.size + kept.size}, к удалению: #{candidates.size}, остаётся: #{kept.size}"
+    kept.each do |s|
+      reasons = used_by.call(s)
+      reasons << 'есть потомки, которые остаются' if reasons.empty?
+      puts "  оставлена ##{s.id} #{s.name.strip}: #{reasons.join(', ')}"
+    end
+
+    ActiveRecord::Base.transaction do
+      # сначала самые глубокие, чтобы удаление не зависело от orphan_strategy ancestry
+      candidates.sort_by { |s| -s.depth }.each do |schema|
+        tags   = schema.schema_tags.count
+        labels = schema.schema_labels.count
+        puts "  удалить ##{schema.id} #{schema.name.strip}#{" (schema_tags: #{tags}, schema_labels: #{labels})" if tags + labels > 0}"
+        schema.destroy! if Schema.exists?(schema.id)
+      end
+
+      raise ActiveRecord::Rollback if dry_run
+    end
+
+    puts dry_run ? "DRY RUN — откачено, ничего не удалено" : "Готово. Схем осталось: #{Schema.count}"
+  end
 end
