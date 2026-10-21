@@ -223,6 +223,7 @@ module MiscHelpers
   # anchor / title: не указано -> умолчание (h1 / title); ':имя' -> колонка страницы
   # (на языке lang); любая другая строка -> этот текст. Другие опции: lang (по умолчанию
   # язык текущей страницы), css_class.
+  # Если целевая страница не опубликована — вместо <a> выводится только текст якоря.
   # Старые опции anchor_text: / anchor_column: ещё встречаются в body страниц и работают
   # как синонимы anchor: 'текст' / anchor: ':колонка'.
   def link_to(schema_id, options={})
@@ -245,6 +246,9 @@ module MiscHelpers
 
       if page
         anchor = link_text_for(page, anchor_spec, 'h1')
+        # Непубликованная страница даёт 404 — ссылку не делаем, оставляем только текст-якорь.
+        return anchor unless page.published?
+
         title  = ERB::Util.html_escape(link_text_for(page, title_spec, 'title'))
 
         "<a href=\"#{page.uri}\" class=\"#{css_class} is-underlined\" title=\"#{title}\">#{anchor}</a>"
