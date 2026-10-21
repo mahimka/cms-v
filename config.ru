@@ -24,6 +24,7 @@ use PicturesController
 use ItemsController
 use EntitiesController
 use EntityImportsController
+use PageImportsController
 use EventsController
 use PageTemplatesController
 use PagesController
