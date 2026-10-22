@@ -6,6 +6,7 @@
 !prompts/
 !tasks/
 !views/
+!row-data/
 
 !_routes.rb
 !_project_methods.rb
