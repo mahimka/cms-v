@@ -1,7 +1,7 @@
 <nav class="breadcrumb has-succeeds-separator" aria-label="breadcrumbs">
   <ul>
     <% if !@page.ancestry.blank? && !@page.ancestry.nil?  %>
-      <% @page.ancestors.each_with_index do |page, index| %>
+      <% @page.ancestors.published.each_with_index do |page, index| %>
         <li><a href="<%= page.uri %>"><%= page.anchor_1 %></a></li>
       <% end %>
       <li class="is-active"><a href="#" aria-current="page"><%= @page.anchor_1 %></a></li>

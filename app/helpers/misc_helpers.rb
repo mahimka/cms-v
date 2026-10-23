@@ -265,6 +265,23 @@ module MiscHelpers
 
   end
 
+  # Адрес Stay22-виджета для города текущей страницы (ключ town в config.yml, например
+  # `porec: https://stay22.com/embed/...`), иначе default_town; nil, если не задан ни один.
+  def stay22_embed_url
+    uri  = @page.uri.to_s
+    town = uri.match?(/\A\/[a-zA-Z]{2}\//) ? uri.split('/')[2] : uri.split('/')[1]
+    town = 'izola' if town.nil? || town == 'rooms'
+    town = 'trieste' if settings.domain == 'triestia.com'
+
+    # settings.send(town) открыл бы и служебные настройки Sinatra (views, root...) — берём только url;
+    # нет виджета для города -> общий default_town из config.yml
+    [town, 'default_town'].each do |key|
+      url = settings.respond_to?(key) ? settings.send(key) : nil
+      return url if url.is_a?(String) && url.match?(%r{\Ahttps?://})
+    end
+    nil
+  end
+
   # spec: nil/'' -> колонка default_column; ':имя' -> колонка page.имя; иначе сам текст.
   # Пустая или неизвестная колонка -> default_column (для anchor это h1, для title — title).
   def link_text_for(page, spec, default_column)

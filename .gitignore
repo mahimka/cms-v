@@ -48,3 +48,5 @@ public/stylesheets/*
 
 db/content.db.lock
 db/content.db.tmp-*
+
+db/main.db.bak-*
