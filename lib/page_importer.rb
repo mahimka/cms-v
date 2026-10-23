@@ -9,7 +9,8 @@ require 'json'
 #     "slug": "...", "uri": "...", # только для справки: сверяются со страницей, не меняются
 #     "title": "...", "h1": "...", "subtitle": "...",
 #     "anchor_1": "...", "anchor_2": "...", "anchor_3": "...",
-#     "meta_description": "...", "body": "...", "faq": "..."
+#     "meta_description": "...", "body": "...", "faq": "...",
+#     "robots_index": true, "robots_follow": true   # <meta name="robots">: index/noindex, follow/nofollow
 #   }]
 #
 # Правила:
@@ -25,7 +26,8 @@ require 'json'
 class PageImporter
   FIELDS     = %w[title h1 subtitle anchor_1 anchor_2 anchor_3 meta_description body faq].freeze
   REFERENCE  = %w[slug uri].freeze
-  KEYS       = (%w[id] + REFERENCE + FIELDS).freeze
+  FLAGS      = %w[robots_index robots_follow].freeze  # true/false; ключа нет -> не трогаем
+  KEYS       = (%w[id] + REFERENCE + FIELDS + FLAGS).freeze
   NONE       = '∅'.freeze
 
   Report = Struct.new(:records, :fatal, :applied, keyword_init: true) do
@@ -124,7 +126,7 @@ class PageImporter
     return if rec[:errors].any?
 
     page.assign_attributes(attrs)
-    changed = page.changes.keys & FIELDS
+    changed = page.changes.keys & (FIELDS + FLAGS)
     page.changes.slice(*changed).each { |field, (from, to)| add_change(rec, field, from, to) }
     return if changed.empty?
 
@@ -144,7 +146,13 @@ class PageImporter
   end
 
   def field_attributes(item, rec)
-    FIELDS.each_with_object({}) do |key, attrs|
+    FLAGS.each do |key|
+      rec[:errors] << "#{key} должен быть true или false" if item.key?(key) && ![true, false].include?(item[key])
+    end
+
+    flags = FLAGS.select { |key| item.key?(key) && [true, false].include?(item[key]) }.to_h { |key| [key, item[key]] }
+
+    FIELDS.each_with_object(flags) do |key, attrs|
       next unless item.key?(key)
 
       value = item[key]

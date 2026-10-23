@@ -15,6 +15,7 @@
   <meta name="description" content="<%= yield_content :meta_description %>"/>
   <%- end -%>
 
+  <meta name="robots" content="<%= @page.robots_index == false ? 'noindex' : 'index' %>, <%= @page.robots_follow == false ? 'nofollow' : 'follow' %>">
   <link rel="canonical" href="https://<%= settings.domain -%><%= @page.uri -%>" />
 
   <!-- Open Graph -->

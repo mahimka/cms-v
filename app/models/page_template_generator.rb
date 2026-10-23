@@ -296,7 +296,22 @@ class PageTemplateGenerator
         results[status] << page
       end
     end
+    sync_unvisited_list_pages(results) if force
     results
+  end
+
+  # List-страницы создаются только для городов с опубликованными профилями (см. list_targets),
+  # поэтому привязанные к template страницы (adopt) без таких профилей генератор не обходит.
+  # При force подтягиваем им хотя бы page_ready / page_robots_* из template, остальное не трогаем.
+  def sync_unvisited_list_pages(results)
+    visited_ids = results.values.flatten.filter_map { |item| item.id if item.respond_to?(:id) }
+    Page.where(template_id: @page_template.id).where.not(id: visited_ids).find_each do |page|
+      page.update_columns(ready: @page_template.page_ready,
+                          robots_index: @page_template.page_robots_index,
+                          robots_follow: @page_template.page_robots_follow,
+                          updated_at: Time.current)
+      results[:updated] << page
+    end
   end
 
   # Группа тегов не задана в slug (slug — просто слова, например "parking"),
@@ -565,7 +580,7 @@ class PageTemplateGenerator
 
   def save_page(existing, attrs, force, object)
     if existing
-      # ready/published НЕ трогаем при обновлении — это решение админа
+      # published НЕ трогаем при обновлении — это решение админа
       # (опубликовал/снял с публикации вручную после генерации), а не
       # то, что должен молча перезатирать force refresh. Раньше это
       # безусловно ставилось из page_template на каждый прогон — тихо
@@ -577,13 +592,23 @@ class PageTemplateGenerator
       #
       # Поля, которые правили руками (Page#edited_columns) — force
       # refresh их тоже не трогает.
+      #
+      # ready и robots (index/follow) — наоборот, всегда берутся из template
+      # (page_ready, page_robots_index, page_robots_follow): они не входят в
+      # edited_columns, и смена настройки в template должна доходить до страниц.
       protected_fields = Array(existing.edited_columns).map(&:to_sym)
-      existing.update!(attrs.except(*protected_fields))
+      existing.update!(attrs.except(*protected_fields).merge(
+        ready: @page_template.page_ready,
+        robots_index: @page_template.page_robots_index,
+        robots_follow: @page_template.page_robots_follow
+      ))
       [existing, :updated]
     else
-      # ready/published — только при первом создании страницы.
+      # ready/published/robots — только при первом создании страницы.
       attrs[:ready] = @page_template.page_ready
       attrs[:published] = @page_template.page_published
+      attrs[:robots_index] = @page_template.page_robots_index
+      attrs[:robots_follow] = @page_template.page_robots_follow
       [create_page_disambiguating_slug(attrs, object), :created]
     end
   end

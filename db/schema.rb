@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_10_13_090000) do
+ActiveRecord::Schema.define(version: 2026_10_23_110000) do
 
   create_table "details", force: :cascade do |t|
     t.string "detailable_type"
@@ -219,6 +219,8 @@ ActiveRecord::Schema.define(version: 2026_10_13_090000) do
     t.integer "parent_template_id"
     t.boolean "active", default: false
     t.string "parent_page_uri"
+    t.boolean "page_robots_index", default: true, null: false
+    t.boolean "page_robots_follow", default: true, null: false
   end
 
   create_table "pages", force: :cascade do |t|
@@ -267,6 +269,8 @@ ActiveRecord::Schema.define(version: 2026_10_13_090000) do
     t.text "edited_columns"
     t.integer "list_tag_id"
     t.integer "geonames_id"
+    t.boolean "robots_index", default: true, null: false
+    t.boolean "robots_follow", default: true, null: false
     t.index ["ancestry"], name: "index_pages_on_ancestry"
     t.index ["geonames_id"], name: "index_pages_on_geonames_id"
     t.index ["master_id", "lang"], name: "index_pages_on_master_and_lang", unique: true, where: "master_id IS NOT NULL"

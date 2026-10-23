@@ -32,6 +32,26 @@
             <span class="is-size-7 has-text-weight-light">published</span>
           </label>
 
+          <label class="checkbox ">
+            <input type="hidden" name="page[robots_index]" value="0">
+            <input type="checkbox"
+              name="page[robots_index]"
+              value="1"
+              <%= "checked" if @page.robots_index != false %>
+            >
+            <span class="is-size-7 has-text-weight-light">index</span>
+          </label>
+
+          <label class="checkbox ">
+            <input type="hidden" name="page[robots_follow]" value="0">
+            <input type="checkbox"
+              name="page[robots_follow]"
+              value="1"
+              <%= "checked" if @page.robots_follow != false %>
+            >
+            <span class="is-size-7 has-text-weight-light">follow</span>
+          </label>
+
           <a href='<%= @page.uri %>' target='_blank'><%= @page.uri %></a>
 
         </h2>

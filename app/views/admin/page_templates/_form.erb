@@ -19,7 +19,7 @@
 
   <div class="column is-2">
     <%= label(:page_template, :page_ready, "page_ready / page_published", options = {class: 'label'}) %>
-    <p class="help">ready/published, которые проставляются сгенерированной странице (не самому template)</p>
+    <p class="help">ready/published/robots (index, follow), которые проставляются сгенерированной странице (не самому template). Published — только при создании; ready и robots — и при перегенерации</p>
   </div>
 
   <div class="column is-9">
@@ -28,10 +28,20 @@
       <input type="checkbox" name="page_template[page_ready]" value="1" <%= @page_template.page_ready ? "checked" : "" %>>
       page_ready
     </label>
-    <label class="checkbox">
+    <label class="checkbox mr-4">
       <input type="hidden" name="page_template[page_published]" value="0">
       <input type="checkbox" name="page_template[page_published]" value="1" <%= @page_template.page_published ? "checked" : "" %>>
       page_published
+    </label>
+    <label class="checkbox mr-4">
+      <input type="hidden" name="page_template[page_robots_index]" value="0">
+      <input type="checkbox" name="page_template[page_robots_index]" value="1" <%= @page_template.page_robots_index != false ? "checked" : "" %>>
+      page_robots_index
+    </label>
+    <label class="checkbox">
+      <input type="hidden" name="page_template[page_robots_follow]" value="0">
+      <input type="checkbox" name="page_template[page_robots_follow]" value="1" <%= @page_template.page_robots_follow != false ? "checked" : "" %>>
+      page_robots_follow
     </label>
   </div>
 

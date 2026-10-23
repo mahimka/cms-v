@@ -340,9 +340,11 @@
       <td><a href='/admin/pages/<%= page.id %>/edit-in-place' class="button is-small">edit</a></td>
       <td><%= page.master_id %></td>
 
-  <!--    <td><%= checkbox_in_place page, :ready %></td> 
+      <td><%= checkbox_in_place page, :ready %></td> 
       <td><%= checkbox_in_place page, :published %></td> 
-
+      <td><%= checkbox_in_place page, :robots_index %></td> 
+      <td><%= checkbox_in_place page, :robots_follow %></td> 
+  <!-- 
       <td><%#= page.pictures.length %></td>
       
       <td><a href="/admin/pages/<%= page.id %>/edit-in-place" class='button is-small'>edit</a></td>
