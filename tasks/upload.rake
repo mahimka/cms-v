@@ -135,9 +135,25 @@ namespace :upload do
     end
 
     # 2. синхронизация
+    # db/main.db не в WAL (обычный rollback journal), на ремоуте живой puma/passenger
+    # держит соединения с busy_timeout всего 5s (config/database.yml) -- sqlite3_rsync
+    # делает там BEGIN IMMEDIATE и, если в этот момент идёт запись из приложения,
+    # сразу получает "database is locked" (своего busy_timeout/ретрая у sqlite3_rsync
+    # нет). Та же контенция, что и в tasks/parse_websites.rake -- лечим тем же способом,
+    # коротким ретраем с нарастающей паузой, а не падаем с первой неудачи.
     puts "sqlite3_rsync #{local_db} -> #{host}:#{remote_db}".white.on_green
-    ok = system(rsync_bin, local_db, "#{host}:#{remote_db}", '--exe', "/home/#{@user}/bin/sqlite3_rsync", '-v')
-    abort "sqlite3_rsync failed, remote marker not updated".red unless ok
+    attempts = 0
+    ok = false
+    until ok || attempts >= 5
+      attempts += 1
+      ok = system(rsync_bin, local_db, "#{host}:#{remote_db}", '--exe', "/home/#{@user}/bin/sqlite3_rsync", '-v')
+      if !ok && attempts < 5
+        wait = 2 * attempts
+        puts "sqlite3_rsync failed (attempt #{attempts}/5), retrying in #{wait}s...".yellow
+        sleep(wait)
+      end
+    end
+    abort "sqlite3_rsync failed after #{attempts} attempts, remote marker not updated".red unless ok
 
     # 3. запоминаем mtime, который получила реплика
     ok, out = remote.call("stat -c %Y #{remote_db} > #{marker} && cat #{marker}")
